@@ -1,175 +1,187 @@
 
-
 #include <stdexcept>
 #include <sstream>
 
 #include "public_grammar.h"
-using namespace parser;
-using namespace private_;
+using parser::PublicGrammar;
 
-//////////////////////////////////////////////////////////////////////////
-// public_grammar constructor
-//////////////////////////////////////////////////////////////////////////
-
-public_grammar::public_grammar( const char* _grammar_name )
-  :
-  grammar_name_(_grammar_name),
-  max_sym_id_(-1),
-  max_rule_id_(-1),
-  min_sym_id_(1<<sizeof(int)),
-  min_rule_id_(1<<sizeof(int)),
-  num_of_terms_(0),
-  num_of_nonterms_(0)
+/*!
+ * /brief Инициализация грамматики.
+ *
+ * \param desc Описание грамматики в удобном для человека виде.
+ */
+PublicGrammar::PublicGrammar( const char* desc )
+  : grammar_name_(desc)
+  , max_sym_id_(kUnknownMapId)
+  , max_rule_id_(kUnknownMapId)
+  , min_sym_id_(kUnknownMapId)
+  , min_rule_id_(kUnknownMapId)
+  , num_of_terms_(0)
+  , num_of_nonterms_(0)
 {}
 
-
-//////////////////////////////////////////////////////////////////////////
-// methods to add symbols ang rules
-//////////////////////////////////////////////////////////////////////////
-
-void public_grammar::add_terminal( int _id, const char* _name )
-{
-  symbol_table_t::iterator it = symbols_.find(_id);
+/*!
+ * \brief Добавление терминального символа.
+ *
+ * \param id    Идентификатор символа.
+ * \param name  Имя символа для человека.
+ */
+void PublicGrammar::AddTerminal( MapId id, const char* name ) {
+  // Проверяем, присутствует ли символ уже в грамматике или нет.
+  SymbolTable::iterator it = symbols_.find(id);
   if (it != symbols_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_terminal:\n";
-    st << "The symbol with id = \"" << _id << "\" is already in the grammar's symbol set under the name \""
-        << it->second.name_ << "\"";
-        
-    throw std::runtime_error( st.str().c_str() );
+    st << "The symbol with id = \"" << id
+       << "\" is already in the grammar's symbol set under the name \"" << it->second.name_ << "\"";
+    throw std::invalid_argument(st.str().c_str());
   }
-  
-  symbols_[_id] = symbol_(_name, false);
-  
-  if( max_sym_id_ < _id ) {
-    max_sym_id_ = _id;
-  }
-  
-  if( min_sym_id_ > _id )  {
-    min_sym_id_ = _id;
-  }
-  
-  ++ num_of_terms_;
+
+  // Добавляем символ в грамматику.
+  symbols_[id] = Symbol(name, false);
+
+  // Меняем минимальных и максимальные значения идентификаторов, если необходимо.
+  if (max_sym_id_ < id) max_sym_id_ = id;
+  if (min_sym_id_ == kUnknownMapId) min_sym_id_ = id;
+  else if (min_sym_id_ > id) min_sym_id_ = id;
+
+  // Увеличиваем количество терминальных символов.
+  ++num_of_terms_;
 }
 
-void public_grammar::add_nonterminal( int _id, const char* _name ) {
-  symbol_table_t::iterator it = symbols_.find(_id);
+/*!
+ * \brief Добавление нетерминального символа.
+ *
+ * \param id    Идентификатор символа.
+ * \param name  Имя символа для человека.
+ */
+void PublicGrammar::AddNonterminal( MapId id, const char* name ) {
+  // Проверяем, присутствует ли символ уже в грамматике или нет.
+  SymbolTable::iterator it = symbols_.find(id);
   if (it != symbols_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_nonterminal:\n";
-    st << "The symbol with id = \"" << _id << "\" is already in the grammar's symbol set under the name \""
-      << it->second.name_ << "\"";
-
-    throw std::runtime_error( st.str().c_str() );
+    st << "The symbol with id = \"" << id
+       << "\" is already in the grammar's symbol set under the name \"" << it->second.name_ << "\"";
+    throw std::invalid_argument(st.str().c_str());
   }
 
-  symbols_[_id] = symbol_(_name, true);
-  
-  if( max_sym_id_ < _id ) {
-    max_sym_id_ = _id;
-  }
-  
-  if( min_sym_id_ > _id ) {
-    min_sym_id_ = _id;
-  }
-  
-  ++ num_of_nonterms_;
+  // Добавляем символ в грамматику.
+  symbols_[id] = Symbol(name, false);
+
+  // Меняем минимальных и максимальные значения идентификаторов, если необходимо.
+  if (max_sym_id_ < id) max_sym_id_ = id;
+  if (min_sym_id_ == kUnknownMapId) min_sym_id_ = id;
+  else if (min_sym_id_ > id) min_sym_id_ = id;
+
+  // Увеличиваем количество нетерминальных символов.
+  ++num_of_nonterms_;
 }
 
-void public_grammar::add_rule( int _id, const char* _name ) {
-  rule_table_t::iterator it = rules_.find(_id);
+/*!
+ * \brief Добавление правила.
+ *
+ * \param id    Идентификатор правила.
+ * \param name  Имя символа для человека.
+ */
+void PublicGrammar::AddRule( MapId id, const char* name ) {
+  // Проверяем, не занят ли уже переданный идентификатор под некоторое правило.
+  RuleTable::iterator it = rules_.find(id);
   if (it != rules_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_rule:\n";
-    st << "The rule with id = \"" << _id << "\" is already in the grammar's rule set under the name \""
-      << it->second.name_ << "\"";
-
-    throw std::runtime_error( st.str().c_str() );
+    st << "The rule with id = \"" << id 
+       << "\" is already in the grammar's rule set under the name \"" << it->second.name_ << "\"";
+    throw std::invalid_argument(st.str().c_str());
   }
 
-  rules_[_id] = rule_(_name);
-  
-  if( max_rule_id_ < _id ) {
-    max_rule_id_ = _id;
-  }
-  
-  if( min_rule_id_ > _id ) {
-    min_rule_id_ = _id;
-  }
+  // Добавляем правило.
+  rules_[id] = Rule(name);
+
+  // Меняем минимальное и максимальное значения идентификаторов правил, если необходимо.
+  if (max_rule_id_ < id) max_rule_id_ = id;  
+  if (min_rule_id_ == kUnknownMapId) min_rule_id_ = id;
+  else if (min_rule_id_ > id) min_rule_id_ = id;
 }
 
-void public_grammar::add_lhs_symbol( int _rule_id, int _sym_id ) {
-  rule_table_t::iterator rule_it = rules_.find(_rule_id);
+/*!
+ * \brief Добавление символа в левой части правила.
+ *
+ * \param rule_id Идентификатор правила.
+ * \param sym_id  Идентификатор символа.
+ */
+void PublicGrammar::AddLhsSymbol( MapId rule_id, MapId sym_id ) {
+  // Проверяем наличие правила в грамматике.
+  RuleTable::iterator rule_it = rules_.find(rule_id);
   if (rule_it == rules_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_lhs_symbol:\n";
-    st << "The rule with id = \"" << _rule_id << "\" does not exist in the grammar's rule set";
-
-    throw std::runtime_error( st.str().c_str() );
+    st << "The rule with id = \"" << rule_id << "\" does not exist in the grammar's rule set";
+    throw std::invalid_argument(st.str().c_str());
   }
-  
-  symbol_table_t::iterator symbol_it = symbols_.find(_sym_id);
+
+  // Проверяем наличие добавляемого символа в грамматике.
+  SymbolTable::iterator symbol_it = symbols_.find(sym_id);
   if (symbol_it == symbols_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_lhs_symbol:\n";
-    st << "The symbol with id = \"" << _sym_id << "\" does not exist in the grammar's symbol set";
-
+    st << "The symbol with id = \"" << sym_id << "\" does not exist in the grammar's symbol set";
     throw std::runtime_error( st.str().c_str() );
   }
 
+  // Необходимо проверить, является ли символ нетерминальным.
   if (not symbol_it->second.nonterminal_) {
     std::stringstream st;
-    st << "public_grammar::add_lhs_symbol:\n";
-    st << "The symbol with id = \"" << _sym_id << "\" is not nonterminal";
-  
-    throw std::runtime_error( st.str().c_str() );
+    st << "The symbol with id = \"" << sym_id << "\" is not nonterminal";
+    throw std::invalid_argument( st.str().c_str() );
   }
 
-  rule_it->second.left_symbol_ = _sym_id;
+  // Устанавливаем символ в левую часть правила.
+  rule_it->second.lhs_symbol_ = sym_id;
 }
 
-void public_grammar::add_rhs_symbol( int _rule_id, int _sym_id ) {
-  rule_table_t::iterator rule_it = rules_.find(_rule_id);
+/*!
+ * \brief Добавление символа в правой части правила.
+ *
+ * \param rule_id Идентификатор правила.
+ * \param sym_id  Идентификатор символа.
+ */
+void PublicGrammar::AddRhsSymbol( MapId rule_id, MapId sym_id ) {
+  // Проверяем наличие правила в грамматике.
+  RuleTable::iterator rule_it = rules_.find(rule_id);
   if (rule_it == rules_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_rhs_symbol:\n";
-    st << "The rule with id = \"" << _rule_id << "\" does not exist in the grammar's rule set";
-
-    throw std::runtime_error( st.str().c_str() );
+    st << "The rule with id = \"" << rule_id << "\" does not exist in the grammar's rule set";
+    throw std::invalid_argument(st.str().c_str());
   }
 
-  symbol_table_t::iterator symbol_it = symbols_.find(_sym_id);
+  // Проверяем наличие добавляемого символа в грамматике.
+  SymbolTable::iterator symbol_it = symbols_.find(sym_id);
   if (symbol_it == symbols_.end()) {
     std::stringstream st;
-    st << "public_grammar::add_rhs_symbol:\n";
-    st << "The symbol with id = \"" << _sym_id << "\" does not exist in the grammar's symbol set";
-
+    st << "The symbol with id = \"" << sym_id << "\" does not exist in the grammar's symbol set";
     throw std::runtime_error( st.str().c_str() );
   }
 
-  rule_it->second.rhs_list_.push_back(_sym_id);
+  // Добавляем символ в правую часть правила.
+  rule_it->second.rhs_list_.push_back(sym_id);
 }
 
-//////////////////////////////////////////////////////////////////////////
-// printing grammar
-//////////////////////////////////////////////////////////////////////////
-
-void public_grammar::print( std::ostream& out )
-{
+/*!
+ * \brief Печать содержимого грамматики.
+ *
+ * \param out Поток, в который будет производиться печать.
+ */
+void PublicGrammar::Print( std::ostream& out ) {
   out << "**************************************************************************\n";
   out << "********* Grammar \"" << grammar_name_ << std::endl;
   out << "**************************************************************************\n";
 
-  rule_table_t::iterator rule_it = rules_.begin(), rules_end = rules_.end();
-  for (; rule_it != rules_end; ++ rule_it ) {
+  RuleTable::iterator rule_it = rules_.begin(), rules_end = rules_.end();
+  for (; rule_it != rules_end; ++rule_it) {
     out << "(" << rule_it->second.name_ << ", " << rule_it->first << ") [";
 
-    symbol_table_t::iterator symbol_it = symbols_.find(rule_it->second.left_symbol_);
+    SymbolTable::iterator symbol_it = symbols_.find(rule_it->second.lhs_symbol_);
     out << symbol_it->second.name_ << " -->";
 
-    list_t::iterator rhs_symbol_it = rule_it->second.rhs_list_.begin(), rhs_symbol_end = rule_it->second.rhs_list_.end();
+    MapIdList::iterator rhs_symbol_it = rule_it->second.rhs_list_.begin(), rhs_symbol_end = rule_it->second.rhs_list_.end();
     for (; rhs_symbol_it != rhs_symbol_end; ++rhs_symbol_it) {
-      symbol_table_t::iterator symbol_it = symbols_.find(*rhs_symbol_it);
+      SymbolTable::iterator symbol_it = symbols_.find(*rhs_symbol_it);
       out << " " << symbol_it->second.name_;
     }
 

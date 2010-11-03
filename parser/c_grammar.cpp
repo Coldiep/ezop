@@ -7,8 +7,8 @@
 #include "c_grammar.h"
 using namespace c_grammar;
 
-static char* token_names_buffer_[ SYMBOL_TABLE_LAST + 2 ];
-static char** token_names_ = token_names_buffer_ + 1;
+static const char* token_names_buffer_[ SYMBOL_TABLE_LAST + 2 ];
+static const char** token_names_ = token_names_buffer_ + 1;
 
 // print token to the ostream
 void parser::token::print( std::ostream& _str )
@@ -621,186 +621,185 @@ void lexer::init_keywords()
 }
 
 // initialize public grammar by c language grammar
-void c_grammar::init_grammar( parser::public_grammar* _gr )
-{
+void c_grammar::init_grammar( parser::PublicGrammar* _gr ) {
   // add terminals
-  _gr->add_terminal( EN_EOF, "EOF" );
-  _gr->add_terminal( UNKNOWN, "unknown" );
+  _gr->AddTerminal( EN_EOF, "EOF" );
+  _gr->AddTerminal( UNKNOWN, "unknown" );
   
-  _gr->add_terminal( IDENTIFIER, "IDENTIFIER" );
+  _gr->AddTerminal( IDENTIFIER, "IDENTIFIER" );
   
-  _gr->add_terminal( OCTAL, "OCTAL" );
-  _gr->add_terminal( HEX, "HEX" );
-  _gr->add_terminal( INTEGER, "INTEGER" );
-  _gr->add_terminal( REAL, "REAL" );
+  _gr->AddTerminal( OCTAL, "OCTAL" );
+  _gr->AddTerminal( HEX, "HEX" );
+  _gr->AddTerminal( INTEGER, "INTEGER" );
+  _gr->AddTerminal( REAL, "REAL" );
   
-  _gr->add_terminal( CHARACTER_LITERAL, "CHARACTER_LITERAL" );
-  _gr->add_terminal( STRING_LITERAL, "STRING_LITERAL" );
+  _gr->AddTerminal( CHARACTER_LITERAL, "CHARACTER_LITERAL" );
+  _gr->AddTerminal( STRING_LITERAL, "STRING_LITERAL" );
   
-  _gr->add_terminal( STAR, "*" );
-  _gr->add_terminal( PLUS, "+" );
-  _gr->add_terminal( MINUS, "-" );
-  _gr->add_terminal( SLASH, "/" );
-  _gr->add_terminal( MOD, "%" );
+  _gr->AddTerminal( STAR, "*" );
+  _gr->AddTerminal( PLUS, "+" );
+  _gr->AddTerminal( MINUS, "-" );
+  _gr->AddTerminal( SLASH, "/" );
+  _gr->AddTerminal( MOD, "%" );
   
-  _gr->add_terminal( EQUAL, "=" );
-  _gr->add_terminal( LESS, "<" );
-  _gr->add_terminal( MORE, ">" );
-  _gr->add_terminal( DOT, "->" );
-  _gr->add_terminal( AND, "&" );
-  _gr->add_terminal( OR, "|" );
-  _gr->add_terminal( XOR, "^" );
-  _gr->add_terminal( EXCLAMATION, "!" );
-  _gr->add_terminal( TILDA, "~" );
-  _gr->add_terminal( QUESTION, "?" );
+  _gr->AddTerminal( EQUAL, "=" );
+  _gr->AddTerminal( LESS, "<" );
+  _gr->AddTerminal( MORE, ">" );
+  _gr->AddTerminal( DOT, "->" );
+  _gr->AddTerminal( AND, "&" );
+  _gr->AddTerminal( OR, "|" );
+  _gr->AddTerminal( XOR, "^" );
+  _gr->AddTerminal( EXCLAMATION, "!" );
+  _gr->AddTerminal( TILDA, "~" );
+  _gr->AddTerminal( QUESTION, "?" );
   
-  _gr->add_terminal( LEFT_BRACE, "(" );
-  _gr->add_terminal( RIGHT_BRACE, ")" );
-  _gr->add_terminal( LEFT_SQ_BRACKET, "[" );
-  _gr->add_terminal( RIGHT_SQ_BRACKET, "]" );
-  _gr->add_terminal( LEFT_CL_BRACKET, "{" );
-  _gr->add_terminal( RIGHT_CL_BRACKET, "}" );
+  _gr->AddTerminal( LEFT_BRACE, "(" );
+  _gr->AddTerminal( RIGHT_BRACE, ")" );
+  _gr->AddTerminal( LEFT_SQ_BRACKET, "[" );
+  _gr->AddTerminal( RIGHT_SQ_BRACKET, "]" );
+  _gr->AddTerminal( LEFT_CL_BRACKET, "{" );
+  _gr->AddTerminal( RIGHT_CL_BRACKET, "}" );
   
-  _gr->add_terminal( COLON, ":" );
-  _gr->add_terminal( SEMICOLON, ";" );
-  _gr->add_terminal( COMMA, "," );
+  _gr->AddTerminal( COLON, ":" );
+  _gr->AddTerminal( SEMICOLON, ";" );
+  _gr->AddTerminal( COMMA, "," );
   
-  _gr->add_terminal( PTR_OP, "->" );
-  _gr->add_terminal( INC_OP, "++" );
-  _gr->add_terminal( DEC_OP, "--" );
-  _gr->add_terminal( LEFT_OP, "<<" );
-  _gr->add_terminal( RIGHT_OP, ">>" );
-  _gr->add_terminal( LE_OP, "<=" );
-  _gr->add_terminal( GE_OP, ">=" );
-  _gr->add_terminal( EQ_OP, "==" );
-  _gr->add_terminal( NE_OP, "!=" );
-  _gr->add_terminal( AND_OP, "&&" );
-  _gr->add_terminal( OR_OP, "||" );
+  _gr->AddTerminal( PTR_OP, "->" );
+  _gr->AddTerminal( INC_OP, "++" );
+  _gr->AddTerminal( DEC_OP, "--" );
+  _gr->AddTerminal( LEFT_OP, "<<" );
+  _gr->AddTerminal( RIGHT_OP, ">>" );
+  _gr->AddTerminal( LE_OP, "<=" );
+  _gr->AddTerminal( GE_OP, ">=" );
+  _gr->AddTerminal( EQ_OP, "==" );
+  _gr->AddTerminal( NE_OP, "!=" );
+  _gr->AddTerminal( AND_OP, "&&" );
+  _gr->AddTerminal( OR_OP, "||" );
   
-  _gr->add_terminal( MUL_ASSIGN, "*=" );
-  _gr->add_terminal( DIV_ASSIGN, "?=" );
-  _gr->add_terminal( MOD_ASSIGN, "%=" );
-  _gr->add_terminal( ADD_ASSIGN, "+=" );
-  _gr->add_terminal( SUB_ASSIGN, "-=" );
-  _gr->add_terminal( LEFT_ASSIGN, "<<=" );
-  _gr->add_terminal( RIGHT_ASSIGN, ">>=" );
-  _gr->add_terminal( AND_ASSIGN, "&=" );
-  _gr->add_terminal( XOR_ASSIGN, "^=" );
-  _gr->add_terminal( OR_ASSIGN, "|=" );
+  _gr->AddTerminal( MUL_ASSIGN, "*=" );
+  _gr->AddTerminal( DIV_ASSIGN, "?=" );
+  _gr->AddTerminal( MOD_ASSIGN, "%=" );
+  _gr->AddTerminal( ADD_ASSIGN, "+=" );
+  _gr->AddTerminal( SUB_ASSIGN, "-=" );
+  _gr->AddTerminal( LEFT_ASSIGN, "<<=" );
+  _gr->AddTerminal( RIGHT_ASSIGN, ">>=" );
+  _gr->AddTerminal( AND_ASSIGN, "&=" );
+  _gr->AddTerminal( XOR_ASSIGN, "^=" );
+  _gr->AddTerminal( OR_ASSIGN, "|=" );
   
-  _gr->add_terminal( ELIPSIS, "..." );
-  _gr->add_terminal( RANGE, "range" );
+  _gr->AddTerminal( ELIPSIS, "..." );
+  _gr->AddTerminal( RANGE, "range" );
   
-  _gr->add_terminal( SIZEOF, "sizeof" );
-  _gr->add_terminal( TYPEDEF, "typedef" );
-  _gr->add_terminal( EXTERN, "extern" );
-  _gr->add_terminal( STATIC, "static" );
-  _gr->add_terminal( AUTO, "auto" );
-  _gr->add_terminal( REGISTER, "register" );
+  _gr->AddTerminal( SIZEOF, "sizeof" );
+  _gr->AddTerminal( TYPEDEF, "typedef" );
+  _gr->AddTerminal( EXTERN, "extern" );
+  _gr->AddTerminal( STATIC, "static" );
+  _gr->AddTerminal( AUTO, "auto" );
+  _gr->AddTerminal( REGISTER, "register" );
   
-  _gr->add_terminal( CHAR, "char" );
-  _gr->add_terminal( SHORT, "short" );
-  _gr->add_terminal( INT, "int" );
-  _gr->add_terminal( LONG, "long" );
-  _gr->add_terminal( SIGNED, "signed" );
-  _gr->add_terminal( UNSIGNED, "unsigned" );
-  _gr->add_terminal( FLOAT, "float" );
-  _gr->add_terminal( DOUBLE, "double" );
-  _gr->add_terminal( CONST, "const" );
-  _gr->add_terminal( VOLATILE, "volatile" );
-  _gr->add_terminal( VOID, "void" );
+  _gr->AddTerminal( CHAR, "char" );
+  _gr->AddTerminal( SHORT, "short" );
+  _gr->AddTerminal( INT, "int" );
+  _gr->AddTerminal( LONG, "long" );
+  _gr->AddTerminal( SIGNED, "signed" );
+  _gr->AddTerminal( UNSIGNED, "unsigned" );
+  _gr->AddTerminal( FLOAT, "float" );
+  _gr->AddTerminal( DOUBLE, "double" );
+  _gr->AddTerminal( CONST, "const" );
+  _gr->AddTerminal( VOLATILE, "volatile" );
+  _gr->AddTerminal( VOID, "void" );
   
-  _gr->add_terminal( STRUCT, "struct" );
-  _gr->add_terminal( UNION, "union" );
-  _gr->add_terminal( ENUM, "enum" );
+  _gr->AddTerminal( STRUCT, "struct" );
+  _gr->AddTerminal( UNION, "union" );
+  _gr->AddTerminal( ENUM, "enum" );
   
-  _gr->add_terminal( CASE, "case" );
-  _gr->add_terminal( DEFAULT, "default" );
-  _gr->add_terminal( IF, "if" );
-  _gr->add_terminal( ELSE, "else" );
-  _gr->add_terminal( SWITCH, "switch" );
-  _gr->add_terminal( WHILE, "while" );
-  _gr->add_terminal( DO, "do" );
-  _gr->add_terminal( FOR, "for" );
-  _gr->add_terminal( GOTO, "goto" );
-  _gr->add_terminal( CONTINUE, "continue" );
-  _gr->add_terminal( BREAK, "break" );
-  _gr->add_terminal( RETURN, "break" );
+  _gr->AddTerminal( CASE, "case" );
+  _gr->AddTerminal( DEFAULT, "default" );
+  _gr->AddTerminal( IF, "if" );
+  _gr->AddTerminal( ELSE, "else" );
+  _gr->AddTerminal( SWITCH, "switch" );
+  _gr->AddTerminal( WHILE, "while" );
+  _gr->AddTerminal( DO, "do" );
+  _gr->AddTerminal( FOR, "for" );
+  _gr->AddTerminal( GOTO, "goto" );
+  _gr->AddTerminal( CONTINUE, "continue" );
+  _gr->AddTerminal( BREAK, "break" );
+  _gr->AddTerminal( RETURN, "break" );
   
   // add nonterminals
-  _gr->add_nonterminal( primary_expr, "primary expr" );
-  _gr->add_nonterminal( postfix_expr, "postfix expr" );
-  _gr->add_nonterminal( argument_expr_list, "argument expr list" );
-  _gr->add_nonterminal( unary_expr, "unary expr" );
-  _gr->add_nonterminal( unary_operator, "unary operator" );
-  _gr->add_nonterminal( cast_expr, "cast expr" );
-  _gr->add_nonterminal( multiplicative_expr, "multiplicative expr" );
-  _gr->add_nonterminal( additive_expr, "additive expr" );
-  _gr->add_nonterminal( shift_expr, "shift expr" );
-  _gr->add_nonterminal( relational_expr, "relational expr" );
-  _gr->add_nonterminal( equality_expr, "equality expr" );
-  _gr->add_nonterminal( and_expr, "and expr" );
-  _gr->add_nonterminal( exclusive_or_expr, "exclusive or expr" );
-  _gr->add_nonterminal( inclusive_or_expr, "inclusive or expr" );
-  _gr->add_nonterminal( logical_and_expr, "logical and expr" );
-  _gr->add_nonterminal( logical_or_expr, "logical or expr" );
-  _gr->add_nonterminal( conditional_expr, "conditional expr" );
-  _gr->add_nonterminal( assignment_expr, "assignment expr" );
-  _gr->add_nonterminal( assignment_operator, "assignment operator" );
-  _gr->add_nonterminal( expr, "expr" );
-  _gr->add_nonterminal( constant_expr, "constant expr" );
+  _gr->AddNonterminal( primary_expr, "primary expr" );
+  _gr->AddNonterminal( postfix_expr, "postfix expr" );
+  _gr->AddNonterminal( argument_expr_list, "argument expr list" );
+  _gr->AddNonterminal( unary_expr, "unary expr" );
+  _gr->AddNonterminal( unary_operator, "unary operator" );
+  _gr->AddNonterminal( cast_expr, "cast expr" );
+  _gr->AddNonterminal( multiplicative_expr, "multiplicative expr" );
+  _gr->AddNonterminal( additive_expr, "additive expr" );
+  _gr->AddNonterminal( shift_expr, "shift expr" );
+  _gr->AddNonterminal( relational_expr, "relational expr" );
+  _gr->AddNonterminal( equality_expr, "equality expr" );
+  _gr->AddNonterminal( and_expr, "and expr" );
+  _gr->AddNonterminal( exclusive_or_expr, "exclusive or expr" );
+  _gr->AddNonterminal( inclusive_or_expr, "inclusive or expr" );
+  _gr->AddNonterminal( logical_and_expr, "logical and expr" );
+  _gr->AddNonterminal( logical_or_expr, "logical or expr" );
+  _gr->AddNonterminal( conditional_expr, "conditional expr" );
+  _gr->AddNonterminal( assignment_expr, "assignment expr" );
+  _gr->AddNonterminal( assignment_operator, "assignment operator" );
+  _gr->AddNonterminal( expr, "expr" );
+  _gr->AddNonterminal( constant_expr, "constant expr" );
   
-  _gr->add_nonterminal( declaration, "declaration" );
-  _gr->add_nonterminal( declaration_specifiers, "declaration specifiers" );
-  _gr->add_nonterminal( init_declarator_list, "init declarator list" );
-  _gr->add_nonterminal( init_declarator, "init declarator" );
-  _gr->add_nonterminal( storage_class_specifier, "storage class specifier" );
-  _gr->add_nonterminal( type_specifier, "type specifier" );
-  _gr->add_nonterminal( struct_or_union_specifier, "struct or union specifier" );
-  _gr->add_nonterminal( struct_or_union, "struct or union" );
-  _gr->add_nonterminal( struct_declaration_list, "struct declaration list" );
-  _gr->add_nonterminal( struct_declaration, "struct declaration" );
-  _gr->add_nonterminal( struct_declarator_list, "struct declarator list" );
-  _gr->add_nonterminal( struct_declarator, "struct declarator" );
-  _gr->add_nonterminal( enum_specifier, "enum specifier" );
-  _gr->add_nonterminal( enumerator_list, "enumerator list" );
-  _gr->add_nonterminal( enumerator, "enumerator" );
-  _gr->add_nonterminal( declarator, "declarator" );
-  _gr->add_nonterminal( declarator2, "declarator2" );
-  _gr->add_nonterminal( pointer, "pointer" );
-  _gr->add_nonterminal( type_specifier_list, "type specifier list" );
-  _gr->add_nonterminal( parameter_identifier_list, "parameter identifier list" );
-  _gr->add_nonterminal( identifier_list, "identifier list" );
-  _gr->add_nonterminal( parameter_type_list, "parameter type list" );
-  _gr->add_nonterminal( parameter_list, "parameter list" );
-  _gr->add_nonterminal( parameter_declaration, "parameter declaration" );
-  _gr->add_nonterminal( type_name, "type_name" );
-  _gr->add_nonterminal( abstract_declarator, "abstract declarator" );
-  _gr->add_nonterminal( abstract_declarator2, "abstract declarator2" );
-  _gr->add_nonterminal( initializer, "initializer" );
-  _gr->add_nonterminal( initializer_list, "initializer list" );
+  _gr->AddNonterminal( declaration, "declaration" );
+  _gr->AddNonterminal( declaration_specifiers, "declaration specifiers" );
+  _gr->AddNonterminal( init_declarator_list, "init declarator list" );
+  _gr->AddNonterminal( init_declarator, "init declarator" );
+  _gr->AddNonterminal( storage_class_specifier, "storage class specifier" );
+  _gr->AddNonterminal( type_specifier, "type specifier" );
+  _gr->AddNonterminal( struct_or_union_specifier, "struct or union specifier" );
+  _gr->AddNonterminal( struct_or_union, "struct or union" );
+  _gr->AddNonterminal( struct_declaration_list, "struct declaration list" );
+  _gr->AddNonterminal( struct_declaration, "struct declaration" );
+  _gr->AddNonterminal( struct_declarator_list, "struct declarator list" );
+  _gr->AddNonterminal( struct_declarator, "struct declarator" );
+  _gr->AddNonterminal( enum_specifier, "enum specifier" );
+  _gr->AddNonterminal( enumerator_list, "enumerator list" );
+  _gr->AddNonterminal( enumerator, "enumerator" );
+  _gr->AddNonterminal( declarator, "declarator" );
+  _gr->AddNonterminal( declarator2, "declarator2" );
+  _gr->AddNonterminal( pointer, "pointer" );
+  _gr->AddNonterminal( type_specifier_list, "type specifier list" );
+  _gr->AddNonterminal( parameter_identifier_list, "parameter identifier list" );
+  _gr->AddNonterminal( identifier_list, "identifier list" );
+  _gr->AddNonterminal( parameter_type_list, "parameter type list" );
+  _gr->AddNonterminal( parameter_list, "parameter list" );
+  _gr->AddNonterminal( parameter_declaration, "parameter declaration" );
+  _gr->AddNonterminal( type_name, "type_name" );
+  _gr->AddNonterminal( abstract_declarator, "abstract declarator" );
+  _gr->AddNonterminal( abstract_declarator2, "abstract declarator2" );
+  _gr->AddNonterminal( initializer, "initializer" );
+  _gr->AddNonterminal( initializer_list, "initializer list" );
   
-  _gr->add_nonterminal( statement, "statement" );
-  _gr->add_nonterminal( labeled_statement, "labeled statement" );
-  _gr->add_nonterminal( compound_statement, "compound statement" );
-  _gr->add_nonterminal( declaration_list, "declaration list" );
-  _gr->add_nonterminal( statement_list, "statement list" );
-  _gr->add_nonterminal( expression_statement, "expression statement" );
-  _gr->add_nonterminal( selection_statement, "selection statement" );
-  _gr->add_nonterminal( iteration_statement, "iteration statement" );
-  _gr->add_nonterminal( jump_statement, "jump statement" );
+  _gr->AddNonterminal( statement, "statement" );
+  _gr->AddNonterminal( labeled_statement, "labeled statement" );
+  _gr->AddNonterminal( compound_statement, "compound statement" );
+  _gr->AddNonterminal( declaration_list, "declaration list" );
+  _gr->AddNonterminal( statement_list, "statement list" );
+  _gr->AddNonterminal( expression_statement, "expression statement" );
+  _gr->AddNonterminal( selection_statement, "selection statement" );
+  _gr->AddNonterminal( iteration_statement, "iteration statement" );
+  _gr->AddNonterminal( jump_statement, "jump statement" );
   
-  _gr->add_nonterminal( file, "file" );
-  _gr->add_nonterminal( external_definition, "external definition" );
-  _gr->add_nonterminal( function_definition, "function definition" );
-  _gr->add_nonterminal( function_body, "function body" );
+  _gr->AddNonterminal( file, "file" );
+  _gr->AddNonterminal( external_definition, "external definition" );
+  _gr->AddNonterminal( function_definition, "function definition" );
+  _gr->AddNonterminal( function_body, "function body" );
   
-  _gr->add_nonterminal( identifier, "identifier" );
+  _gr->AddNonterminal( identifier, "identifier" );
   
-  _gr->add_nonterminal( constant, "constant" );
+  _gr->AddNonterminal( constant, "constant" );
   
   // set start symbol
-  _gr->set_start_symbol( file );
+  _gr->SetStartSymbolId( file );
   
   // add rules
   
@@ -810,23 +809,23 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | STRING_LITERAL
   // | '(' expr ')'
 
-  _gr->add_rule( primary_expr__identifier, "primary_expr --> identifier" );
-  _gr->add_lhs_symbol( primary_expr__identifier, primary_expr );
-  _gr->add_rhs_symbol( primary_expr__identifier, identifier );
+  _gr->AddRule( primary_expr__identifier, "primary_expr --> identifier" );
+  _gr->AddLhsSymbol( primary_expr__identifier, primary_expr );
+  _gr->AddRhsSymbol( primary_expr__identifier, identifier );
   
-  _gr->add_rule( primary_expr__constant, "primary_expr --> constant" );
-  _gr->add_lhs_symbol( primary_expr__constant, primary_expr );
-  _gr->add_rhs_symbol( primary_expr__constant, constant );
+  _gr->AddRule( primary_expr__constant, "primary_expr --> constant" );
+  _gr->AddLhsSymbol( primary_expr__constant, primary_expr );
+  _gr->AddRhsSymbol( primary_expr__constant, constant );
 
-  _gr->add_rule( primary_expr__STRING_LITERAL, "primary_expr --> STRING_LITERAL" );
-  _gr->add_lhs_symbol( primary_expr__STRING_LITERAL, primary_expr );
-  _gr->add_rhs_symbol( primary_expr__STRING_LITERAL, STRING_LITERAL );
+  _gr->AddRule( primary_expr__STRING_LITERAL, "primary_expr --> STRING_LITERAL" );
+  _gr->AddLhsSymbol( primary_expr__STRING_LITERAL, primary_expr );
+  _gr->AddRhsSymbol( primary_expr__STRING_LITERAL, STRING_LITERAL );
 
-  _gr->add_rule( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, "primary_expr --> ( expr )" );
-  _gr->add_lhs_symbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, primary_expr );
-  _gr->add_rhs_symbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, expr );
-  _gr->add_rhs_symbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, "primary_expr --> ( expr )" );
+  _gr->AddLhsSymbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, primary_expr );
+  _gr->AddRhsSymbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, expr );
+  _gr->AddRhsSymbol( primary_expr__LEFT_BRACE_expr_RIGHT_BRACE, RIGHT_BRACE );
   
   // postfix_expr
   // : primary_expr
@@ -838,64 +837,64 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | postfix_expr INC_OP
   // | postfix_expr DEC_OP
   
-  _gr->add_rule( postfix_expr__primary_expr, "postfix_expr --> primary_expr" );
-  _gr->add_lhs_symbol( postfix_expr__primary_expr, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__primary_expr, primary_expr );
+  _gr->AddRule( postfix_expr__primary_expr, "postfix_expr --> primary_expr" );
+  _gr->AddLhsSymbol( postfix_expr__primary_expr, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__primary_expr, primary_expr );
   
-  _gr->add_rule( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, "postfix_expr --> postfix_expr [ expr ]" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
+  _gr->AddRule( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, "postfix_expr --> postfix_expr [ expr ]" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_SQ_BRACKET_expr_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
   
-  _gr->add_rule( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, "postfix_expr --> postfix_expr ( )" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, "postfix_expr --> postfix_expr ( )" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
     
-  _gr->add_rule( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, "postfix_expr --> postfix_expr ( argument_expr_list )" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, argument_expr_list );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, "postfix_expr --> postfix_expr ( argument_expr_list )" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, argument_expr_list );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_LEFT_BRACE_argument_expr_list_RIGHT_BRACE, RIGHT_BRACE );
   
-  _gr->add_rule( postfix_expr__postfix_expr_DOT_identifier, "postfix_expr --> postfix_expr . identifier" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_DOT_identifier, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_DOT_identifier, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_DOT_identifier, DOT );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_DOT_identifier, identifier );
+  _gr->AddRule( postfix_expr__postfix_expr_DOT_identifier, "postfix_expr --> postfix_expr . identifier" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_DOT_identifier, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_DOT_identifier, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_DOT_identifier, DOT );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_DOT_identifier, identifier );
   
-  _gr->add_rule( postfix_expr__postfix_expr_PTR_OP_identifier, "postfix_expr --> postfix_expr -> identifier" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_PTR_OP_identifier, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_PTR_OP_identifier, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_PTR_OP_identifier, PTR_OP );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_PTR_OP_identifier, identifier );
+  _gr->AddRule( postfix_expr__postfix_expr_PTR_OP_identifier, "postfix_expr --> postfix_expr -> identifier" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_PTR_OP_identifier, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_PTR_OP_identifier, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_PTR_OP_identifier, PTR_OP );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_PTR_OP_identifier, identifier );
   
-  _gr->add_rule( postfix_expr__postfix_expr_INC_OP, "postfix_expr --> postfix_expr ++" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_INC_OP, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_INC_OP, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_INC_OP, INC_OP );
+  _gr->AddRule( postfix_expr__postfix_expr_INC_OP, "postfix_expr --> postfix_expr ++" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_INC_OP, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_INC_OP, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_INC_OP, INC_OP );
   
-  _gr->add_rule( postfix_expr__postfix_expr_DEC_OP, "postfix_expr --> postfix_expr --" );
-  _gr->add_lhs_symbol( postfix_expr__postfix_expr_DEC_OP, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_DEC_OP, postfix_expr );
-  _gr->add_rhs_symbol( postfix_expr__postfix_expr_DEC_OP, DEC_OP );
+  _gr->AddRule( postfix_expr__postfix_expr_DEC_OP, "postfix_expr --> postfix_expr --" );
+  _gr->AddLhsSymbol( postfix_expr__postfix_expr_DEC_OP, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_DEC_OP, postfix_expr );
+  _gr->AddRhsSymbol( postfix_expr__postfix_expr_DEC_OP, DEC_OP );
   
   // argument_expr_list
   // : assignment_expr
   // | argument_expr_list ',' assignment_expr
   
-  _gr->add_rule( argument_expr_list__assignment_expr, "argument_expr_list --> assignment_expr" );
-  _gr->add_lhs_symbol( argument_expr_list__assignment_expr, argument_expr_list );
-  _gr->add_rhs_symbol( argument_expr_list__assignment_expr, assignment_expr );
+  _gr->AddRule( argument_expr_list__assignment_expr, "argument_expr_list --> assignment_expr" );
+  _gr->AddLhsSymbol( argument_expr_list__assignment_expr, argument_expr_list );
+  _gr->AddRhsSymbol( argument_expr_list__assignment_expr, assignment_expr );
   
-  _gr->add_rule( argument_expr_list__argument_expr_list_COMMA_assignment_expr, "argument_expr_list --> argument_expr_list , assignment_expr" );
-  _gr->add_lhs_symbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, argument_expr_list );
-  _gr->add_rhs_symbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, argument_expr_list );
-  _gr->add_rhs_symbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, COMMA );
-  _gr->add_rhs_symbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, assignment_expr );
+  _gr->AddRule( argument_expr_list__argument_expr_list_COMMA_assignment_expr, "argument_expr_list --> argument_expr_list , assignment_expr" );
+  _gr->AddLhsSymbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, argument_expr_list );
+  _gr->AddRhsSymbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, argument_expr_list );
+  _gr->AddRhsSymbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, COMMA );
+  _gr->AddRhsSymbol( argument_expr_list__argument_expr_list_COMMA_assignment_expr, assignment_expr );
   
   // unary_expr
   // : postfix_expr
@@ -905,36 +904,36 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | SIZEOF unary_expr
   // | SIZEOF '(' type_name ')'
 
-  _gr->add_rule( unary_expr__postfix_expr, "unary_expr --> postfix_expr" );
-  _gr->add_lhs_symbol( unary_expr__postfix_expr, unary_expr );
-  _gr->add_rhs_symbol( unary_expr__postfix_expr, postfix_expr );
+  _gr->AddRule( unary_expr__postfix_expr, "unary_expr --> postfix_expr" );
+  _gr->AddLhsSymbol( unary_expr__postfix_expr, unary_expr );
+  _gr->AddRhsSymbol( unary_expr__postfix_expr, postfix_expr );
   
-  _gr->add_rule( unary_expr__INC_OP_unary_expr, "unary_expr --> ++ unary_expr" );
-  _gr->add_lhs_symbol( unary_expr__INC_OP_unary_expr, unary_expr );
-  _gr->add_rhs_symbol( unary_expr__INC_OP_unary_expr, INC_OP );
-  _gr->add_rhs_symbol( unary_expr__INC_OP_unary_expr, unary_expr );
+  _gr->AddRule( unary_expr__INC_OP_unary_expr, "unary_expr --> ++ unary_expr" );
+  _gr->AddLhsSymbol( unary_expr__INC_OP_unary_expr, unary_expr );
+  _gr->AddRhsSymbol( unary_expr__INC_OP_unary_expr, INC_OP );
+  _gr->AddRhsSymbol( unary_expr__INC_OP_unary_expr, unary_expr );
   
-  _gr->add_rule( unary_expr__DEC_OP_unary_expr, "unary_expr --> -- unary_expr" );
-  _gr->add_lhs_symbol( unary_expr__DEC_OP_unary_expr, unary_expr );
-  _gr->add_rhs_symbol( unary_expr__DEC_OP_unary_expr, DEC_OP );
-  _gr->add_rhs_symbol( unary_expr__DEC_OP_unary_expr, unary_expr );
+  _gr->AddRule( unary_expr__DEC_OP_unary_expr, "unary_expr --> -- unary_expr" );
+  _gr->AddLhsSymbol( unary_expr__DEC_OP_unary_expr, unary_expr );
+  _gr->AddRhsSymbol( unary_expr__DEC_OP_unary_expr, DEC_OP );
+  _gr->AddRhsSymbol( unary_expr__DEC_OP_unary_expr, unary_expr );
   
-  _gr->add_rule( unary_expr__unary_operator_cast_expr, "unary_expr --> unary_operator cast_expr" );
-  _gr->add_lhs_symbol( unary_expr__unary_operator_cast_expr, unary_expr );
-  _gr->add_rhs_symbol( unary_expr__unary_operator_cast_expr, unary_operator );
-  _gr->add_rhs_symbol( unary_expr__unary_operator_cast_expr, cast_expr );
+  _gr->AddRule( unary_expr__unary_operator_cast_expr, "unary_expr --> unary_operator cast_expr" );
+  _gr->AddLhsSymbol( unary_expr__unary_operator_cast_expr, unary_expr );
+  _gr->AddRhsSymbol( unary_expr__unary_operator_cast_expr, unary_operator );
+  _gr->AddRhsSymbol( unary_expr__unary_operator_cast_expr, cast_expr );
   
-  _gr->add_rule( unary_expr__SIZEOF_unary_expr, "unary_expr --> sizeof unary_expr" );
-  _gr->add_lhs_symbol( unary_expr__SIZEOF_unary_expr, unary_expr );
-  _gr->add_rhs_symbol( unary_expr__SIZEOF_unary_expr, SIZEOF );
-  _gr->add_rhs_symbol( unary_expr__SIZEOF_unary_expr, unary_expr );
+  _gr->AddRule( unary_expr__SIZEOF_unary_expr, "unary_expr --> sizeof unary_expr" );
+  _gr->AddLhsSymbol( unary_expr__SIZEOF_unary_expr, unary_expr );
+  _gr->AddRhsSymbol( unary_expr__SIZEOF_unary_expr, SIZEOF );
+  _gr->AddRhsSymbol( unary_expr__SIZEOF_unary_expr, unary_expr );
   
-  _gr->add_rule( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, "unary_expr --> sizeof ( type_name )" );
-  _gr->add_lhs_symbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, unary_expr );
-  _gr->add_rhs_symbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, SIZEOF );
-  _gr->add_rhs_symbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, type_name );
-  _gr->add_rhs_symbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, "unary_expr --> sizeof ( type_name )" );
+  _gr->AddLhsSymbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, unary_expr );
+  _gr->AddRhsSymbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, SIZEOF );
+  _gr->AddRhsSymbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, type_name );
+  _gr->AddRhsSymbol( unary_expr__SIZEOF_LEFT_BRACE_type_name_RIGHT_BRACE, RIGHT_BRACE );
   
   // unary_operator
   // : '&'
@@ -944,44 +943,44 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | '~'
   // | '!'
 
-  _gr->add_rule( unary_operator__AND, "unary_operator --> &" );
-  _gr->add_lhs_symbol( unary_operator__AND, unary_operator );
-  _gr->add_rhs_symbol( unary_operator__AND, AND );
+  _gr->AddRule( unary_operator__AND, "unary_operator --> &" );
+  _gr->AddLhsSymbol( unary_operator__AND, unary_operator );
+  _gr->AddRhsSymbol( unary_operator__AND, AND );
   
-  _gr->add_rule( unary_operator__STAR, "unary_operator --> *" );
-  _gr->add_lhs_symbol( unary_operator__STAR, unary_operator );
-  _gr->add_rhs_symbol( unary_operator__STAR, STAR );
+  _gr->AddRule( unary_operator__STAR, "unary_operator --> *" );
+  _gr->AddLhsSymbol( unary_operator__STAR, unary_operator );
+  _gr->AddRhsSymbol( unary_operator__STAR, STAR );
   
-  _gr->add_rule( unary_operator__PLUS, "unary_operator --> +" );
-  _gr->add_lhs_symbol( unary_operator__PLUS, unary_operator );
-  _gr->add_rhs_symbol( unary_operator__PLUS, PLUS );
+  _gr->AddRule( unary_operator__PLUS, "unary_operator --> +" );
+  _gr->AddLhsSymbol( unary_operator__PLUS, unary_operator );
+  _gr->AddRhsSymbol( unary_operator__PLUS, PLUS );
   
-  _gr->add_rule( unary_operator__MINUS, "unary_operator --> -" );
-  _gr->add_lhs_symbol( unary_operator__MINUS, unary_operator );
-  _gr->add_rhs_symbol( unary_operator__MINUS, MINUS );
+  _gr->AddRule( unary_operator__MINUS, "unary_operator --> -" );
+  _gr->AddLhsSymbol( unary_operator__MINUS, unary_operator );
+  _gr->AddRhsSymbol( unary_operator__MINUS, MINUS );
   
-  _gr->add_rule( unary_operator__TILDA, "unary_operator ~" );
-  _gr->add_lhs_symbol( unary_operator__TILDA, unary_operator );
-  _gr->add_rhs_symbol( unary_operator__TILDA, TILDA );
+  _gr->AddRule( unary_operator__TILDA, "unary_operator ~" );
+  _gr->AddLhsSymbol( unary_operator__TILDA, unary_operator );
+  _gr->AddRhsSymbol( unary_operator__TILDA, TILDA );
   
-  _gr->add_rule( unary_operator__EXCLAMATION, "unary_operator --> !" );
-  _gr->add_lhs_symbol( unary_operator__EXCLAMATION, unary_operator );
-  _gr->add_rhs_symbol( unary_operator__EXCLAMATION, EXCLAMATION );
+  _gr->AddRule( unary_operator__EXCLAMATION, "unary_operator --> !" );
+  _gr->AddLhsSymbol( unary_operator__EXCLAMATION, unary_operator );
+  _gr->AddRhsSymbol( unary_operator__EXCLAMATION, EXCLAMATION );
   
   // cast_expr
   // : unary_expr
   // | '(' type_name ')' cast_expr
   
-  _gr->add_rule( cast_expr__unary_expr, "cast_expr --> unary_expr" );
-  _gr->add_lhs_symbol( cast_expr__unary_expr, cast_expr );
-  _gr->add_rhs_symbol( cast_expr__unary_expr, unary_expr );
+  _gr->AddRule( cast_expr__unary_expr, "cast_expr --> unary_expr" );
+  _gr->AddLhsSymbol( cast_expr__unary_expr, cast_expr );
+  _gr->AddRhsSymbol( cast_expr__unary_expr, unary_expr );
 
-  _gr->add_rule( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, "cast_expr --> ( type_name ) cast_expr" );
-  _gr->add_lhs_symbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, cast_expr );
-  _gr->add_rhs_symbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, LEFT_BRACE );
-  _gr->add_rhs_symbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, type_name );
-  _gr->add_rhs_symbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, RIGHT_BRACE );
-  _gr->add_rhs_symbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, cast_expr );
+  _gr->AddRule( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, "cast_expr --> ( type_name ) cast_expr" );
+  _gr->AddLhsSymbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, cast_expr );
+  _gr->AddRhsSymbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, LEFT_BRACE );
+  _gr->AddRhsSymbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, type_name );
+  _gr->AddRhsSymbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, RIGHT_BRACE );
+  _gr->AddRhsSymbol( cast_expr__LEFT_BRACE_type_name_RIGHT_BRACE_cast_expr, cast_expr );
 
   // multiplicative_expr
   // : cast_expr
@@ -989,69 +988,69 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | multiplicative_expr '/' cast_expr
   // | multiplicative_expr '%' cast_expr
 
-  _gr->add_rule( multiplicative_expr__cast_expr, "multiplicative_expr --> cast_expr" );
-  _gr->add_lhs_symbol( multiplicative_expr__cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__cast_expr, cast_expr );
+  _gr->AddRule( multiplicative_expr__cast_expr, "multiplicative_expr --> cast_expr" );
+  _gr->AddLhsSymbol( multiplicative_expr__cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__cast_expr, cast_expr );
   
-  _gr->add_rule( multiplicative_expr__multiplicative_expr_STAR_cast_expr, "multiplicative_expr --> multiplicative_expr * cast_expr" );
-  _gr->add_lhs_symbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, STAR );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, cast_expr );
+  _gr->AddRule( multiplicative_expr__multiplicative_expr_STAR_cast_expr, "multiplicative_expr --> multiplicative_expr * cast_expr" );
+  _gr->AddLhsSymbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, STAR );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_STAR_cast_expr, cast_expr );
   
-  _gr->add_rule( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, "multiplicative_expr --> multiplicative_expr / cast_expr" );
-  _gr->add_lhs_symbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, SLASH );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, cast_expr );
+  _gr->AddRule( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, "multiplicative_expr --> multiplicative_expr / cast_expr" );
+  _gr->AddLhsSymbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, SLASH );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_SLASH_cast_expr, cast_expr );
   
-  _gr->add_rule( multiplicative_expr__multiplicative_expr_MOD_cast_expr, "multiplicative_expr --> multiplicative_expr % cast_expr" );
-  _gr->add_lhs_symbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, multiplicative_expr );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, MOD );
-  _gr->add_rhs_symbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, cast_expr );
+  _gr->AddRule( multiplicative_expr__multiplicative_expr_MOD_cast_expr, "multiplicative_expr --> multiplicative_expr % cast_expr" );
+  _gr->AddLhsSymbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, multiplicative_expr );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, MOD );
+  _gr->AddRhsSymbol( multiplicative_expr__multiplicative_expr_MOD_cast_expr, cast_expr );
   
   // additive_expr
   // : multiplicative_expr
   // | additive_expr '+' multiplicative_expr
   // | additive_expr '-' multiplicative_expr
 
-  _gr->add_rule( additive_expr__multiplicative_expr, "additive_expr --> multiplicative_expr" );
-  _gr->add_lhs_symbol( additive_expr__multiplicative_expr, additive_expr );
-  _gr->add_rhs_symbol( additive_expr__multiplicative_expr, multiplicative_expr );
+  _gr->AddRule( additive_expr__multiplicative_expr, "additive_expr --> multiplicative_expr" );
+  _gr->AddLhsSymbol( additive_expr__multiplicative_expr, additive_expr );
+  _gr->AddRhsSymbol( additive_expr__multiplicative_expr, multiplicative_expr );
 
-  _gr->add_rule( additive_expr__additive_expr_PLUS_multiplicative_expr, "additive_expr --> additive_expr + multiplicative_expr" );
-  _gr->add_lhs_symbol( additive_expr__additive_expr_PLUS_multiplicative_expr, additive_expr );
-  _gr->add_rhs_symbol( additive_expr__additive_expr_PLUS_multiplicative_expr, additive_expr );
-  _gr->add_rhs_symbol( additive_expr__additive_expr_PLUS_multiplicative_expr, PLUS );
-  _gr->add_rhs_symbol( additive_expr__additive_expr_PLUS_multiplicative_expr, multiplicative_expr );
+  _gr->AddRule( additive_expr__additive_expr_PLUS_multiplicative_expr, "additive_expr --> additive_expr + multiplicative_expr" );
+  _gr->AddLhsSymbol( additive_expr__additive_expr_PLUS_multiplicative_expr, additive_expr );
+  _gr->AddRhsSymbol( additive_expr__additive_expr_PLUS_multiplicative_expr, additive_expr );
+  _gr->AddRhsSymbol( additive_expr__additive_expr_PLUS_multiplicative_expr, PLUS );
+  _gr->AddRhsSymbol( additive_expr__additive_expr_PLUS_multiplicative_expr, multiplicative_expr );
 
-  _gr->add_rule( additive_expr__additive_expr_MINUS_multiplicative_expr, "additive_expr --> additive_expr - multiplicative_expr" );
-  _gr->add_lhs_symbol( additive_expr__additive_expr_MINUS_multiplicative_expr, additive_expr );
-  _gr->add_rhs_symbol( additive_expr__additive_expr_MINUS_multiplicative_expr, additive_expr );
-  _gr->add_rhs_symbol( additive_expr__additive_expr_MINUS_multiplicative_expr, MINUS );
-  _gr->add_rhs_symbol( additive_expr__additive_expr_MINUS_multiplicative_expr, multiplicative_expr );
+  _gr->AddRule( additive_expr__additive_expr_MINUS_multiplicative_expr, "additive_expr --> additive_expr - multiplicative_expr" );
+  _gr->AddLhsSymbol( additive_expr__additive_expr_MINUS_multiplicative_expr, additive_expr );
+  _gr->AddRhsSymbol( additive_expr__additive_expr_MINUS_multiplicative_expr, additive_expr );
+  _gr->AddRhsSymbol( additive_expr__additive_expr_MINUS_multiplicative_expr, MINUS );
+  _gr->AddRhsSymbol( additive_expr__additive_expr_MINUS_multiplicative_expr, multiplicative_expr );
   
   // shift_expr
   // : additive_expr
   // | shift_expr LEFT_OP additive_expr
   // | shift_expr RIGHT_OP additive_expr
 
-  _gr->add_rule( shift_expr__additive_expr, "shift_expr --> additive_expr" );
-  _gr->add_lhs_symbol( shift_expr__additive_expr, shift_expr );
-  _gr->add_rhs_symbol( shift_expr__additive_expr, additive_expr );
+  _gr->AddRule( shift_expr__additive_expr, "shift_expr --> additive_expr" );
+  _gr->AddLhsSymbol( shift_expr__additive_expr, shift_expr );
+  _gr->AddRhsSymbol( shift_expr__additive_expr, additive_expr );
 
-  _gr->add_rule( shift_expr__shift_expr_LEFT_OP_additive_expr, "shift_expr --> shift_expr << additive_expr" );
-  _gr->add_lhs_symbol( shift_expr__shift_expr_LEFT_OP_additive_expr, shift_expr );
-  _gr->add_rhs_symbol( shift_expr__shift_expr_LEFT_OP_additive_expr, shift_expr );
-  _gr->add_rhs_symbol( shift_expr__shift_expr_LEFT_OP_additive_expr, LEFT_OP );
-  _gr->add_rhs_symbol( shift_expr__shift_expr_LEFT_OP_additive_expr, additive_expr );
+  _gr->AddRule( shift_expr__shift_expr_LEFT_OP_additive_expr, "shift_expr --> shift_expr << additive_expr" );
+  _gr->AddLhsSymbol( shift_expr__shift_expr_LEFT_OP_additive_expr, shift_expr );
+  _gr->AddRhsSymbol( shift_expr__shift_expr_LEFT_OP_additive_expr, shift_expr );
+  _gr->AddRhsSymbol( shift_expr__shift_expr_LEFT_OP_additive_expr, LEFT_OP );
+  _gr->AddRhsSymbol( shift_expr__shift_expr_LEFT_OP_additive_expr, additive_expr );
 
-  _gr->add_rule( shift_expr__shift_expr_RIGHT_OP_additive_expr, "shift_expr --> shift_expr >> additive_expr" );
-  _gr->add_lhs_symbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, shift_expr );
-  _gr->add_rhs_symbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, shift_expr );
-  _gr->add_rhs_symbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, RIGHT_OP );
-  _gr->add_rhs_symbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, additive_expr );
+  _gr->AddRule( shift_expr__shift_expr_RIGHT_OP_additive_expr, "shift_expr --> shift_expr >> additive_expr" );
+  _gr->AddLhsSymbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, shift_expr );
+  _gr->AddRhsSymbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, shift_expr );
+  _gr->AddRhsSymbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, RIGHT_OP );
+  _gr->AddRhsSymbol( shift_expr__shift_expr_RIGHT_OP_additive_expr, additive_expr );
   
   // relational_expr
   // : shift_expr
@@ -1060,155 +1059,155 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | relational_expr LE_OP shift_expr
   // | relational_expr GE_OP shift_expr
   
-  _gr->add_rule( relational_expr__shift_expr, "relational_expr --> shift_expr" );
-  _gr->add_lhs_symbol( relational_expr__shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__shift_expr, shift_expr );
+  _gr->AddRule( relational_expr__shift_expr, "relational_expr --> shift_expr" );
+  _gr->AddLhsSymbol( relational_expr__shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__shift_expr, shift_expr );
 
-  _gr->add_rule( relational_expr__relational_expr_LESS_shift_expr, "relational_expr --> relational_expr < shift_expr" );
-  _gr->add_lhs_symbol( relational_expr__relational_expr_LESS_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_LESS_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_LESS_shift_expr, LESS );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_LESS_shift_expr, shift_expr );
+  _gr->AddRule( relational_expr__relational_expr_LESS_shift_expr, "relational_expr --> relational_expr < shift_expr" );
+  _gr->AddLhsSymbol( relational_expr__relational_expr_LESS_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_LESS_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_LESS_shift_expr, LESS );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_LESS_shift_expr, shift_expr );
 
-  _gr->add_rule( relational_expr__relational_expr_MORE_shift_expr, "relational_expr --> relational_expr > shift_expr" );
-  _gr->add_lhs_symbol( relational_expr__relational_expr_MORE_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_MORE_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_MORE_shift_expr, MORE );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_MORE_shift_expr, shift_expr );
+  _gr->AddRule( relational_expr__relational_expr_MORE_shift_expr, "relational_expr --> relational_expr > shift_expr" );
+  _gr->AddLhsSymbol( relational_expr__relational_expr_MORE_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_MORE_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_MORE_shift_expr, MORE );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_MORE_shift_expr, shift_expr );
 
-  _gr->add_rule( relational_expr__relational_expr_LE_OP_shift_expr, "relational_expr --> relational_expr <= shift_expr" );
-  _gr->add_lhs_symbol( relational_expr__relational_expr_LE_OP_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_LE_OP_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_LE_OP_shift_expr, LE_OP );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_LE_OP_shift_expr, shift_expr );
+  _gr->AddRule( relational_expr__relational_expr_LE_OP_shift_expr, "relational_expr --> relational_expr <= shift_expr" );
+  _gr->AddLhsSymbol( relational_expr__relational_expr_LE_OP_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_LE_OP_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_LE_OP_shift_expr, LE_OP );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_LE_OP_shift_expr, shift_expr );
 
-  _gr->add_rule( relational_expr__relational_expr_GE_OP_shift_expr, "relational_expr --> relational_expr >= shift_expr" );
-  _gr->add_lhs_symbol( relational_expr__relational_expr_GE_OP_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_GE_OP_shift_expr, relational_expr );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_GE_OP_shift_expr, GE_OP );
-  _gr->add_rhs_symbol( relational_expr__relational_expr_GE_OP_shift_expr, shift_expr );
+  _gr->AddRule( relational_expr__relational_expr_GE_OP_shift_expr, "relational_expr --> relational_expr >= shift_expr" );
+  _gr->AddLhsSymbol( relational_expr__relational_expr_GE_OP_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_GE_OP_shift_expr, relational_expr );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_GE_OP_shift_expr, GE_OP );
+  _gr->AddRhsSymbol( relational_expr__relational_expr_GE_OP_shift_expr, shift_expr );
   
   // equality_expr
   // : relational_expr
   // | equality_expr EQ_OP relational_expr
   // | equality_expr NE_OP relational_expr
   
-  _gr->add_rule( equality_expr__relational_expr, "equality_expr --> relational_expr" );
-  _gr->add_lhs_symbol( equality_expr__relational_expr, equality_expr );
-  _gr->add_rhs_symbol( equality_expr__relational_expr, relational_expr );
+  _gr->AddRule( equality_expr__relational_expr, "equality_expr --> relational_expr" );
+  _gr->AddLhsSymbol( equality_expr__relational_expr, equality_expr );
+  _gr->AddRhsSymbol( equality_expr__relational_expr, relational_expr );
 
-  _gr->add_rule( equality_expr__equality_expr_EQ_OP_relational_expr, "equality_expr --> equality_expr == relational_expr" );
-  _gr->add_lhs_symbol( equality_expr__equality_expr_EQ_OP_relational_expr, equality_expr );
-  _gr->add_rhs_symbol( equality_expr__equality_expr_EQ_OP_relational_expr, equality_expr );
-  _gr->add_rhs_symbol( equality_expr__equality_expr_EQ_OP_relational_expr, EQ_OP );
-  _gr->add_rhs_symbol( equality_expr__equality_expr_EQ_OP_relational_expr, relational_expr );
+  _gr->AddRule( equality_expr__equality_expr_EQ_OP_relational_expr, "equality_expr --> equality_expr == relational_expr" );
+  _gr->AddLhsSymbol( equality_expr__equality_expr_EQ_OP_relational_expr, equality_expr );
+  _gr->AddRhsSymbol( equality_expr__equality_expr_EQ_OP_relational_expr, equality_expr );
+  _gr->AddRhsSymbol( equality_expr__equality_expr_EQ_OP_relational_expr, EQ_OP );
+  _gr->AddRhsSymbol( equality_expr__equality_expr_EQ_OP_relational_expr, relational_expr );
 
-  _gr->add_rule( equality_expr__equality_expr_NE_OP_relational_expr, "equality_expr --> equality_expr != relational_expr" );
-  _gr->add_lhs_symbol( equality_expr__equality_expr_NE_OP_relational_expr, equality_expr );
-  _gr->add_rhs_symbol( equality_expr__equality_expr_NE_OP_relational_expr, equality_expr );
-  _gr->add_rhs_symbol( equality_expr__equality_expr_NE_OP_relational_expr, NE_OP );
-  _gr->add_rhs_symbol( equality_expr__equality_expr_NE_OP_relational_expr, relational_expr );
+  _gr->AddRule( equality_expr__equality_expr_NE_OP_relational_expr, "equality_expr --> equality_expr != relational_expr" );
+  _gr->AddLhsSymbol( equality_expr__equality_expr_NE_OP_relational_expr, equality_expr );
+  _gr->AddRhsSymbol( equality_expr__equality_expr_NE_OP_relational_expr, equality_expr );
+  _gr->AddRhsSymbol( equality_expr__equality_expr_NE_OP_relational_expr, NE_OP );
+  _gr->AddRhsSymbol( equality_expr__equality_expr_NE_OP_relational_expr, relational_expr );
   
   // and_expr
   // : equality_expr
   // | and_expr '&' equality_expr
   
-  _gr->add_rule( and_expr__equality_expr, "and_expr --> equality_expr" );
-  _gr->add_lhs_symbol( and_expr__equality_expr, and_expr );
-  _gr->add_rhs_symbol( and_expr__equality_expr, equality_expr );
+  _gr->AddRule( and_expr__equality_expr, "and_expr --> equality_expr" );
+  _gr->AddLhsSymbol( and_expr__equality_expr, and_expr );
+  _gr->AddRhsSymbol( and_expr__equality_expr, equality_expr );
 
-  _gr->add_rule( and_expr__and_expr_AND_equality_expr, "and_expr --> and_expr & equality_expr" );
-  _gr->add_lhs_symbol( and_expr__and_expr_AND_equality_expr, and_expr );
-  _gr->add_rhs_symbol( and_expr__and_expr_AND_equality_expr, and_expr );
-  _gr->add_rhs_symbol( and_expr__and_expr_AND_equality_expr, AND );
-  _gr->add_rhs_symbol( and_expr__and_expr_AND_equality_expr, equality_expr );
+  _gr->AddRule( and_expr__and_expr_AND_equality_expr, "and_expr --> and_expr & equality_expr" );
+  _gr->AddLhsSymbol( and_expr__and_expr_AND_equality_expr, and_expr );
+  _gr->AddRhsSymbol( and_expr__and_expr_AND_equality_expr, and_expr );
+  _gr->AddRhsSymbol( and_expr__and_expr_AND_equality_expr, AND );
+  _gr->AddRhsSymbol( and_expr__and_expr_AND_equality_expr, equality_expr );
 
 
   // exclusive_or_expr
   // : and_expr
   // | exclusive_or_expr '^' and_expr
 
-  _gr->add_rule( exclusive_or_expr__and_expr, "exclusive_or_expr --> and_expr" );
-  _gr->add_lhs_symbol( exclusive_or_expr__and_expr, exclusive_or_expr );
-  _gr->add_rhs_symbol( exclusive_or_expr__and_expr, and_expr );
+  _gr->AddRule( exclusive_or_expr__and_expr, "exclusive_or_expr --> and_expr" );
+  _gr->AddLhsSymbol( exclusive_or_expr__and_expr, exclusive_or_expr );
+  _gr->AddRhsSymbol( exclusive_or_expr__and_expr, and_expr );
 
-  _gr->add_rule( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, "exclusive_or_expr --> exclusive_or_expr ^ and_expr" );
-  _gr->add_lhs_symbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, exclusive_or_expr );
-  _gr->add_rhs_symbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, exclusive_or_expr );
-  _gr->add_rhs_symbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, XOR );
-  _gr->add_rhs_symbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, and_expr );
+  _gr->AddRule( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, "exclusive_or_expr --> exclusive_or_expr ^ and_expr" );
+  _gr->AddLhsSymbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, exclusive_or_expr );
+  _gr->AddRhsSymbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, exclusive_or_expr );
+  _gr->AddRhsSymbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, XOR );
+  _gr->AddRhsSymbol( exclusive_or_expr__exclusive_or_expr_XOR_and_expr, and_expr );
   
   // inclusive_or_expr
   // : exclusive_or_expr
   // | inclusive_or_expr '|' exclusive_or_expr
 
-  _gr->add_rule( inclusive_or_expr__exclusive_or_expr, "inclusive_or_expr --> exclusive_or_expr" );
-  _gr->add_lhs_symbol( inclusive_or_expr__exclusive_or_expr, inclusive_or_expr );
-  _gr->add_rhs_symbol( inclusive_or_expr__exclusive_or_expr, exclusive_or_expr );
+  _gr->AddRule( inclusive_or_expr__exclusive_or_expr, "inclusive_or_expr --> exclusive_or_expr" );
+  _gr->AddLhsSymbol( inclusive_or_expr__exclusive_or_expr, inclusive_or_expr );
+  _gr->AddRhsSymbol( inclusive_or_expr__exclusive_or_expr, exclusive_or_expr );
   
-  _gr->add_rule( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, "inclusive_or_expr --> inclusive_or_expr & exclusive_or_expr" );
-  _gr->add_lhs_symbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, inclusive_or_expr );
-  _gr->add_rhs_symbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, inclusive_or_expr );
-  _gr->add_rhs_symbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, OR );
-  _gr->add_rhs_symbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, exclusive_or_expr );
+  _gr->AddRule( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, "inclusive_or_expr --> inclusive_or_expr & exclusive_or_expr" );
+  _gr->AddLhsSymbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, inclusive_or_expr );
+  _gr->AddRhsSymbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, inclusive_or_expr );
+  _gr->AddRhsSymbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, OR );
+  _gr->AddRhsSymbol( inclusive_or_expr__inclusive_or_expr_OR_exclusive_or_expr, exclusive_or_expr );
   
   // logical_and_expr
   // : inclusive_or_expr
   // | logical_and_expr AND_OP inclusive_or_expr
   
-  _gr->add_rule( logical_and_expr__inclusive_or_expr, "logical_and_expr --> inclusive_or_expr" );
-  _gr->add_lhs_symbol( logical_and_expr__inclusive_or_expr, logical_and_expr );
-  _gr->add_rhs_symbol( logical_and_expr__inclusive_or_expr, inclusive_or_expr );
+  _gr->AddRule( logical_and_expr__inclusive_or_expr, "logical_and_expr --> inclusive_or_expr" );
+  _gr->AddLhsSymbol( logical_and_expr__inclusive_or_expr, logical_and_expr );
+  _gr->AddRhsSymbol( logical_and_expr__inclusive_or_expr, inclusive_or_expr );
 
-  _gr->add_rule( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, "logical_and_expr --> logical_and_expr && inclusive_or_expr" );
-  _gr->add_lhs_symbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, logical_and_expr );
-  _gr->add_rhs_symbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, logical_and_expr );
-  _gr->add_rhs_symbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, AND_OP );
-  _gr->add_rhs_symbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, inclusive_or_expr );
+  _gr->AddRule( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, "logical_and_expr --> logical_and_expr && inclusive_or_expr" );
+  _gr->AddLhsSymbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, logical_and_expr );
+  _gr->AddRhsSymbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, logical_and_expr );
+  _gr->AddRhsSymbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, AND_OP );
+  _gr->AddRhsSymbol( logical_and_expr__logical_and_expr_AND_OP_inclusive_or_expr, inclusive_or_expr );
   
   // logical_or_expr
   // : logical_and_expr
   // | logical_or_expr OR_OP logical_and_expr
   
-  _gr->add_rule( logical_or_expr__logical_and_expr, "logical_or_expr --> logical_and_expr" );
-  _gr->add_lhs_symbol( logical_or_expr__logical_and_expr, logical_or_expr );
-  _gr->add_rhs_symbol( logical_or_expr__logical_and_expr, logical_and_expr );
+  _gr->AddRule( logical_or_expr__logical_and_expr, "logical_or_expr --> logical_and_expr" );
+  _gr->AddLhsSymbol( logical_or_expr__logical_and_expr, logical_or_expr );
+  _gr->AddRhsSymbol( logical_or_expr__logical_and_expr, logical_and_expr );
   
-  _gr->add_rule( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, "logical_or_expr --> logical_or_expr || logical_and_expr" );
-  _gr->add_lhs_symbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, logical_or_expr );
-  _gr->add_rhs_symbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, logical_or_expr );
-  _gr->add_rhs_symbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, OR_OP );
-  _gr->add_rhs_symbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, logical_and_expr );
+  _gr->AddRule( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, "logical_or_expr --> logical_or_expr || logical_and_expr" );
+  _gr->AddLhsSymbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, logical_or_expr );
+  _gr->AddRhsSymbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, logical_or_expr );
+  _gr->AddRhsSymbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, OR_OP );
+  _gr->AddRhsSymbol( logical_or_expr__logical_or_expr_OR_OP_logical_and_expr, logical_and_expr );
   
   // conditional_expr
   // : logical_or_expr
   // | logical_or_expr '?' logical_or_expr ':' conditional_expr
   
-  _gr->add_rule( conditional_expr__logical_or_expr, "conditional_expr --> logical_or_expr" );
-  _gr->add_lhs_symbol( conditional_expr__logical_or_expr, conditional_expr );
-  _gr->add_rhs_symbol( conditional_expr__logical_or_expr, logical_or_expr );
+  _gr->AddRule( conditional_expr__logical_or_expr, "conditional_expr --> logical_or_expr" );
+  _gr->AddLhsSymbol( conditional_expr__logical_or_expr, conditional_expr );
+  _gr->AddRhsSymbol( conditional_expr__logical_or_expr, logical_or_expr );
   
-  _gr->add_rule( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, "conditional_expr --> logical_or_expr ? logical_or_expr : conditional_expr" );
-  _gr->add_lhs_symbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, logical_or_expr );
-  _gr->add_rhs_symbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, logical_or_expr );
-  _gr->add_rhs_symbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, QUESTION );
-  _gr->add_rhs_symbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, logical_or_expr );
-  _gr->add_rhs_symbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, COLON );
-  _gr->add_rhs_symbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, conditional_expr );
+  _gr->AddRule( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, "conditional_expr --> logical_or_expr ? logical_or_expr : conditional_expr" );
+  _gr->AddLhsSymbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, logical_or_expr );
+  _gr->AddRhsSymbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, logical_or_expr );
+  _gr->AddRhsSymbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, QUESTION );
+  _gr->AddRhsSymbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, logical_or_expr );
+  _gr->AddRhsSymbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, COLON );
+  _gr->AddRhsSymbol( conditional_expr__logical_or_expr_QUESTION_logical_or_expr_COLON_conditional_expr, conditional_expr );
   
   // assignment_expr
   // : conditional_expr
   // | unary_expr assignment_operator assignment_expr
   
-  _gr->add_rule( assignment_expr__conditional_expr, "assignment_expr --> conditional_expr" );
-  _gr->add_lhs_symbol( assignment_expr__conditional_expr, assignment_expr );
-  _gr->add_rhs_symbol( assignment_expr__conditional_expr, conditional_expr );
+  _gr->AddRule( assignment_expr__conditional_expr, "assignment_expr --> conditional_expr" );
+  _gr->AddLhsSymbol( assignment_expr__conditional_expr, assignment_expr );
+  _gr->AddRhsSymbol( assignment_expr__conditional_expr, conditional_expr );
   
-  _gr->add_rule( assignment_expr__unary_expr_assignment_operator_assignment_expr, "assignment_expr --> unary_expr assignment_operator assignment_expr" );
-  _gr->add_lhs_symbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, assignment_expr );
-  _gr->add_rhs_symbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, unary_expr );
-  _gr->add_rhs_symbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, assignment_operator );
-  _gr->add_rhs_symbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, assignment_expr );
+  _gr->AddRule( assignment_expr__unary_expr_assignment_operator_assignment_expr, "assignment_expr --> unary_expr assignment_operator assignment_expr" );
+  _gr->AddLhsSymbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, assignment_expr );
+  _gr->AddRhsSymbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, unary_expr );
+  _gr->AddRhsSymbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, assignment_operator );
+  _gr->AddRhsSymbol( assignment_expr__unary_expr_assignment_operator_assignment_expr, assignment_expr );
 
   // assignment_operator
   // : '='
@@ -1223,85 +1222,85 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | XOR_ASSIGN
   // | OR_ASSIGN
 
-  _gr->add_rule( assignment_operator__EQUAL, "assignment_operator --> =" );
-  _gr->add_lhs_symbol( assignment_operator__EQUAL, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__EQUAL, EQUAL );
+  _gr->AddRule( assignment_operator__EQUAL, "assignment_operator --> =" );
+  _gr->AddLhsSymbol( assignment_operator__EQUAL, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__EQUAL, EQUAL );
 
-  _gr->add_rule( assignment_operator__MUL_ASSIGN, "assignment_operator --> *=" );
-  _gr->add_lhs_symbol( assignment_operator__MUL_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__MUL_ASSIGN, MUL_ASSIGN );
+  _gr->AddRule( assignment_operator__MUL_ASSIGN, "assignment_operator --> *=" );
+  _gr->AddLhsSymbol( assignment_operator__MUL_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__MUL_ASSIGN, MUL_ASSIGN );
 
-  _gr->add_rule( assignment_operator__DIV_ASSIGN, "assignment_operator /=" );
-  _gr->add_lhs_symbol( assignment_operator__DIV_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__DIV_ASSIGN, DIV_ASSIGN );
+  _gr->AddRule( assignment_operator__DIV_ASSIGN, "assignment_operator /=" );
+  _gr->AddLhsSymbol( assignment_operator__DIV_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__DIV_ASSIGN, DIV_ASSIGN );
 
-  _gr->add_rule( assignment_operator__MOD_ASSIGN, "assignment_operator --> %=" );
-  _gr->add_lhs_symbol( assignment_operator__MOD_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__MOD_ASSIGN, MOD_ASSIGN );
+  _gr->AddRule( assignment_operator__MOD_ASSIGN, "assignment_operator --> %=" );
+  _gr->AddLhsSymbol( assignment_operator__MOD_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__MOD_ASSIGN, MOD_ASSIGN );
 
-  _gr->add_rule( assignment_operator__ADD_ASSIGN, "assignment_operator --> +=" );
-  _gr->add_lhs_symbol( assignment_operator__ADD_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__ADD_ASSIGN, ADD_ASSIGN );
+  _gr->AddRule( assignment_operator__ADD_ASSIGN, "assignment_operator --> +=" );
+  _gr->AddLhsSymbol( assignment_operator__ADD_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__ADD_ASSIGN, ADD_ASSIGN );
 
-  _gr->add_rule( assignment_operator__SUB_ASSIGN, "assignment_operator --> -=" );
-  _gr->add_lhs_symbol( assignment_operator__SUB_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__SUB_ASSIGN, SUB_ASSIGN );
+  _gr->AddRule( assignment_operator__SUB_ASSIGN, "assignment_operator --> -=" );
+  _gr->AddLhsSymbol( assignment_operator__SUB_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__SUB_ASSIGN, SUB_ASSIGN );
 
-  _gr->add_rule( assignment_operator__LEFT_ASSIGN, "assignment_operator --> <<=" );
-  _gr->add_lhs_symbol( assignment_operator__LEFT_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__LEFT_ASSIGN, LEFT_ASSIGN );
+  _gr->AddRule( assignment_operator__LEFT_ASSIGN, "assignment_operator --> <<=" );
+  _gr->AddLhsSymbol( assignment_operator__LEFT_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__LEFT_ASSIGN, LEFT_ASSIGN );
 
-  _gr->add_rule( assignment_operator__RIGHT_ASSIGN, "assignment_operator >>=" );
-  _gr->add_lhs_symbol( assignment_operator__RIGHT_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__RIGHT_ASSIGN, RIGHT_ASSIGN );
+  _gr->AddRule( assignment_operator__RIGHT_ASSIGN, "assignment_operator >>=" );
+  _gr->AddLhsSymbol( assignment_operator__RIGHT_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__RIGHT_ASSIGN, RIGHT_ASSIGN );
 
-  _gr->add_rule( assignment_operator__AND_ASSIGN, "assignment_operator --> &=" );
-  _gr->add_lhs_symbol( assignment_operator__AND_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__AND_ASSIGN, AND_ASSIGN );
+  _gr->AddRule( assignment_operator__AND_ASSIGN, "assignment_operator --> &=" );
+  _gr->AddLhsSymbol( assignment_operator__AND_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__AND_ASSIGN, AND_ASSIGN );
 
-  _gr->add_rule( assignment_operator__XOR_ASSIGN, "assignment_operator --> ^=" );
-  _gr->add_lhs_symbol( assignment_operator__XOR_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__XOR_ASSIGN, XOR_ASSIGN );
+  _gr->AddRule( assignment_operator__XOR_ASSIGN, "assignment_operator --> ^=" );
+  _gr->AddLhsSymbol( assignment_operator__XOR_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__XOR_ASSIGN, XOR_ASSIGN );
 
-  _gr->add_rule( assignment_operator__OR_ASSIGN, "assignment_operator --> |=" );
-  _gr->add_lhs_symbol( assignment_operator__OR_ASSIGN, assignment_operator );
-  _gr->add_rhs_symbol( assignment_operator__OR_ASSIGN, OR_ASSIGN );
+  _gr->AddRule( assignment_operator__OR_ASSIGN, "assignment_operator --> |=" );
+  _gr->AddLhsSymbol( assignment_operator__OR_ASSIGN, assignment_operator );
+  _gr->AddRhsSymbol( assignment_operator__OR_ASSIGN, OR_ASSIGN );
 
   // expr
   // : assignment_expr
   // | expr ',' assignment_expr
 
-  _gr->add_rule( expr__assignment_expr, "expr --> assignment_expr" );
-  _gr->add_lhs_symbol( expr__assignment_expr, expr );
-  _gr->add_rhs_symbol( expr__assignment_expr, assignment_expr );
+  _gr->AddRule( expr__assignment_expr, "expr --> assignment_expr" );
+  _gr->AddLhsSymbol( expr__assignment_expr, expr );
+  _gr->AddRhsSymbol( expr__assignment_expr, assignment_expr );
 
-  _gr->add_rule( expr__expr_COMMA_assignment_expr, "expr --> expr , assignment_expr" );
-  _gr->add_lhs_symbol( expr__expr_COMMA_assignment_expr, expr );
-  _gr->add_rhs_symbol( expr__expr_COMMA_assignment_expr, expr );
-  _gr->add_rhs_symbol( expr__expr_COMMA_assignment_expr, COMMA );
-  _gr->add_rhs_symbol( expr__expr_COMMA_assignment_expr, assignment_expr );
+  _gr->AddRule( expr__expr_COMMA_assignment_expr, "expr --> expr , assignment_expr" );
+  _gr->AddLhsSymbol( expr__expr_COMMA_assignment_expr, expr );
+  _gr->AddRhsSymbol( expr__expr_COMMA_assignment_expr, expr );
+  _gr->AddRhsSymbol( expr__expr_COMMA_assignment_expr, COMMA );
+  _gr->AddRhsSymbol( expr__expr_COMMA_assignment_expr, assignment_expr );
   
   // constant_expr
   // : conditional_expr
 
-  _gr->add_rule( constant_expr__conditional_expr, "constant_expr --> conditional_expr" );
-  _gr->add_lhs_symbol( constant_expr__conditional_expr, constant_expr );
-  _gr->add_rhs_symbol( constant_expr__conditional_expr, conditional_expr );
+  _gr->AddRule( constant_expr__conditional_expr, "constant_expr --> conditional_expr" );
+  _gr->AddLhsSymbol( constant_expr__conditional_expr, constant_expr );
+  _gr->AddRhsSymbol( constant_expr__conditional_expr, conditional_expr );
   
   // declaration
   // : declaration_specifiers ';'
   // | declaration_specifiers init_declarator_list ';'
   
-  _gr->add_rule( declaration__declaration_specifiers_SEMICOLON, "declaration --> declaration_specifiers ;" );
-  _gr->add_lhs_symbol( declaration__declaration_specifiers_SEMICOLON, declaration );
-  _gr->add_rhs_symbol( declaration__declaration_specifiers_SEMICOLON, declaration_specifiers );
-  _gr->add_rhs_symbol( declaration__declaration_specifiers_SEMICOLON, SEMICOLON );
+  _gr->AddRule( declaration__declaration_specifiers_SEMICOLON, "declaration --> declaration_specifiers ;" );
+  _gr->AddLhsSymbol( declaration__declaration_specifiers_SEMICOLON, declaration );
+  _gr->AddRhsSymbol( declaration__declaration_specifiers_SEMICOLON, declaration_specifiers );
+  _gr->AddRhsSymbol( declaration__declaration_specifiers_SEMICOLON, SEMICOLON );
   
-  _gr->add_rule( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, "declaration --> declaration_specifiers init_declarator_list ;" );
-  _gr->add_lhs_symbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, declaration );
-  _gr->add_rhs_symbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, declaration_specifiers );
-  _gr->add_rhs_symbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, init_declarator_list );
-  _gr->add_rhs_symbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, SEMICOLON );
+  _gr->AddRule( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, "declaration --> declaration_specifiers init_declarator_list ;" );
+  _gr->AddLhsSymbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, declaration );
+  _gr->AddRhsSymbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, declaration_specifiers );
+  _gr->AddRhsSymbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, init_declarator_list );
+  _gr->AddRhsSymbol( declaration__declaration_specifiers_init_declarator_list_SEMICOLON, SEMICOLON );
   
   // declaration_specifiers
   // : storage_class_specifier
@@ -1309,51 +1308,51 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | type_specifier
   // | type_specifier declaration_specifiers
   
-  _gr->add_rule( declaration_specifiers__storage_class_specifier, "declaration_specifiers --> storage_class_specifier" );
-  _gr->add_lhs_symbol( declaration_specifiers__storage_class_specifier, declaration_specifiers );
-  _gr->add_rhs_symbol( declaration_specifiers__storage_class_specifier, storage_class_specifier );
+  _gr->AddRule( declaration_specifiers__storage_class_specifier, "declaration_specifiers --> storage_class_specifier" );
+  _gr->AddLhsSymbol( declaration_specifiers__storage_class_specifier, declaration_specifiers );
+  _gr->AddRhsSymbol( declaration_specifiers__storage_class_specifier, storage_class_specifier );
   
-  _gr->add_rule( declaration_specifiers__storage_class_specifier_declaration_specifiers, "declaration_specifiers --> storage_class_specifier declaration_specifiers" );
-  _gr->add_lhs_symbol( declaration_specifiers__storage_class_specifier_declaration_specifiers, declaration_specifiers );
-  _gr->add_rhs_symbol( declaration_specifiers__storage_class_specifier_declaration_specifiers, storage_class_specifier );
-  _gr->add_rhs_symbol( declaration_specifiers__storage_class_specifier_declaration_specifiers, declaration_specifiers );
+  _gr->AddRule( declaration_specifiers__storage_class_specifier_declaration_specifiers, "declaration_specifiers --> storage_class_specifier declaration_specifiers" );
+  _gr->AddLhsSymbol( declaration_specifiers__storage_class_specifier_declaration_specifiers, declaration_specifiers );
+  _gr->AddRhsSymbol( declaration_specifiers__storage_class_specifier_declaration_specifiers, storage_class_specifier );
+  _gr->AddRhsSymbol( declaration_specifiers__storage_class_specifier_declaration_specifiers, declaration_specifiers );
   
-  _gr->add_rule( declaration_specifiers__type_specifier, "declaration_specifiers --> type_specifier" );
-  _gr->add_lhs_symbol( declaration_specifiers__type_specifier, declaration_specifiers );
-  _gr->add_rhs_symbol( declaration_specifiers__type_specifier, type_specifier );
+  _gr->AddRule( declaration_specifiers__type_specifier, "declaration_specifiers --> type_specifier" );
+  _gr->AddLhsSymbol( declaration_specifiers__type_specifier, declaration_specifiers );
+  _gr->AddRhsSymbol( declaration_specifiers__type_specifier, type_specifier );
   
-  _gr->add_rule( declaration_specifiers__type_specifier_declaration_specifiers, "declaration_specifiers --> type_specifier declaration_specifiers" );
-  _gr->add_lhs_symbol( declaration_specifiers__type_specifier_declaration_specifiers, declaration_specifiers );
-  _gr->add_rhs_symbol( declaration_specifiers__type_specifier_declaration_specifiers, type_specifier );
-  _gr->add_rhs_symbol( declaration_specifiers__type_specifier_declaration_specifiers, declaration_specifiers );
+  _gr->AddRule( declaration_specifiers__type_specifier_declaration_specifiers, "declaration_specifiers --> type_specifier declaration_specifiers" );
+  _gr->AddLhsSymbol( declaration_specifiers__type_specifier_declaration_specifiers, declaration_specifiers );
+  _gr->AddRhsSymbol( declaration_specifiers__type_specifier_declaration_specifiers, type_specifier );
+  _gr->AddRhsSymbol( declaration_specifiers__type_specifier_declaration_specifiers, declaration_specifiers );
   
   // init_declarator_list
   // : init_declarator
   // | init_declarator_list ',' init_declarator
   
-  _gr->add_rule( init_declarator_list__init_declarator, "init_declarator_list --> init_declarator" );
-  _gr->add_lhs_symbol( init_declarator_list__init_declarator, init_declarator_list );
-  _gr->add_rhs_symbol( init_declarator_list__init_declarator, init_declarator );
+  _gr->AddRule( init_declarator_list__init_declarator, "init_declarator_list --> init_declarator" );
+  _gr->AddLhsSymbol( init_declarator_list__init_declarator, init_declarator_list );
+  _gr->AddRhsSymbol( init_declarator_list__init_declarator, init_declarator );
   
-  _gr->add_rule( init_declarator_list__init_declarator_list_COMMA_init_declarator, "init_declarator_list --> init_declarator_list , init_declarator" );
-  _gr->add_lhs_symbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, init_declarator_list );
-  _gr->add_rhs_symbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, init_declarator_list );
-  _gr->add_rhs_symbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, COMMA );
-  _gr->add_rhs_symbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, init_declarator );
+  _gr->AddRule( init_declarator_list__init_declarator_list_COMMA_init_declarator, "init_declarator_list --> init_declarator_list , init_declarator" );
+  _gr->AddLhsSymbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, init_declarator_list );
+  _gr->AddRhsSymbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, init_declarator_list );
+  _gr->AddRhsSymbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, COMMA );
+  _gr->AddRhsSymbol( init_declarator_list__init_declarator_list_COMMA_init_declarator, init_declarator );
   
   // init_declarator
   // : declarator
   // | declarator '=' initializer
   
-  _gr->add_rule( init_declarator__declarator, "init_declarator --> declarator" );
-  _gr->add_lhs_symbol( init_declarator__declarator, init_declarator );
-  _gr->add_rhs_symbol( init_declarator__declarator, declarator );
+  _gr->AddRule( init_declarator__declarator, "init_declarator --> declarator" );
+  _gr->AddLhsSymbol( init_declarator__declarator, init_declarator );
+  _gr->AddRhsSymbol( init_declarator__declarator, declarator );
   
-  _gr->add_rule( init_declarator__declarator_EQUAL_initializer, "init_declarator --> declarator = initializer" );
-  _gr->add_lhs_symbol( init_declarator__declarator_EQUAL_initializer, init_declarator );
-  _gr->add_rhs_symbol( init_declarator__declarator_EQUAL_initializer, declarator );
-  _gr->add_rhs_symbol( init_declarator__declarator_EQUAL_initializer, EQUAL );
-  _gr->add_rhs_symbol( init_declarator__declarator_EQUAL_initializer, initializer );
+  _gr->AddRule( init_declarator__declarator_EQUAL_initializer, "init_declarator --> declarator = initializer" );
+  _gr->AddLhsSymbol( init_declarator__declarator_EQUAL_initializer, init_declarator );
+  _gr->AddRhsSymbol( init_declarator__declarator_EQUAL_initializer, declarator );
+  _gr->AddRhsSymbol( init_declarator__declarator_EQUAL_initializer, EQUAL );
+  _gr->AddRhsSymbol( init_declarator__declarator_EQUAL_initializer, initializer );
   
   // storage_class_specifier
   // : TYPEDEF
@@ -1362,25 +1361,25 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | AUTO
   // | REGISTER
   
-  _gr->add_rule( storage_class_specifier__TYPEDEF, "storage_class_specifier --> typedef" );
-  _gr->add_lhs_symbol( storage_class_specifier__TYPEDEF, storage_class_specifier );
-  _gr->add_rhs_symbol( storage_class_specifier__TYPEDEF, TYPEDEF );
+  _gr->AddRule( storage_class_specifier__TYPEDEF, "storage_class_specifier --> typedef" );
+  _gr->AddLhsSymbol( storage_class_specifier__TYPEDEF, storage_class_specifier );
+  _gr->AddRhsSymbol( storage_class_specifier__TYPEDEF, TYPEDEF );
   
-  _gr->add_rule( storage_class_specifier__EXTERN, "storage_class_specifier --> extern" );
-  _gr->add_lhs_symbol( storage_class_specifier__EXTERN, storage_class_specifier );
-  _gr->add_rhs_symbol( storage_class_specifier__EXTERN, EXTERN );
+  _gr->AddRule( storage_class_specifier__EXTERN, "storage_class_specifier --> extern" );
+  _gr->AddLhsSymbol( storage_class_specifier__EXTERN, storage_class_specifier );
+  _gr->AddRhsSymbol( storage_class_specifier__EXTERN, EXTERN );
   
-  _gr->add_rule( storage_class_specifier__STATIC, "storage_class_specifier --> static" );
-  _gr->add_lhs_symbol( storage_class_specifier__STATIC, storage_class_specifier );
-  _gr->add_rhs_symbol( storage_class_specifier__STATIC, STATIC );
+  _gr->AddRule( storage_class_specifier__STATIC, "storage_class_specifier --> static" );
+  _gr->AddLhsSymbol( storage_class_specifier__STATIC, storage_class_specifier );
+  _gr->AddRhsSymbol( storage_class_specifier__STATIC, STATIC );
   
-  _gr->add_rule( storage_class_specifier__AUTO, "storage_class_specifier --> auto" );
-  _gr->add_lhs_symbol( storage_class_specifier__AUTO, storage_class_specifier );
-  _gr->add_rhs_symbol( storage_class_specifier__AUTO, AUTO );
+  _gr->AddRule( storage_class_specifier__AUTO, "storage_class_specifier --> auto" );
+  _gr->AddLhsSymbol( storage_class_specifier__AUTO, storage_class_specifier );
+  _gr->AddRhsSymbol( storage_class_specifier__AUTO, AUTO );
   
-  _gr->add_rule( storage_class_specifier__REGISTER, "storage_class_specifier --> register" );
-  _gr->add_lhs_symbol( storage_class_specifier__REGISTER, storage_class_specifier );
-  _gr->add_rhs_symbol( storage_class_specifier__REGISTER, REGISTER );
+  _gr->AddRule( storage_class_specifier__REGISTER, "storage_class_specifier --> register" );
+  _gr->AddLhsSymbol( storage_class_specifier__REGISTER, storage_class_specifier );
+  _gr->AddRhsSymbol( storage_class_specifier__REGISTER, REGISTER );
   
   // type_specifier
   // : CHAR
@@ -1398,215 +1397,215 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | enum_specifier
   // | TYPE_NAME
   
-  _gr->add_rule( type_specifier__CHAR, "type_specifier --> char" );
-  _gr->add_lhs_symbol( type_specifier__CHAR, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__CHAR, CHAR );
+  _gr->AddRule( type_specifier__CHAR, "type_specifier --> char" );
+  _gr->AddLhsSymbol( type_specifier__CHAR, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__CHAR, CHAR );
 
-  _gr->add_rule( type_specifier__SHORT, "type_specifier --> short" );
-  _gr->add_lhs_symbol( type_specifier__SHORT, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__SHORT, SHORT );
+  _gr->AddRule( type_specifier__SHORT, "type_specifier --> short" );
+  _gr->AddLhsSymbol( type_specifier__SHORT, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__SHORT, SHORT );
 
-  _gr->add_rule( type_specifier__INT, "type_specifier --> int" );
-  _gr->add_lhs_symbol( type_specifier__INT, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__INT, INT );
+  _gr->AddRule( type_specifier__INT, "type_specifier --> int" );
+  _gr->AddLhsSymbol( type_specifier__INT, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__INT, INT );
 
-  _gr->add_rule( type_specifier__LONG, "type_specifier --> long" );
-  _gr->add_lhs_symbol( type_specifier__LONG, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__LONG, LONG );
+  _gr->AddRule( type_specifier__LONG, "type_specifier --> long" );
+  _gr->AddLhsSymbol( type_specifier__LONG, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__LONG, LONG );
 
-  _gr->add_rule( type_specifier__SIGNED, "type_specifier --> signed" );
-  _gr->add_lhs_symbol( type_specifier__SIGNED, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__SIGNED, SIGNED );
+  _gr->AddRule( type_specifier__SIGNED, "type_specifier --> signed" );
+  _gr->AddLhsSymbol( type_specifier__SIGNED, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__SIGNED, SIGNED );
 
-  _gr->add_rule( type_specifier__UNSIGNED, "type_specifier --> unsigned" );
-  _gr->add_lhs_symbol( type_specifier__UNSIGNED, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__UNSIGNED, UNSIGNED );
+  _gr->AddRule( type_specifier__UNSIGNED, "type_specifier --> unsigned" );
+  _gr->AddLhsSymbol( type_specifier__UNSIGNED, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__UNSIGNED, UNSIGNED );
 
-  _gr->add_rule( type_specifier__FLOAT, "type_specifier --> float" );
-  _gr->add_lhs_symbol( type_specifier__FLOAT, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__FLOAT, FLOAT );
+  _gr->AddRule( type_specifier__FLOAT, "type_specifier --> float" );
+  _gr->AddLhsSymbol( type_specifier__FLOAT, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__FLOAT, FLOAT );
 
-  _gr->add_rule( type_specifier__DOUBLE, "type_specifier --> double" );
-  _gr->add_lhs_symbol( type_specifier__DOUBLE, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__DOUBLE, DOUBLE );
+  _gr->AddRule( type_specifier__DOUBLE, "type_specifier --> double" );
+  _gr->AddLhsSymbol( type_specifier__DOUBLE, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__DOUBLE, DOUBLE );
 
-  _gr->add_rule( type_specifier__CONST, "type_specifier --> const" );
-  _gr->add_lhs_symbol( type_specifier__CONST, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__CONST, CONST );
+  _gr->AddRule( type_specifier__CONST, "type_specifier --> const" );
+  _gr->AddLhsSymbol( type_specifier__CONST, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__CONST, CONST );
 
-  _gr->add_rule( type_specifier__VOLATILE, "type_specifier --> volatile" );
-  _gr->add_lhs_symbol( type_specifier__VOLATILE, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__VOLATILE, VOLATILE );
+  _gr->AddRule( type_specifier__VOLATILE, "type_specifier --> volatile" );
+  _gr->AddLhsSymbol( type_specifier__VOLATILE, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__VOLATILE, VOLATILE );
 
-  _gr->add_rule( type_specifier__VOID, "type_specifier --> void" );
-  _gr->add_lhs_symbol( type_specifier__VOID, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__VOID, VOID );
+  _gr->AddRule( type_specifier__VOID, "type_specifier --> void" );
+  _gr->AddLhsSymbol( type_specifier__VOID, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__VOID, VOID );
 
-  _gr->add_rule( type_specifier__struct_or_union_specifier, "type_specifier --> struct_or_union_specifier" );
-  _gr->add_lhs_symbol( type_specifier__struct_or_union_specifier, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__struct_or_union_specifier, struct_or_union_specifier );
+  _gr->AddRule( type_specifier__struct_or_union_specifier, "type_specifier --> struct_or_union_specifier" );
+  _gr->AddLhsSymbol( type_specifier__struct_or_union_specifier, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__struct_or_union_specifier, struct_or_union_specifier );
 
-  _gr->add_rule( type_specifier__enum_specifier, "type_specifier --> enum_specifier" );
-  _gr->add_lhs_symbol( type_specifier__enum_specifier, type_specifier );
-  _gr->add_rhs_symbol( type_specifier__enum_specifier, enum_specifier );
+  _gr->AddRule( type_specifier__enum_specifier, "type_specifier --> enum_specifier" );
+  _gr->AddLhsSymbol( type_specifier__enum_specifier, type_specifier );
+  _gr->AddRhsSymbol( type_specifier__enum_specifier, enum_specifier );
   
   // struct_or_union_specifier
   // : struct_or_union identifier '{' struct_declaration_list '}'
   // | struct_or_union '{' struct_declaration_list '}'
   // | struct_or_union identifier
   
-  _gr->add_rule( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, "struct_or_union_specifier --> struct_or_union identifier { struct_declaration_list }" );
-  _gr->add_lhs_symbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union_specifier );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, identifier );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_declaration_list );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, "struct_or_union_specifier --> struct_or_union identifier { struct_declaration_list }" );
+  _gr->AddLhsSymbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union_specifier );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, identifier );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_declaration_list );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
 
-  _gr->add_rule( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, "struct_or_union_specifier --> struct_or_union { struct_declaration_list }" );
-  _gr->add_lhs_symbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union_specifier );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_declaration_list );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, "struct_or_union_specifier --> struct_or_union { struct_declaration_list }" );
+  _gr->AddLhsSymbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union_specifier );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_or_union );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, struct_declaration_list );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_LEFT_CL_BRACKET_struct_declaration_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
 
-  _gr->add_rule( struct_or_union_specifier__struct_or_union_identifier, "struct_or_union_specifier --> struct_or_union identifier" );
-  _gr->add_lhs_symbol( struct_or_union_specifier__struct_or_union_identifier, struct_or_union_specifier );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier, struct_or_union );
-  _gr->add_rhs_symbol( struct_or_union_specifier__struct_or_union_identifier, identifier );
+  _gr->AddRule( struct_or_union_specifier__struct_or_union_identifier, "struct_or_union_specifier --> struct_or_union identifier" );
+  _gr->AddLhsSymbol( struct_or_union_specifier__struct_or_union_identifier, struct_or_union_specifier );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier, struct_or_union );
+  _gr->AddRhsSymbol( struct_or_union_specifier__struct_or_union_identifier, identifier );
   
   // struct_or_union
   // : STRUCT
   // | UNION
   
-  _gr->add_rule( struct_or_union__STRUCT, "struct_or_union --> struct" );
-  _gr->add_lhs_symbol( struct_or_union__STRUCT, struct_or_union );
-  _gr->add_rhs_symbol( struct_or_union__STRUCT, STRUCT );
+  _gr->AddRule( struct_or_union__STRUCT, "struct_or_union --> struct" );
+  _gr->AddLhsSymbol( struct_or_union__STRUCT, struct_or_union );
+  _gr->AddRhsSymbol( struct_or_union__STRUCT, STRUCT );
   
-  _gr->add_rule( struct_or_union__UNION, "struct_or_union --> union" );
-  _gr->add_lhs_symbol( struct_or_union__UNION, struct_or_union );
-  _gr->add_rhs_symbol( struct_or_union__UNION, UNION );
+  _gr->AddRule( struct_or_union__UNION, "struct_or_union --> union" );
+  _gr->AddLhsSymbol( struct_or_union__UNION, struct_or_union );
+  _gr->AddRhsSymbol( struct_or_union__UNION, UNION );
   
   // struct_declaration_list
   // : struct_declaration
   // | struct_declaration_list struct_declaration
   
-  _gr->add_rule( struct_declaration_list__struct_declaration, "struct_declaration_list --> struct_declaration" );
-  _gr->add_lhs_symbol( struct_declaration_list__struct_declaration, struct_declaration_list );
-  _gr->add_rhs_symbol( struct_declaration_list__struct_declaration, struct_declaration );
+  _gr->AddRule( struct_declaration_list__struct_declaration, "struct_declaration_list --> struct_declaration" );
+  _gr->AddLhsSymbol( struct_declaration_list__struct_declaration, struct_declaration_list );
+  _gr->AddRhsSymbol( struct_declaration_list__struct_declaration, struct_declaration );
   
-  _gr->add_rule( struct_declaration_list__struct_declaration_list_struct_declaration, "struct_declaration_list --> struct_declaration_list struct_declaration" );
-  _gr->add_lhs_symbol( struct_declaration_list__struct_declaration_list_struct_declaration, struct_declaration_list );
-  _gr->add_rhs_symbol( struct_declaration_list__struct_declaration_list_struct_declaration, struct_declaration_list );
-  _gr->add_rhs_symbol( struct_declaration_list__struct_declaration_list_struct_declaration, struct_declaration );
+  _gr->AddRule( struct_declaration_list__struct_declaration_list_struct_declaration, "struct_declaration_list --> struct_declaration_list struct_declaration" );
+  _gr->AddLhsSymbol( struct_declaration_list__struct_declaration_list_struct_declaration, struct_declaration_list );
+  _gr->AddRhsSymbol( struct_declaration_list__struct_declaration_list_struct_declaration, struct_declaration_list );
+  _gr->AddRhsSymbol( struct_declaration_list__struct_declaration_list_struct_declaration, struct_declaration );
   
   // struct_declaration
   // : type_specifier_list struct_declarator_list ';'
   
-  _gr->add_rule( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, "struct_declaration --> type_specifier_list struct_declarator_list ;" );
-  _gr->add_lhs_symbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, struct_declaration );
-  _gr->add_rhs_symbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, type_specifier_list );
-  _gr->add_rhs_symbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, struct_declarator_list );
-  _gr->add_rhs_symbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, SEMICOLON );
+  _gr->AddRule( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, "struct_declaration --> type_specifier_list struct_declarator_list ;" );
+  _gr->AddLhsSymbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, struct_declaration );
+  _gr->AddRhsSymbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, type_specifier_list );
+  _gr->AddRhsSymbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, struct_declarator_list );
+  _gr->AddRhsSymbol( struct_declaration__type_specifier_list_struct_declarator_list_SEMICOLON, SEMICOLON );
   
   // struct_declarator_list
   // : struct_declarator
   // | struct_declarator_list ',' struct_declarator
   
-  _gr->add_rule( struct_declarator_list__struct_declarator, "struct_declarator_list --> struct_declarator" );
-  _gr->add_lhs_symbol( struct_declarator_list__struct_declarator, struct_declarator_list );
-  _gr->add_rhs_symbol( struct_declarator_list__struct_declarator, struct_declarator );
+  _gr->AddRule( struct_declarator_list__struct_declarator, "struct_declarator_list --> struct_declarator" );
+  _gr->AddLhsSymbol( struct_declarator_list__struct_declarator, struct_declarator_list );
+  _gr->AddRhsSymbol( struct_declarator_list__struct_declarator, struct_declarator );
 
-  _gr->add_rule( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, "struct_declarator_list --> struct_declarator_list , struct_declarator" );
-  _gr->add_lhs_symbol( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, struct_declarator_list );
-  _gr->add_rhs_symbol( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, COMMA );
-  _gr->add_rhs_symbol( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, struct_declarator );
+  _gr->AddRule( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, "struct_declarator_list --> struct_declarator_list , struct_declarator" );
+  _gr->AddLhsSymbol( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, struct_declarator_list );
+  _gr->AddRhsSymbol( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, COMMA );
+  _gr->AddRhsSymbol( struct_declarator_list__struct_declarator_list_COMMA_struct_declarator, struct_declarator );
   
   // struct_declarator
   // : declarator
   // | ':' constant_expr
   // | declarator ':' constant_expr
   
-  _gr->add_rule( struct_declarator__declarator, "struct_declarator --> declarator" );
-  _gr->add_lhs_symbol( struct_declarator__declarator, struct_declarator );
-  _gr->add_rhs_symbol( struct_declarator__declarator, declarator );
+  _gr->AddRule( struct_declarator__declarator, "struct_declarator --> declarator" );
+  _gr->AddLhsSymbol( struct_declarator__declarator, struct_declarator );
+  _gr->AddRhsSymbol( struct_declarator__declarator, declarator );
 
-  _gr->add_rule( struct_declarator__COLON_constant_expr, "struct_declarator --> : constant_expr" );
-  _gr->add_lhs_symbol( struct_declarator__COLON_constant_expr, struct_declarator );
-  _gr->add_rhs_symbol( struct_declarator__COLON_constant_expr, COLON );
-  _gr->add_rhs_symbol( struct_declarator__COLON_constant_expr, constant_expr );
+  _gr->AddRule( struct_declarator__COLON_constant_expr, "struct_declarator --> : constant_expr" );
+  _gr->AddLhsSymbol( struct_declarator__COLON_constant_expr, struct_declarator );
+  _gr->AddRhsSymbol( struct_declarator__COLON_constant_expr, COLON );
+  _gr->AddRhsSymbol( struct_declarator__COLON_constant_expr, constant_expr );
 
-  _gr->add_rule( struct_declarator__declarator_COLON_constant_expr, "struct_declarator --> declarator ; constant_expr" );
-  _gr->add_lhs_symbol( struct_declarator__declarator_COLON_constant_expr, struct_declarator );
-  _gr->add_rhs_symbol( struct_declarator__declarator_COLON_constant_expr, declarator );
-  _gr->add_rhs_symbol( struct_declarator__declarator_COLON_constant_expr, COLON );
-  _gr->add_rhs_symbol( struct_declarator__declarator_COLON_constant_expr, constant_expr );
+  _gr->AddRule( struct_declarator__declarator_COLON_constant_expr, "struct_declarator --> declarator ; constant_expr" );
+  _gr->AddLhsSymbol( struct_declarator__declarator_COLON_constant_expr, struct_declarator );
+  _gr->AddRhsSymbol( struct_declarator__declarator_COLON_constant_expr, declarator );
+  _gr->AddRhsSymbol( struct_declarator__declarator_COLON_constant_expr, COLON );
+  _gr->AddRhsSymbol( struct_declarator__declarator_COLON_constant_expr, constant_expr );
   
   // enum_specifier
   // : ENUM '{' enumerator_list '}'
   // | ENUM identifier '{' enumerator_list '}'
   // | ENUM identifier
   
-  _gr->add_rule( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, "enum_specifier --> enum { enumerator_list }" );
-  _gr->add_lhs_symbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enum_specifier );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, ENUM );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enumerator_list );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, "enum_specifier --> enum { enumerator_list }" );
+  _gr->AddLhsSymbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enum_specifier );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, ENUM );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enumerator_list );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
   
-  _gr->add_rule( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, "enum_specifier --> enum identifier { enumerator_list }" );
-  _gr->add_lhs_symbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enum_specifier );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, ENUM );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, identifier );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enumerator_list );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, "enum_specifier --> enum identifier { enumerator_list }" );
+  _gr->AddLhsSymbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enum_specifier );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, ENUM );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, identifier );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, enumerator_list );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier_LEFT_CL_BRACKET_enumerator_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
   
-  _gr->add_rule( enum_specifier__ENUM_identifier, "enum_specifier --> enum identifier" );
-  _gr->add_lhs_symbol( enum_specifier__ENUM_identifier, enum_specifier );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier, ENUM );
-  _gr->add_rhs_symbol( enum_specifier__ENUM_identifier, identifier );
+  _gr->AddRule( enum_specifier__ENUM_identifier, "enum_specifier --> enum identifier" );
+  _gr->AddLhsSymbol( enum_specifier__ENUM_identifier, enum_specifier );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier, ENUM );
+  _gr->AddRhsSymbol( enum_specifier__ENUM_identifier, identifier );
 
   // enumerator_list
   // : enumerator
   // | enumerator_list ',' enumerator
 
-  _gr->add_rule( enumerator_list__enumerator, "enumerator_list --> enumerator" );
-  _gr->add_lhs_symbol( enumerator_list__enumerator, enumerator_list );
-  _gr->add_rhs_symbol( enumerator_list__enumerator, enumerator );
+  _gr->AddRule( enumerator_list__enumerator, "enumerator_list --> enumerator" );
+  _gr->AddLhsSymbol( enumerator_list__enumerator, enumerator_list );
+  _gr->AddRhsSymbol( enumerator_list__enumerator, enumerator );
 
-  _gr->add_rule( enumerator_list__enumerator_list_COMMA_enumerator, "enumerator_list --> enumerator_list , enumerator" );
-  _gr->add_lhs_symbol( enumerator_list__enumerator_list_COMMA_enumerator, enumerator_list );
-  _gr->add_rhs_symbol( enumerator_list__enumerator_list_COMMA_enumerator, enumerator_list );
-  _gr->add_rhs_symbol( enumerator_list__enumerator_list_COMMA_enumerator, COMMA );
-  _gr->add_rhs_symbol( enumerator_list__enumerator_list_COMMA_enumerator, enumerator );
+  _gr->AddRule( enumerator_list__enumerator_list_COMMA_enumerator, "enumerator_list --> enumerator_list , enumerator" );
+  _gr->AddLhsSymbol( enumerator_list__enumerator_list_COMMA_enumerator, enumerator_list );
+  _gr->AddRhsSymbol( enumerator_list__enumerator_list_COMMA_enumerator, enumerator_list );
+  _gr->AddRhsSymbol( enumerator_list__enumerator_list_COMMA_enumerator, COMMA );
+  _gr->AddRhsSymbol( enumerator_list__enumerator_list_COMMA_enumerator, enumerator );
   
   // enumerator
   // : identifier
   // | identifier '=' constant_expr
   
-  _gr->add_rule( enumerator__identifier, "enumerator --> identifier" );
-  _gr->add_lhs_symbol( enumerator__identifier, enumerator );
-  _gr->add_rhs_symbol( enumerator__identifier, identifier );
+  _gr->AddRule( enumerator__identifier, "enumerator --> identifier" );
+  _gr->AddLhsSymbol( enumerator__identifier, enumerator );
+  _gr->AddRhsSymbol( enumerator__identifier, identifier );
 
-  _gr->add_rule( enumerator__identifier_EQUAL_constant_expr, "enumerator --> identifier = constant_expr" );
-  _gr->add_lhs_symbol( enumerator__identifier_EQUAL_constant_expr, enumerator );
-  _gr->add_rhs_symbol( enumerator__identifier_EQUAL_constant_expr, identifier );
-  _gr->add_rhs_symbol( enumerator__identifier_EQUAL_constant_expr, EQUAL );
-  _gr->add_rhs_symbol( enumerator__identifier_EQUAL_constant_expr, constant_expr );
+  _gr->AddRule( enumerator__identifier_EQUAL_constant_expr, "enumerator --> identifier = constant_expr" );
+  _gr->AddLhsSymbol( enumerator__identifier_EQUAL_constant_expr, enumerator );
+  _gr->AddRhsSymbol( enumerator__identifier_EQUAL_constant_expr, identifier );
+  _gr->AddRhsSymbol( enumerator__identifier_EQUAL_constant_expr, EQUAL );
+  _gr->AddRhsSymbol( enumerator__identifier_EQUAL_constant_expr, constant_expr );
   
   // declarator
   // : declarator2
   // | pointer declarator2
   
-  _gr->add_rule( declarator__declarator2, "declarator --> declarator2" );
-  _gr->add_lhs_symbol( declarator__declarator2, declarator );
-  _gr->add_rhs_symbol( declarator__declarator2, declarator2 );
+  _gr->AddRule( declarator__declarator2, "declarator --> declarator2" );
+  _gr->AddLhsSymbol( declarator__declarator2, declarator );
+  _gr->AddRhsSymbol( declarator__declarator2, declarator2 );
 
-  _gr->add_rule( declarator__pointer_declarator2, "declarator --> pointer declarator2" );
-  _gr->add_lhs_symbol( declarator__pointer_declarator2, declarator );
-  _gr->add_rhs_symbol( declarator__pointer_declarator2, pointer );
-  _gr->add_rhs_symbol( declarator__pointer_declarator2, declarator2 );
+  _gr->AddRule( declarator__pointer_declarator2, "declarator --> pointer declarator2" );
+  _gr->AddLhsSymbol( declarator__pointer_declarator2, declarator );
+  _gr->AddRhsSymbol( declarator__pointer_declarator2, pointer );
+  _gr->AddRhsSymbol( declarator__pointer_declarator2, declarator2 );
   
   // declarator2
   // : identifier
@@ -1617,48 +1616,48 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | declarator2 '(' parameter_type_list ')'
   // | declarator2 '(' parameter_identifier_list ')'
 
-  _gr->add_rule( declarator2__identifier, "declarator2 --> identifier" );
-  _gr->add_lhs_symbol( declarator2__identifier, declarator2 );
-  _gr->add_rhs_symbol( declarator2__identifier, identifier );
+  _gr->AddRule( declarator2__identifier, "declarator2 --> identifier" );
+  _gr->AddLhsSymbol( declarator2__identifier, declarator2 );
+  _gr->AddRhsSymbol( declarator2__identifier, identifier );
 
-  _gr->add_rule( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, "declarator2 --> ( declarator )" );
-  _gr->add_lhs_symbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, declarator );
-  _gr->add_rhs_symbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, "declarator2 --> ( declarator )" );
+  _gr->AddLhsSymbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, declarator );
+  _gr->AddRhsSymbol( declarator2__LEFT_BRACE_declarator_RIGHT_BRACE, RIGHT_BRACE );
 
-  _gr->add_rule( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, "declarator2 --> declarator2 [ ]" );
-  _gr->add_lhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
+  _gr->AddRule( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, "declarator2 --> declarator2 [ ]" );
+  _gr->AddLhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
 
-  _gr->add_rule( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, "declarator2 --> declarator2 [ constant_expr ]" );
-  _gr->add_lhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, constant_expr );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
+  _gr->AddRule( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, "declarator2 --> declarator2 [ constant_expr ]" );
+  _gr->AddLhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, constant_expr );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
 
-  _gr->add_rule( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, "declarator2 --> declarator2 ( )" );
-  _gr->add_lhs_symbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, "declarator2 --> declarator2 ( )" );
+  _gr->AddLhsSymbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
 
-  _gr->add_rule( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, "declarator2 --> declarator2 ( parameter_type_list )" );
-  _gr->add_lhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, parameter_type_list );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, "declarator2 --> declarator2 ( parameter_type_list )" );
+  _gr->AddLhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, parameter_type_list );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, RIGHT_BRACE );
 
-  _gr->add_rule( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, "declarator2 --> declarator2 ( parameter_identifier_list )" );
-  _gr->add_lhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, declarator2 );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, parameter_identifier_list );
-  _gr->add_rhs_symbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, "declarator2 --> declarator2 ( parameter_identifier_list )" );
+  _gr->AddLhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, declarator2 );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, parameter_identifier_list );
+  _gr->AddRhsSymbol( declarator2__declarator2_LEFT_BRACE_parameter_identifier_list_RIGHT_BRACE, RIGHT_BRACE );
   
   // pointer
   // : '*'
@@ -1666,138 +1665,138 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | '*' pointer
   // | '*' type_specifier_list pointer
   
-  _gr->add_rule( pointer__STAR, "pointer --> *" );
-  _gr->add_lhs_symbol( pointer__STAR, pointer );
-  _gr->add_rhs_symbol( pointer__STAR, STAR );
+  _gr->AddRule( pointer__STAR, "pointer --> *" );
+  _gr->AddLhsSymbol( pointer__STAR, pointer );
+  _gr->AddRhsSymbol( pointer__STAR, STAR );
 
-  _gr->add_rule( pointer__STAR_type_specifier_list, "pointer --> * type_specifier_list" );
-  _gr->add_lhs_symbol( pointer__STAR_type_specifier_list, pointer );
-  _gr->add_rhs_symbol( pointer__STAR_type_specifier_list, STAR );
-  _gr->add_rhs_symbol( pointer__STAR_type_specifier_list, type_specifier_list );
+  _gr->AddRule( pointer__STAR_type_specifier_list, "pointer --> * type_specifier_list" );
+  _gr->AddLhsSymbol( pointer__STAR_type_specifier_list, pointer );
+  _gr->AddRhsSymbol( pointer__STAR_type_specifier_list, STAR );
+  _gr->AddRhsSymbol( pointer__STAR_type_specifier_list, type_specifier_list );
 
-  _gr->add_rule( pointer__STAR_pointer, "pointer --> * pointer" );
-  _gr->add_lhs_symbol( pointer__STAR_pointer, pointer );
-  _gr->add_rhs_symbol( pointer__STAR_pointer, STAR );
-  _gr->add_rhs_symbol( pointer__STAR_pointer, pointer );
+  _gr->AddRule( pointer__STAR_pointer, "pointer --> * pointer" );
+  _gr->AddLhsSymbol( pointer__STAR_pointer, pointer );
+  _gr->AddRhsSymbol( pointer__STAR_pointer, STAR );
+  _gr->AddRhsSymbol( pointer__STAR_pointer, pointer );
 
-  _gr->add_rule( pointer__STAR_type_specifier_list_pointer, "pointer --> * type_specifier_list pointer" );
-  _gr->add_lhs_symbol( pointer__STAR_type_specifier_list_pointer, pointer );
-  _gr->add_rhs_symbol( pointer__STAR_type_specifier_list_pointer, STAR );
-  _gr->add_rhs_symbol( pointer__STAR_type_specifier_list_pointer, type_specifier_list );
-  _gr->add_rhs_symbol( pointer__STAR_type_specifier_list_pointer, pointer );
+  _gr->AddRule( pointer__STAR_type_specifier_list_pointer, "pointer --> * type_specifier_list pointer" );
+  _gr->AddLhsSymbol( pointer__STAR_type_specifier_list_pointer, pointer );
+  _gr->AddRhsSymbol( pointer__STAR_type_specifier_list_pointer, STAR );
+  _gr->AddRhsSymbol( pointer__STAR_type_specifier_list_pointer, type_specifier_list );
+  _gr->AddRhsSymbol( pointer__STAR_type_specifier_list_pointer, pointer );
   
   // type_specifier_list
   // : type_specifier
   // | type_specifier_list type_specifier
   
-  _gr->add_rule( type_specifier_list__type_specifier, "type_specifier_list --> type_specifier" );
-  _gr->add_lhs_symbol( type_specifier_list__type_specifier, type_specifier_list );
-  _gr->add_rhs_symbol( type_specifier_list__type_specifier, type_specifier );
+  _gr->AddRule( type_specifier_list__type_specifier, "type_specifier_list --> type_specifier" );
+  _gr->AddLhsSymbol( type_specifier_list__type_specifier, type_specifier_list );
+  _gr->AddRhsSymbol( type_specifier_list__type_specifier, type_specifier );
 
-  _gr->add_rule( type_specifier_list__type_specifier_list_type_specifier, "type_specifier_list --> type_specifier_list type_specifier" );
-  _gr->add_lhs_symbol( type_specifier_list__type_specifier_list_type_specifier, type_specifier_list );
-  _gr->add_rhs_symbol( type_specifier_list__type_specifier_list_type_specifier, type_specifier_list );
-  _gr->add_rhs_symbol( type_specifier_list__type_specifier_list_type_specifier, type_specifier );
+  _gr->AddRule( type_specifier_list__type_specifier_list_type_specifier, "type_specifier_list --> type_specifier_list type_specifier" );
+  _gr->AddLhsSymbol( type_specifier_list__type_specifier_list_type_specifier, type_specifier_list );
+  _gr->AddRhsSymbol( type_specifier_list__type_specifier_list_type_specifier, type_specifier_list );
+  _gr->AddRhsSymbol( type_specifier_list__type_specifier_list_type_specifier, type_specifier );
   
   // parameter_identifier_list
   // : identifier_list
   // | identifier_list ',' ELIPSIS
   
-  _gr->add_rule( parameter_identifier_list__identifier_list, "parameter_identifier_list --> identifier_list" );
-  _gr->add_lhs_symbol( parameter_identifier_list__identifier_list, parameter_identifier_list );
-  _gr->add_rhs_symbol( parameter_identifier_list__identifier_list, identifier_list );
+  _gr->AddRule( parameter_identifier_list__identifier_list, "parameter_identifier_list --> identifier_list" );
+  _gr->AddLhsSymbol( parameter_identifier_list__identifier_list, parameter_identifier_list );
+  _gr->AddRhsSymbol( parameter_identifier_list__identifier_list, identifier_list );
   
-  _gr->add_rule( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, "parameter_identifier_list --> identifier_list , ..." );
-  _gr->add_lhs_symbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, parameter_identifier_list );
-  _gr->add_rhs_symbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, identifier_list );
-  _gr->add_rhs_symbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, COMMA );
-  _gr->add_rhs_symbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, ELIPSIS );
+  _gr->AddRule( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, "parameter_identifier_list --> identifier_list , ..." );
+  _gr->AddLhsSymbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, parameter_identifier_list );
+  _gr->AddRhsSymbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, identifier_list );
+  _gr->AddRhsSymbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, COMMA );
+  _gr->AddRhsSymbol( parameter_identifier_list__identifier_list_COMMA_ELIPSIS, ELIPSIS );
   
   // identifier_list
   // : identifier
   // | identifier_list ',' identifier
   
-  _gr->add_rule( identifier_list__identifier, "identifier_list --> identifier" );
-  _gr->add_lhs_symbol( identifier_list__identifier, identifier_list );
-  _gr->add_rhs_symbol( identifier_list__identifier, identifier );
+  _gr->AddRule( identifier_list__identifier, "identifier_list --> identifier" );
+  _gr->AddLhsSymbol( identifier_list__identifier, identifier_list );
+  _gr->AddRhsSymbol( identifier_list__identifier, identifier );
 
-  _gr->add_rule( identifier_list__identifier_list_COMMA_identifier, "identifier_list --> identifier_list , identifier" );
-  _gr->add_lhs_symbol( identifier_list__identifier_list_COMMA_identifier, identifier_list );
-  _gr->add_rhs_symbol( identifier_list__identifier_list_COMMA_identifier, identifier_list );
-  _gr->add_rhs_symbol( identifier_list__identifier_list_COMMA_identifier, COMMA );
-  _gr->add_rhs_symbol( identifier_list__identifier_list_COMMA_identifier, identifier );
+  _gr->AddRule( identifier_list__identifier_list_COMMA_identifier, "identifier_list --> identifier_list , identifier" );
+  _gr->AddLhsSymbol( identifier_list__identifier_list_COMMA_identifier, identifier_list );
+  _gr->AddRhsSymbol( identifier_list__identifier_list_COMMA_identifier, identifier_list );
+  _gr->AddRhsSymbol( identifier_list__identifier_list_COMMA_identifier, COMMA );
+  _gr->AddRhsSymbol( identifier_list__identifier_list_COMMA_identifier, identifier );
   
   // parameter_type_list
   // : parameter_list
   // | parameter_list ',' ELIPSIS
   
-  _gr->add_rule( parameter_type_list__parameter_list, "parameter_type_list --> parameter_list" );
-  _gr->add_lhs_symbol( parameter_type_list__parameter_list, parameter_type_list );
-  _gr->add_rhs_symbol( parameter_type_list__parameter_list, parameter_list );
+  _gr->AddRule( parameter_type_list__parameter_list, "parameter_type_list --> parameter_list" );
+  _gr->AddLhsSymbol( parameter_type_list__parameter_list, parameter_type_list );
+  _gr->AddRhsSymbol( parameter_type_list__parameter_list, parameter_list );
 
-  _gr->add_rule( parameter_type_list__parameter_list_COMMA_ELIPSIS, "parameter_type_list --> parameter_list , ..." );
-  _gr->add_lhs_symbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, parameter_type_list );
-  _gr->add_rhs_symbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, parameter_list );
-  _gr->add_rhs_symbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, COMMA );
-  _gr->add_rhs_symbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, ELIPSIS );
+  _gr->AddRule( parameter_type_list__parameter_list_COMMA_ELIPSIS, "parameter_type_list --> parameter_list , ..." );
+  _gr->AddLhsSymbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, parameter_type_list );
+  _gr->AddRhsSymbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, parameter_list );
+  _gr->AddRhsSymbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, COMMA );
+  _gr->AddRhsSymbol( parameter_type_list__parameter_list_COMMA_ELIPSIS, ELIPSIS );
   
   // parameter_list
   // : parameter_declaration
   // | parameter_list ',' parameter_declaration
   
-  _gr->add_rule( parameter_list__parameter_declaration, "parameter_list --> parameter_declaration" );
-  _gr->add_lhs_symbol( parameter_list__parameter_declaration, parameter_list );
-  _gr->add_rhs_symbol( parameter_list__parameter_declaration, parameter_declaration );
+  _gr->AddRule( parameter_list__parameter_declaration, "parameter_list --> parameter_declaration" );
+  _gr->AddLhsSymbol( parameter_list__parameter_declaration, parameter_list );
+  _gr->AddRhsSymbol( parameter_list__parameter_declaration, parameter_declaration );
   
-  _gr->add_rule( parameter_list__parameter_list_COMMA_parameter_declaration, "parameter_list --> parameter_list , parameter_declaration" );
-  _gr->add_lhs_symbol( parameter_list__parameter_list_COMMA_parameter_declaration, parameter_list );
-  _gr->add_rhs_symbol( parameter_list__parameter_list_COMMA_parameter_declaration, parameter_list );
-  _gr->add_rhs_symbol( parameter_list__parameter_list_COMMA_parameter_declaration, COMMA );
-  _gr->add_rhs_symbol( parameter_list__parameter_list_COMMA_parameter_declaration, parameter_declaration );
+  _gr->AddRule( parameter_list__parameter_list_COMMA_parameter_declaration, "parameter_list --> parameter_list , parameter_declaration" );
+  _gr->AddLhsSymbol( parameter_list__parameter_list_COMMA_parameter_declaration, parameter_list );
+  _gr->AddRhsSymbol( parameter_list__parameter_list_COMMA_parameter_declaration, parameter_list );
+  _gr->AddRhsSymbol( parameter_list__parameter_list_COMMA_parameter_declaration, COMMA );
+  _gr->AddRhsSymbol( parameter_list__parameter_list_COMMA_parameter_declaration, parameter_declaration );
   
   // parameter_declaration
   // : type_specifier_list declarator
   // | type_name
   
-  _gr->add_rule( parameter_declaration__type_specifier_list_declarator, "parameter_declaration --> type_specifier_list declarator" );
-  _gr->add_lhs_symbol( parameter_declaration__type_specifier_list_declarator, parameter_declaration );
-  _gr->add_rhs_symbol( parameter_declaration__type_specifier_list_declarator, type_specifier_list );
-  _gr->add_rhs_symbol( parameter_declaration__type_specifier_list_declarator, declarator );
+  _gr->AddRule( parameter_declaration__type_specifier_list_declarator, "parameter_declaration --> type_specifier_list declarator" );
+  _gr->AddLhsSymbol( parameter_declaration__type_specifier_list_declarator, parameter_declaration );
+  _gr->AddRhsSymbol( parameter_declaration__type_specifier_list_declarator, type_specifier_list );
+  _gr->AddRhsSymbol( parameter_declaration__type_specifier_list_declarator, declarator );
 
-  _gr->add_rule( parameter_declaration__type_name, "parameter_declaration --> type_name" );
-  _gr->add_lhs_symbol( parameter_declaration__type_name, parameter_declaration );
-  _gr->add_rhs_symbol( parameter_declaration__type_name, type_name );
+  _gr->AddRule( parameter_declaration__type_name, "parameter_declaration --> type_name" );
+  _gr->AddLhsSymbol( parameter_declaration__type_name, parameter_declaration );
+  _gr->AddRhsSymbol( parameter_declaration__type_name, type_name );
   
   // type_name
   // : type_specifier_list
   // | type_specifier_list abstract_declarator
   
-  _gr->add_rule( type_name__type_specifier_list, "type_name --> type_specifier_list" );
-  _gr->add_lhs_symbol( type_name__type_specifier_list, type_name );
-  _gr->add_rhs_symbol( type_name__type_specifier_list, type_specifier_list );
+  _gr->AddRule( type_name__type_specifier_list, "type_name --> type_specifier_list" );
+  _gr->AddLhsSymbol( type_name__type_specifier_list, type_name );
+  _gr->AddRhsSymbol( type_name__type_specifier_list, type_specifier_list );
 
-  _gr->add_rule( type_name__type_specifier_list_abstract_declarator, "type_name --> type_specifier_list abstract_declarator" );
-  _gr->add_lhs_symbol( type_name__type_specifier_list_abstract_declarator, type_name );
-  _gr->add_rhs_symbol( type_name__type_specifier_list_abstract_declarator, type_specifier_list );
-  _gr->add_rhs_symbol( type_name__type_specifier_list_abstract_declarator, abstract_declarator );
+  _gr->AddRule( type_name__type_specifier_list_abstract_declarator, "type_name --> type_specifier_list abstract_declarator" );
+  _gr->AddLhsSymbol( type_name__type_specifier_list_abstract_declarator, type_name );
+  _gr->AddRhsSymbol( type_name__type_specifier_list_abstract_declarator, type_specifier_list );
+  _gr->AddRhsSymbol( type_name__type_specifier_list_abstract_declarator, abstract_declarator );
   
   // abstract_declarator
   // : pointer
   // | abstract_declarator2
   // | pointer abstract_declarator2
   
-  _gr->add_rule( abstract_declarator__pointer, "abstract_declarator --> pointer" );
-  _gr->add_lhs_symbol( abstract_declarator__pointer, abstract_declarator );
-  _gr->add_rhs_symbol( abstract_declarator__pointer, pointer );
+  _gr->AddRule( abstract_declarator__pointer, "abstract_declarator --> pointer" );
+  _gr->AddLhsSymbol( abstract_declarator__pointer, abstract_declarator );
+  _gr->AddRhsSymbol( abstract_declarator__pointer, pointer );
 
-  _gr->add_rule( abstract_declarator__abstract_declarator2, "abstract_declarator --> abstract_declarator2" );
-  _gr->add_lhs_symbol( abstract_declarator__abstract_declarator2, abstract_declarator );
-  _gr->add_rhs_symbol( abstract_declarator__abstract_declarator2, abstract_declarator2 );
+  _gr->AddRule( abstract_declarator__abstract_declarator2, "abstract_declarator --> abstract_declarator2" );
+  _gr->AddLhsSymbol( abstract_declarator__abstract_declarator2, abstract_declarator );
+  _gr->AddRhsSymbol( abstract_declarator__abstract_declarator2, abstract_declarator2 );
   
-  _gr->add_rule( abstract_declarator__pointer_abstract_declarator2, "abstract_declarator --> pointer abstract_declarator2" );
-  _gr->add_lhs_symbol( abstract_declarator__pointer_abstract_declarator2, abstract_declarator );
-  _gr->add_rhs_symbol( abstract_declarator__pointer_abstract_declarator2, pointer );
-  _gr->add_rhs_symbol( abstract_declarator__pointer_abstract_declarator2, abstract_declarator2 );
+  _gr->AddRule( abstract_declarator__pointer_abstract_declarator2, "abstract_declarator --> pointer abstract_declarator2" );
+  _gr->AddLhsSymbol( abstract_declarator__pointer_abstract_declarator2, abstract_declarator );
+  _gr->AddRhsSymbol( abstract_declarator__pointer_abstract_declarator2, pointer );
+  _gr->AddRhsSymbol( abstract_declarator__pointer_abstract_declarator2, abstract_declarator2 );
   
   // abstract_declarator2
   // : '(' abstract_declarator ')'
@@ -1810,95 +1809,95 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | abstract_declarator2 '(' ')'
   // | abstract_declarator2 '(' parameter_type_list ')'
   
-  _gr->add_rule( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, "abstract_declarator2 --> ( abstract_declarator )" );
-  _gr->add_lhs_symbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, abstract_declarator );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, "abstract_declarator2 --> ( abstract_declarator )" );
+  _gr->AddLhsSymbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, abstract_declarator );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_abstract_declarator_RIGHT_BRACE, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, "abstract_declarator2 --> [ ]" );
-  _gr->add_lhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, "abstract_declarator2 --> [ ]" );
+  _gr->AddLhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, "abstract_declarator2 --> [ constant_expr ]" );
-  _gr->add_lhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, constant_expr );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, "abstract_declarator2 --> [ constant_expr ]" );
+  _gr->AddLhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, constant_expr );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, "abstract_declarator2 --> abstract_declarator2 [ ]" );
-  _gr->add_lhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, "abstract_declarator2 --> abstract_declarator2 [ ]" );
+  _gr->AddLhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_RIGHT_SQ_BRACKET, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, "abstract_declarator2 --> abstract_declarator2 [ constant_expr ]" );
-  _gr->add_lhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, constant_expr );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, "abstract_declarator2 --> abstract_declarator2 [ constant_expr ]" );
+  _gr->AddLhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, constant_expr );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_SQ_BRACKET_constant_expr_RIGHT_SQ_BRACKET, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, "abstract_declarator2 --> ( )" );
-  _gr->add_lhs_symbol( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, "abstract_declarator2 --> ( )" );
+  _gr->AddLhsSymbol( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, "abstract_declarator2 --> ( parameter_type_list )" );
-  _gr->add_lhs_symbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, parameter_type_list );
-  _gr->add_rhs_symbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, "abstract_declarator2 --> ( parameter_type_list )" );
+  _gr->AddLhsSymbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, parameter_type_list );
+  _gr->AddRhsSymbol( abstract_declarator2__LEFT_BRACE_parameter_type_list_RIGHT_BRACE, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, "abstract_declarator2 --> abstract_declarator2 ( )" );
-  _gr->add_lhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, "abstract_declarator2 --> abstract_declarator2 ( )" );
+  _gr->AddLhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_RIGHT_BRACE, RIGHT_BRACE );
   
-  _gr->add_rule( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, "abstract_declarator2 --> abstract_declarator2 ( parameter_type_list )" );
-  _gr->add_lhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, abstract_declarator2 );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, parameter_type_list );
-  _gr->add_rhs_symbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, "abstract_declarator2 --> abstract_declarator2 ( parameter_type_list )" );
+  _gr->AddLhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, abstract_declarator2 );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, parameter_type_list );
+  _gr->AddRhsSymbol( abstract_declarator2__abstract_declarator2_LEFT_BRACE_parameter_type_list_RIGHT_BRACE, RIGHT_BRACE );
   
   // initializer
   // : assignment_expr
   // | '{' initializer_list '}'
   // | '{' initializer_list ',' '}'
   
-  _gr->add_rule( initializer__assignment_expr, "initializer --> assignment_expr" );
-  _gr->add_lhs_symbol( initializer__assignment_expr, initializer );
-  _gr->add_rhs_symbol( initializer__assignment_expr, assignment_expr );
+  _gr->AddRule( initializer__assignment_expr, "initializer --> assignment_expr" );
+  _gr->AddLhsSymbol( initializer__assignment_expr, initializer );
+  _gr->AddRhsSymbol( initializer__assignment_expr, assignment_expr );
 
-  _gr->add_rule( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, "initializer --> [ initializer_list ]" );
-  _gr->add_lhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, initializer );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, initializer_list );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
+  _gr->AddRule( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, "initializer --> [ initializer_list ]" );
+  _gr->AddLhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, initializer );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, initializer_list );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
 
-  _gr->add_rule( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, "initializer --> [ initializer_list , ]" );
-  _gr->add_lhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, initializer );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, initializer_list );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, COMMA );
-  _gr->add_rhs_symbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
+  _gr->AddRule( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, "initializer --> [ initializer_list , ]" );
+  _gr->AddLhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, initializer );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, LEFT_SQ_BRACKET );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, initializer_list );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, COMMA );
+  _gr->AddRhsSymbol( initializer__LEFT_SQ_BRACKET_initializer_list_COMMA_RIGHT_SQ_BRACKET, RIGHT_SQ_BRACKET );
   
   // initializer_list
   // : initializer
   // | initializer_list ',' initializer
   
-  _gr->add_rule( initializer_list__initializer, "initializer_list --> initializer" );
-  _gr->add_lhs_symbol( initializer_list__initializer, initializer_list );
-  _gr->add_rhs_symbol( initializer_list__initializer, initializer );
+  _gr->AddRule( initializer_list__initializer, "initializer_list --> initializer" );
+  _gr->AddLhsSymbol( initializer_list__initializer, initializer_list );
+  _gr->AddRhsSymbol( initializer_list__initializer, initializer );
 
-  _gr->add_rule( initializer_list__initializer_list_COMMA_initializer, "initializer_list --> initializer_list , initializer" );
-  _gr->add_lhs_symbol( initializer_list__initializer_list_COMMA_initializer, initializer_list );
-  _gr->add_rhs_symbol( initializer_list__initializer_list_COMMA_initializer, initializer_list );
-  _gr->add_rhs_symbol( initializer_list__initializer_list_COMMA_initializer, COMMA );
-  _gr->add_rhs_symbol( initializer_list__initializer_list_COMMA_initializer, initializer );
+  _gr->AddRule( initializer_list__initializer_list_COMMA_initializer, "initializer_list --> initializer_list , initializer" );
+  _gr->AddLhsSymbol( initializer_list__initializer_list_COMMA_initializer, initializer_list );
+  _gr->AddRhsSymbol( initializer_list__initializer_list_COMMA_initializer, initializer_list );
+  _gr->AddRhsSymbol( initializer_list__initializer_list_COMMA_initializer, COMMA );
+  _gr->AddRhsSymbol( initializer_list__initializer_list_COMMA_initializer, initializer );
   
   // statement
   // : labeled_statement
@@ -1908,53 +1907,53 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | iteration_statement
   // | jump_statement
   
-  _gr->add_rule( statement__labeled_statement, "statement --> labeled_statement" );
-  _gr->add_lhs_symbol( statement__labeled_statement, statement );
-  _gr->add_rhs_symbol( statement__labeled_statement, labeled_statement );
+  _gr->AddRule( statement__labeled_statement, "statement --> labeled_statement" );
+  _gr->AddLhsSymbol( statement__labeled_statement, statement );
+  _gr->AddRhsSymbol( statement__labeled_statement, labeled_statement );
 
-  _gr->add_rule( statement__compound_statement, "statement --> compound_statement" );
-  _gr->add_lhs_symbol( statement__compound_statement, statement );
-  _gr->add_rhs_symbol( statement__compound_statement, compound_statement );
+  _gr->AddRule( statement__compound_statement, "statement --> compound_statement" );
+  _gr->AddLhsSymbol( statement__compound_statement, statement );
+  _gr->AddRhsSymbol( statement__compound_statement, compound_statement );
 
-  _gr->add_rule( statement__expression_statement, "statement --> expression_statement" );
-  _gr->add_lhs_symbol( statement__expression_statement, statement );
-  _gr->add_rhs_symbol( statement__expression_statement, expression_statement );
+  _gr->AddRule( statement__expression_statement, "statement --> expression_statement" );
+  _gr->AddLhsSymbol( statement__expression_statement, statement );
+  _gr->AddRhsSymbol( statement__expression_statement, expression_statement );
 
-  _gr->add_rule( statement__selection_statement, "statement --> selection_statement" );
-  _gr->add_lhs_symbol( statement__selection_statement, statement );
-  _gr->add_rhs_symbol( statement__selection_statement, selection_statement );
+  _gr->AddRule( statement__selection_statement, "statement --> selection_statement" );
+  _gr->AddLhsSymbol( statement__selection_statement, statement );
+  _gr->AddRhsSymbol( statement__selection_statement, selection_statement );
 
-  _gr->add_rule( statement__iteration_statement, "statement --> iteration_statement" );
-  _gr->add_lhs_symbol( statement__iteration_statement, statement );
-  _gr->add_rhs_symbol( statement__iteration_statement, iteration_statement );
+  _gr->AddRule( statement__iteration_statement, "statement --> iteration_statement" );
+  _gr->AddLhsSymbol( statement__iteration_statement, statement );
+  _gr->AddRhsSymbol( statement__iteration_statement, iteration_statement );
 
-  _gr->add_rule( statement__jump_statement, "statement --> jump_statement" );
-  _gr->add_lhs_symbol( statement__jump_statement, statement );
-  _gr->add_rhs_symbol( statement__jump_statement, jump_statement );
+  _gr->AddRule( statement__jump_statement, "statement --> jump_statement" );
+  _gr->AddLhsSymbol( statement__jump_statement, statement );
+  _gr->AddRhsSymbol( statement__jump_statement, jump_statement );
   
   // labeled_statement
   // : identifier ':' statement
   // | CASE constant_expr ':' statement
   // | DEFAULT ':' statement
   
-  _gr->add_rule( labeled_statement__identifier_COLON_statement, "labeled_statement --> identifier : statement" );
-  _gr->add_lhs_symbol( labeled_statement__identifier_COLON_statement, labeled_statement );
-  _gr->add_rhs_symbol( labeled_statement__identifier_COLON_statement, identifier );
-  _gr->add_rhs_symbol( labeled_statement__identifier_COLON_statement, COLON );
-  _gr->add_rhs_symbol( labeled_statement__identifier_COLON_statement, statement );
+  _gr->AddRule( labeled_statement__identifier_COLON_statement, "labeled_statement --> identifier : statement" );
+  _gr->AddLhsSymbol( labeled_statement__identifier_COLON_statement, labeled_statement );
+  _gr->AddRhsSymbol( labeled_statement__identifier_COLON_statement, identifier );
+  _gr->AddRhsSymbol( labeled_statement__identifier_COLON_statement, COLON );
+  _gr->AddRhsSymbol( labeled_statement__identifier_COLON_statement, statement );
   
-  _gr->add_rule( labeled_statement__CASE_constant_expr_COLON_statement, "labeled_statement --> case constant_expr : statement" );
-  _gr->add_lhs_symbol( labeled_statement__CASE_constant_expr_COLON_statement, labeled_statement );
-  _gr->add_rhs_symbol( labeled_statement__CASE_constant_expr_COLON_statement, CASE );
-  _gr->add_rhs_symbol( labeled_statement__CASE_constant_expr_COLON_statement, constant_expr );
-  _gr->add_rhs_symbol( labeled_statement__CASE_constant_expr_COLON_statement, COLON );
-  _gr->add_rhs_symbol( labeled_statement__CASE_constant_expr_COLON_statement, statement );
+  _gr->AddRule( labeled_statement__CASE_constant_expr_COLON_statement, "labeled_statement --> case constant_expr : statement" );
+  _gr->AddLhsSymbol( labeled_statement__CASE_constant_expr_COLON_statement, labeled_statement );
+  _gr->AddRhsSymbol( labeled_statement__CASE_constant_expr_COLON_statement, CASE );
+  _gr->AddRhsSymbol( labeled_statement__CASE_constant_expr_COLON_statement, constant_expr );
+  _gr->AddRhsSymbol( labeled_statement__CASE_constant_expr_COLON_statement, COLON );
+  _gr->AddRhsSymbol( labeled_statement__CASE_constant_expr_COLON_statement, statement );
   
-  _gr->add_rule( labeled_statement__DEFAULT_COLON_statement, "labeled_statement --> default : statement" );
-  _gr->add_lhs_symbol( labeled_statement__DEFAULT_COLON_statement, labeled_statement );
-  _gr->add_rhs_symbol( labeled_statement__DEFAULT_COLON_statement, DEFAULT );
-  _gr->add_rhs_symbol( labeled_statement__DEFAULT_COLON_statement, COLON );
-  _gr->add_rhs_symbol( labeled_statement__DEFAULT_COLON_statement, statement );
+  _gr->AddRule( labeled_statement__DEFAULT_COLON_statement, "labeled_statement --> default : statement" );
+  _gr->AddLhsSymbol( labeled_statement__DEFAULT_COLON_statement, labeled_statement );
+  _gr->AddRhsSymbol( labeled_statement__DEFAULT_COLON_statement, DEFAULT );
+  _gr->AddRhsSymbol( labeled_statement__DEFAULT_COLON_statement, COLON );
+  _gr->AddRhsSymbol( labeled_statement__DEFAULT_COLON_statement, statement );
   
   // compound_statement
   // : '{' '}'
@@ -1962,99 +1961,99 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | '{' declaration_list '}'
   // | '{' declaration_list statement_list '}'
   
-  _gr->add_rule( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, "compound_statement --> [ ]" );
-  _gr->add_lhs_symbol( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, compound_statement );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, "compound_statement --> [ ]" );
+  _gr->AddLhsSymbol( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, compound_statement );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
 
-  _gr->add_rule( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, "compound_statement --> [ statement_list ]" );
-  _gr->add_lhs_symbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, compound_statement );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, statement_list );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, "compound_statement --> [ statement_list ]" );
+  _gr->AddLhsSymbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, compound_statement );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, statement_list );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_statement_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
 
-  _gr->add_rule( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, "compound_statement --> [ declaration_list ]" );
-  _gr->add_lhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, compound_statement );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, declaration_list );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, "compound_statement --> [ declaration_list ]" );
+  _gr->AddLhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, compound_statement );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, declaration_list );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
 
-  _gr->add_rule( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, "compound_statement --> [ declaration_list statement_list ]" );
-  _gr->add_lhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, compound_statement );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, declaration_list );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, statement_list );
-  _gr->add_rhs_symbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
+  _gr->AddRule( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, "compound_statement --> [ declaration_list statement_list ]" );
+  _gr->AddLhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, compound_statement );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, LEFT_CL_BRACKET );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, declaration_list );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, statement_list );
+  _gr->AddRhsSymbol( compound_statement__LEFT_CL_BRACKET_declaration_list_statement_list_RIGHT_CL_BRACKET, RIGHT_CL_BRACKET );
   
   // declaration_list
   // : declaration
   // | declaration_list declaration
   
-  _gr->add_rule( declaration_list__declaration, "declaration_list --> declaration" );
-  _gr->add_lhs_symbol( declaration_list__declaration, declaration_list );
-  _gr->add_rhs_symbol( declaration_list__declaration, declaration );
+  _gr->AddRule( declaration_list__declaration, "declaration_list --> declaration" );
+  _gr->AddLhsSymbol( declaration_list__declaration, declaration_list );
+  _gr->AddRhsSymbol( declaration_list__declaration, declaration );
 
-  _gr->add_rule( declaration_list__declaration_list_declaration, "declaration_list --> declaration_list declaration" );
-  _gr->add_lhs_symbol( declaration_list__declaration_list_declaration, declaration_list );
-  _gr->add_rhs_symbol( declaration_list__declaration_list_declaration, declaration_list );
-  _gr->add_rhs_symbol( declaration_list__declaration_list_declaration, declaration );
+  _gr->AddRule( declaration_list__declaration_list_declaration, "declaration_list --> declaration_list declaration" );
+  _gr->AddLhsSymbol( declaration_list__declaration_list_declaration, declaration_list );
+  _gr->AddRhsSymbol( declaration_list__declaration_list_declaration, declaration_list );
+  _gr->AddRhsSymbol( declaration_list__declaration_list_declaration, declaration );
   
   // statement_list
   // : statement
   // | statement_list statement
   
-  _gr->add_rule( statement_list__statement, "statement_list --> statement" );
-  _gr->add_lhs_symbol( statement_list__statement, statement_list );
-  _gr->add_rhs_symbol( statement_list__statement, statement );
+  _gr->AddRule( statement_list__statement, "statement_list --> statement" );
+  _gr->AddLhsSymbol( statement_list__statement, statement_list );
+  _gr->AddRhsSymbol( statement_list__statement, statement );
 
-  _gr->add_rule( statement_list__statement_list_statement, "statement_list --> statement_list statement" );
-  _gr->add_lhs_symbol( statement_list__statement_list_statement, statement_list );
-  _gr->add_rhs_symbol( statement_list__statement_list_statement, statement_list );
-  _gr->add_rhs_symbol( statement_list__statement_list_statement, statement );
+  _gr->AddRule( statement_list__statement_list_statement, "statement_list --> statement_list statement" );
+  _gr->AddLhsSymbol( statement_list__statement_list_statement, statement_list );
+  _gr->AddRhsSymbol( statement_list__statement_list_statement, statement_list );
+  _gr->AddRhsSymbol( statement_list__statement_list_statement, statement );
   
   // expression_statement
   // : ';'
   // | expr ';'
   
-  _gr->add_rule( expression_statement__SEMICOLON, "expression_statement --> ;" );
-  _gr->add_lhs_symbol( expression_statement__SEMICOLON, expression_statement );
-  _gr->add_rhs_symbol( expression_statement__SEMICOLON, SEMICOLON );
+  _gr->AddRule( expression_statement__SEMICOLON, "expression_statement --> ;" );
+  _gr->AddLhsSymbol( expression_statement__SEMICOLON, expression_statement );
+  _gr->AddRhsSymbol( expression_statement__SEMICOLON, SEMICOLON );
   
-  _gr->add_rule( expression_statement__expr_SEMICOLON, "expression_statement --> expr ;" );
-  _gr->add_lhs_symbol( expression_statement__expr_SEMICOLON, expression_statement );
-  _gr->add_rhs_symbol( expression_statement__expr_SEMICOLON, expr );
-  _gr->add_rhs_symbol( expression_statement__expr_SEMICOLON, SEMICOLON );
+  _gr->AddRule( expression_statement__expr_SEMICOLON, "expression_statement --> expr ;" );
+  _gr->AddLhsSymbol( expression_statement__expr_SEMICOLON, expression_statement );
+  _gr->AddRhsSymbol( expression_statement__expr_SEMICOLON, expr );
+  _gr->AddRhsSymbol( expression_statement__expr_SEMICOLON, SEMICOLON );
   
   // selection_statement
   // : IF '(' expr ')' statement
   // | IF '(' expr ')' statement ELSE statement
   // | SWITCH '(' expr ')' statement
   
-  _gr->add_rule( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, "selection_statement --> if ( expr ) statement" );
-  _gr->add_lhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, selection_statement );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, IF );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, "selection_statement --> if ( expr ) statement" );
+  _gr->AddLhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, selection_statement );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, IF );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, "selection_statement --> if ( expr ) statement else statement" );
-  _gr->add_lhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, selection_statement );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, IF );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, expr );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, statement );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, ELSE );
-  _gr->add_rhs_symbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, statement );
+  _gr->AddRule( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, "selection_statement --> if ( expr ) statement else statement" );
+  _gr->AddLhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, selection_statement );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, IF );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, expr );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, statement );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, ELSE );
+  _gr->AddRhsSymbol( selection_statement__IF_LEFT_BRACE_expr_RIGHT_BRACE_statement_ELSE_statement, statement );
 
-  _gr->add_rule( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, "selection_statement --> switch ( expr ) statement" );
-  _gr->add_lhs_symbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, selection_statement );
-  _gr->add_rhs_symbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, SWITCH );
-  _gr->add_rhs_symbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, "selection_statement --> switch ( expr ) statement" );
+  _gr->AddLhsSymbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, selection_statement );
+  _gr->AddRhsSymbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, SWITCH );
+  _gr->AddRhsSymbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( selection_statement__SWITCH_LEFT_BRACE_expr_RIGHT_BRACE_statement, statement );
   
   // iteration_statement
   // : WHILE '(' expr ')' statement
@@ -2068,106 +2067,106 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | FOR '(' expr ';' expr ';' ')' statement
   // | FOR '(' expr ';' expr ';' expr ')' statement
   
-  _gr->add_rule( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, "iteration_statement --> while ( expr ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, WHILE );
-  _gr->add_rhs_symbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, "iteration_statement --> while ( expr ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, WHILE );
+  _gr->AddRhsSymbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__WHILE_LEFT_BRACE_expr_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, "iteration_statement --> do statement while ( expr )" );
-  _gr->add_lhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, DO );
-  _gr->add_rhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, statement );
-  _gr->add_rhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, WHILE );
-  _gr->add_rhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, expr );
-  _gr->add_rhs_symbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, RIGHT_BRACE );
+  _gr->AddRule( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, "iteration_statement --> do statement while ( expr )" );
+  _gr->AddLhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, DO );
+  _gr->AddRhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, statement );
+  _gr->AddRhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, WHILE );
+  _gr->AddRhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, expr );
+  _gr->AddRhsSymbol( iteration_statement__DO_statement_WHILE_LEFT_BRACE_expr_RIGHT_BRACE, RIGHT_BRACE );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( ; ; ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( ; ; ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( ; ; expr ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( ; ; expr ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( ; expr ; ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( ; expr ; ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( ; expr ; expr ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( ; expr ; expr ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; ; ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; ; ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; ; expr ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; ; expr ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; expr ; ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; expr ; ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_RIGHT_BRACE_statement, statement );
 
-  _gr->add_rule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; expr ; expr ) statement" );
-  _gr->add_lhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
-  _gr->add_rhs_symbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
+  _gr->AddRule( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, "iteration_statement --> for ( expr ; expr ; expr ) statement" );
+  _gr->AddLhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, iteration_statement );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, FOR );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, LEFT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, SEMICOLON );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, expr );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, RIGHT_BRACE );
+  _gr->AddRhsSymbol( iteration_statement__FOR_LEFT_BRACE_expr_SEMICOLON_expr_SEMICOLON_expr_RIGHT_BRACE_statement, statement );
   
   // jump_statement
   // : GOTO identifier ';'
@@ -2176,92 +2175,92 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | RETURN ';'
   // | RETURN expr ';'
   
-  _gr->add_rule( jump_statement__GOTO_identifier_SEMICOLON, "jump_statement -->  goto identifier ;" );
-  _gr->add_lhs_symbol( jump_statement__GOTO_identifier_SEMICOLON, jump_statement );
-  _gr->add_rhs_symbol( jump_statement__GOTO_identifier_SEMICOLON, GOTO );
-  _gr->add_rhs_symbol( jump_statement__GOTO_identifier_SEMICOLON, identifier );
-  _gr->add_rhs_symbol( jump_statement__GOTO_identifier_SEMICOLON, SEMICOLON );
+  _gr->AddRule( jump_statement__GOTO_identifier_SEMICOLON, "jump_statement -->  goto identifier ;" );
+  _gr->AddLhsSymbol( jump_statement__GOTO_identifier_SEMICOLON, jump_statement );
+  _gr->AddRhsSymbol( jump_statement__GOTO_identifier_SEMICOLON, GOTO );
+  _gr->AddRhsSymbol( jump_statement__GOTO_identifier_SEMICOLON, identifier );
+  _gr->AddRhsSymbol( jump_statement__GOTO_identifier_SEMICOLON, SEMICOLON );
 
-  _gr->add_rule( jump_statement__CONTINUE_SEMICOLON, "jump_statement --> continue ;" );
-  _gr->add_lhs_symbol( jump_statement__CONTINUE_SEMICOLON, jump_statement );
-  _gr->add_rhs_symbol( jump_statement__CONTINUE_SEMICOLON, CONTINUE );
-  _gr->add_rhs_symbol( jump_statement__CONTINUE_SEMICOLON, SEMICOLON );
+  _gr->AddRule( jump_statement__CONTINUE_SEMICOLON, "jump_statement --> continue ;" );
+  _gr->AddLhsSymbol( jump_statement__CONTINUE_SEMICOLON, jump_statement );
+  _gr->AddRhsSymbol( jump_statement__CONTINUE_SEMICOLON, CONTINUE );
+  _gr->AddRhsSymbol( jump_statement__CONTINUE_SEMICOLON, SEMICOLON );
 
-  _gr->add_rule( jump_statement__BREAK_SEMICOLON, "jump_statement --> break ;" );
-  _gr->add_lhs_symbol( jump_statement__BREAK_SEMICOLON, jump_statement );
-  _gr->add_rhs_symbol( jump_statement__BREAK_SEMICOLON, BREAK );
-  _gr->add_rhs_symbol( jump_statement__BREAK_SEMICOLON, SEMICOLON );
+  _gr->AddRule( jump_statement__BREAK_SEMICOLON, "jump_statement --> break ;" );
+  _gr->AddLhsSymbol( jump_statement__BREAK_SEMICOLON, jump_statement );
+  _gr->AddRhsSymbol( jump_statement__BREAK_SEMICOLON, BREAK );
+  _gr->AddRhsSymbol( jump_statement__BREAK_SEMICOLON, SEMICOLON );
 
-  _gr->add_rule( jump_statement__RETURN_SEMICOLON, "jump_statement --> return ;" );
-  _gr->add_lhs_symbol( jump_statement__RETURN_SEMICOLON, jump_statement );
-  _gr->add_rhs_symbol( jump_statement__RETURN_SEMICOLON, RETURN );
-  _gr->add_rhs_symbol( jump_statement__RETURN_SEMICOLON, SEMICOLON );
+  _gr->AddRule( jump_statement__RETURN_SEMICOLON, "jump_statement --> return ;" );
+  _gr->AddLhsSymbol( jump_statement__RETURN_SEMICOLON, jump_statement );
+  _gr->AddRhsSymbol( jump_statement__RETURN_SEMICOLON, RETURN );
+  _gr->AddRhsSymbol( jump_statement__RETURN_SEMICOLON, SEMICOLON );
 
-  _gr->add_rule( jump_statement__RETURN_expr_SEMICOLON, "jump_statement --> return expr ;" );
-  _gr->add_lhs_symbol( jump_statement__RETURN_expr_SEMICOLON, jump_statement );
-  _gr->add_rhs_symbol( jump_statement__RETURN_expr_SEMICOLON, RETURN );
-  _gr->add_rhs_symbol( jump_statement__RETURN_expr_SEMICOLON, expr );
-  _gr->add_rhs_symbol( jump_statement__RETURN_expr_SEMICOLON, SEMICOLON );
+  _gr->AddRule( jump_statement__RETURN_expr_SEMICOLON, "jump_statement --> return expr ;" );
+  _gr->AddLhsSymbol( jump_statement__RETURN_expr_SEMICOLON, jump_statement );
+  _gr->AddRhsSymbol( jump_statement__RETURN_expr_SEMICOLON, RETURN );
+  _gr->AddRhsSymbol( jump_statement__RETURN_expr_SEMICOLON, expr );
+  _gr->AddRhsSymbol( jump_statement__RETURN_expr_SEMICOLON, SEMICOLON );
   
   // file
   // : external_definition
   // | file external_definition
   
-  _gr->add_rule( file__external_definition, "file --> external_definition" );
-  _gr->add_lhs_symbol( file__external_definition, file );
-  _gr->add_rhs_symbol( file__external_definition, external_definition );
+  _gr->AddRule( file__external_definition, "file --> external_definition" );
+  _gr->AddLhsSymbol( file__external_definition, file );
+  _gr->AddRhsSymbol( file__external_definition, external_definition );
 
-  _gr->add_rule( file__file_external_definition, "file --> file external_definition" );
-  _gr->add_lhs_symbol( file__file_external_definition, file );
-  _gr->add_rhs_symbol( file__file_external_definition, file );
-  _gr->add_rhs_symbol( file__file_external_definition, external_definition );
+  _gr->AddRule( file__file_external_definition, "file --> file external_definition" );
+  _gr->AddLhsSymbol( file__file_external_definition, file );
+  _gr->AddRhsSymbol( file__file_external_definition, file );
+  _gr->AddRhsSymbol( file__file_external_definition, external_definition );
   
   // external_definition
   // : function_definition
   // | declaration
   
-  _gr->add_rule( external_definition__function_definition, "external_definition --> function_definition" );
-  _gr->add_lhs_symbol( external_definition__function_definition, external_definition );
-  _gr->add_rhs_symbol( external_definition__function_definition, function_definition );
+  _gr->AddRule( external_definition__function_definition, "external_definition --> function_definition" );
+  _gr->AddLhsSymbol( external_definition__function_definition, external_definition );
+  _gr->AddRhsSymbol( external_definition__function_definition, function_definition );
 
-  _gr->add_rule( external_definition__declaration, "external_definition --> declaration" );
-  _gr->add_lhs_symbol( external_definition__declaration, external_definition );
-  _gr->add_rhs_symbol( external_definition__declaration, declaration );
+  _gr->AddRule( external_definition__declaration, "external_definition --> declaration" );
+  _gr->AddLhsSymbol( external_definition__declaration, external_definition );
+  _gr->AddRhsSymbol( external_definition__declaration, declaration );
   
   // function_definition
   // : declarator function_body
   // | declaration_specifiers declarator function_body
   
-  _gr->add_rule( function_definition__declarator_function_body, "function_definition --> declarator function_body" );
-  _gr->add_lhs_symbol( function_definition__declarator_function_body, function_definition );
-  _gr->add_rhs_symbol( function_definition__declarator_function_body, declarator );
-  _gr->add_rhs_symbol( function_definition__declarator_function_body, function_body );
+  _gr->AddRule( function_definition__declarator_function_body, "function_definition --> declarator function_body" );
+  _gr->AddLhsSymbol( function_definition__declarator_function_body, function_definition );
+  _gr->AddRhsSymbol( function_definition__declarator_function_body, declarator );
+  _gr->AddRhsSymbol( function_definition__declarator_function_body, function_body );
 
-  _gr->add_rule( function_definition__declaration_specifiers_declarator_function_body, "function_definition --> declaration_specifiers declarator function_body" );
-  _gr->add_lhs_symbol( function_definition__declaration_specifiers_declarator_function_body, function_definition );
-  _gr->add_rhs_symbol( function_definition__declaration_specifiers_declarator_function_body, declaration_specifiers );
-  _gr->add_rhs_symbol( function_definition__declaration_specifiers_declarator_function_body, declarator );
-  _gr->add_rhs_symbol( function_definition__declaration_specifiers_declarator_function_body, function_body );
+  _gr->AddRule( function_definition__declaration_specifiers_declarator_function_body, "function_definition --> declaration_specifiers declarator function_body" );
+  _gr->AddLhsSymbol( function_definition__declaration_specifiers_declarator_function_body, function_definition );
+  _gr->AddRhsSymbol( function_definition__declaration_specifiers_declarator_function_body, declaration_specifiers );
+  _gr->AddRhsSymbol( function_definition__declaration_specifiers_declarator_function_body, declarator );
+  _gr->AddRhsSymbol( function_definition__declaration_specifiers_declarator_function_body, function_body );
   
   // function_body
   // : compound_statement
   // | declaration_list compound_statement
   
-  _gr->add_rule( function_body__compound_statement, "function_body --> compound_statement" );
-  _gr->add_lhs_symbol( function_body__compound_statement, function_body );
-  _gr->add_rhs_symbol( function_body__compound_statement, compound_statement );
+  _gr->AddRule( function_body__compound_statement, "function_body --> compound_statement" );
+  _gr->AddLhsSymbol( function_body__compound_statement, function_body );
+  _gr->AddRhsSymbol( function_body__compound_statement, compound_statement );
   
-  _gr->add_rule( function_body__declaration_list_compound_statement, "function_body --> declaration_list compound_statement" );
-  _gr->add_lhs_symbol( function_body__declaration_list_compound_statement, function_body );
-  _gr->add_rhs_symbol( function_body__declaration_list_compound_statement, declaration_list );
-  _gr->add_rhs_symbol( function_body__declaration_list_compound_statement, compound_statement );
+  _gr->AddRule( function_body__declaration_list_compound_statement, "function_body --> declaration_list compound_statement" );
+  _gr->AddLhsSymbol( function_body__declaration_list_compound_statement, function_body );
+  _gr->AddRhsSymbol( function_body__declaration_list_compound_statement, declaration_list );
+  _gr->AddRhsSymbol( function_body__declaration_list_compound_statement, compound_statement );
   
   // identifier
   // : IDENTIFIER
   
-  _gr->add_rule( identifier__IDENTIFIER, "identifier --> IDENTIFIER" );
-  _gr->add_lhs_symbol( identifier__IDENTIFIER, identifier );
-  _gr->add_rhs_symbol( identifier__IDENTIFIER, IDENTIFIER );
+  _gr->AddRule( identifier__IDENTIFIER, "identifier --> IDENTIFIER" );
+  _gr->AddLhsSymbol( identifier__IDENTIFIER, identifier );
+  _gr->AddRhsSymbol( identifier__IDENTIFIER, IDENTIFIER );
   
   // constant
   // : HEX
@@ -2270,25 +2269,25 @@ void c_grammar::init_grammar( parser::public_grammar* _gr )
   // | REAL
   // | CHARACTER_LITERAL
   
-  _gr->add_rule( constant__HEX, "constant --> HEX" );
-  _gr->add_lhs_symbol( constant__HEX, constant );
-  _gr->add_rhs_symbol( constant__HEX, HEX );
+  _gr->AddRule( constant__HEX, "constant --> HEX" );
+  _gr->AddLhsSymbol( constant__HEX, constant );
+  _gr->AddRhsSymbol( constant__HEX, HEX );
 
-  _gr->add_rule( constant__OCTAL, "constant --> OCTAL" );
-  _gr->add_lhs_symbol( constant__OCTAL, constant );
-  _gr->add_rhs_symbol( constant__OCTAL, OCTAL );
+  _gr->AddRule( constant__OCTAL, "constant --> OCTAL" );
+  _gr->AddLhsSymbol( constant__OCTAL, constant );
+  _gr->AddRhsSymbol( constant__OCTAL, OCTAL );
 
-  _gr->add_rule( constant__INTEGER, "constant --> INTEGER" );
-  _gr->add_lhs_symbol( constant__INTEGER, constant );
-  _gr->add_rhs_symbol( constant__INTEGER, INTEGER );
+  _gr->AddRule( constant__INTEGER, "constant --> INTEGER" );
+  _gr->AddLhsSymbol( constant__INTEGER, constant );
+  _gr->AddRhsSymbol( constant__INTEGER, INTEGER );
 
-  _gr->add_rule( constant__REAL, "constant --> REAL" );
-  _gr->add_lhs_symbol( constant__REAL, constant );
-  _gr->add_rhs_symbol( constant__REAL, REAL );
+  _gr->AddRule( constant__REAL, "constant --> REAL" );
+  _gr->AddLhsSymbol( constant__REAL, constant );
+  _gr->AddRhsSymbol( constant__REAL, REAL );
 
-  _gr->add_rule( constant__CHARACTER_LITERAL, "constant --> CHARACTER_LITERAL" );
-  _gr->add_lhs_symbol( constant__CHARACTER_LITERAL, constant );
-  _gr->add_rhs_symbol( constant__CHARACTER_LITERAL, CHARACTER_LITERAL );
+  _gr->AddRule( constant__CHARACTER_LITERAL, "constant --> CHARACTER_LITERAL" );
+  _gr->AddLhsSymbol( constant__CHARACTER_LITERAL, constant );
+  _gr->AddRhsSymbol( constant__CHARACTER_LITERAL, CHARACTER_LITERAL );
 }
 
 

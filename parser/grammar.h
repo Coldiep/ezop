@@ -8,7 +8,7 @@
 #include "public_grammar.h"
 #include "list.h"
 
-namespace parser{
+namespace parser {
 
 namespace private_{
 
@@ -58,7 +58,7 @@ class grammar{
   int_table_t    id_to_internal_rule_map_;    // map internal rules id to rules
   int_table_t    internal_rule_to_id_map_;    // map rules to internal rule ids
 
-  public_grammar*  public_grammar_;        // the pointer to public grammar
+  PublicGrammar*  public_grammar_;        // the pointer to public grammar
   
   private_::predict_cache  predict_cache_;      // the prediction cache
 
@@ -85,10 +85,10 @@ public:
   private_::rule_list_t&  get_sym_rules( int _sym_index ) { return predict_cache_.get_sym_rules( _sym_index ); }
 
   const char* get_symbol_name( int _sym_num ) const {
-    return (public_grammar_->get_symbol_table().find(symbols_[_sym_num ]))->second.name_;
+    return (public_grammar_->GetSymbolTable().find(symbols_[_sym_num ]))->second.name_;
   }
 
-  void      initialize( public_grammar* _public_grammar );
+  void      initialize( PublicGrammar* public_grammar );
   
 
 };

@@ -756,7 +756,7 @@ private:
 };
 
 // initialize public grammar by c language grammar
-void              init_grammar( parser::public_grammar* );
+void              init_grammar( parser::PublicGrammar* );
 
 enum rule{
 
