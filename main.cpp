@@ -17,7 +17,7 @@ using namespace c_grammar;
 
 int main() {
   try {
-    public_grammar gr( "c" );
+    PublicGrammar gr( "c" );
     c_grammar::init_grammar(&gr);
 
     grammar grr;
