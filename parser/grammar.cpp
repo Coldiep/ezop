@@ -1,26 +1,21 @@
 
 
 #include "grammar.h"
-using namespace parser;
+using parser::Grammar;
 
 #include <fstream>
 
-void private_::predict_cache::init( int _num_of_syms )
-{
-    //file << "predict_cache::init, _num_of_syms: " << _num_of_syms << std::endl;
-  nonterm_vector_.resize( _num_of_syms );
-}
 
-private_::rule_list_t& private_::predict_cache::get_sym_rules( int _sym_index )
-{
-  return nonterm_vector_[ _sym_index ];
-}
-
-void private_::predict_cache::add_sym_rule( int _sym_index, int _rule_num )
-{
-  nonterm_vector_[ _sym_index ].push_back( _rule_num );
-}
-
+Grammar::Grammar()
+  : start_symbol_index_(kBadSymbolId)
+  , max_symbol_id_(kBadSymbolId)
+  , max_rule_id_(kBadSymbolId)
+  , num_of_terminals_(kBadSymbolId)
+  , num_of_nonterminals_(kBadSymbolId)
+  , num_of_rules_(kBadSymbolId)
+  , rules_space_(kBadSymbolId)
+  , public_grammar_(NULL)
+{}
 
 void grammar::initialize( PublicGrammar* public_grammar )
 {
@@ -115,14 +110,3 @@ void grammar::initialize( PublicGrammar* public_grammar )
   // get start symbol number
   start_symbol_index_ = get_symbol_by_id(public_grammar_->GetStartSymbolId());
 }
-
-grammar::grammar()
-  : start_symbol_index_(-1)
-  , max_symbol_id_(-1)
-  , max_rule_id_(-1)
-  , num_of_terminals_(-1)
-  , num_of_nonterminals_(-1)
-  , num_of_rules_(-1)
-  , rules_space_(-1)
-  , public_grammar_(NULL)
-{}

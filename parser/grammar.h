@@ -12,24 +12,72 @@ namespace parser {
 
 namespace private_{
 
-  typedef parser::list< int > rule_list_t;
-  typedef std::vector< rule_list_t > nonterm_vector_t;
-
-  struct predict_cache{
-  
-    nonterm_vector_t    nonterm_vector_;
-    
-    void          init( int );
-    rule_list_t&      get_sym_rules( int );
-    void          add_sym_rule( int, int );
-  };
 
 }
 
+/*!
+ * \brief Класс представляет собой оптимизированную для целей синтаксического анализа реализацию грамматики.
+ *
+ * Все правила грамматики хранятся в одном массиве подряд в порядке перечисления слева направо. Сначала идет
+ * символ в левой части правила, затем символы в правой части, а затем символ разделитель с идентификатором
+ * kBadSymbolId.
+ *
+ */
+class Grammar {
+ public:
+  typedef PublicGrammar::MapId RuleId;            //!< Тип идентификаторов правила.
+  typedef PublicGrammar::MapId SymbolId;          //!< Тип идентификаторов символа.
+  typedef parser::list<RuleId> RuleIdList;        //!< Тип списка правил грамматики.
+  typedef std::vector<RuleIdList> NontermVector;  //!< Тип вектора списка правил.
 
-class grammar{
+  /*!
+   * \brief Класс представляет кэш помеченных правил, используемых в операции predictor.
+   *
+   * Для каждого нетерминального символа грамматики вектор nonterm_vector_ содержит список правил,
+   * в которых данный символ стоит в левой части, а также правил, которые наследуются из таких
+   * правил следующим образом:
+   *   Если символ A принадлежит грамматике, то включаем в список все правила вида A --> X1 X2 .. Xn,
+   *   а также правила вида B --> Y1 Y2 ... Yk, если имеется правило A --> B ... для каждого нетерминала
+   *   B. Это делаем рекурсивно до тех пор, пока в спимок можно добавить новые правила.
+   */
+  struct PredictCache {
+    //! Вектор списков правил грамматики для каждого нетерминала.
+    NontermVector nonterm_vector_;
+
+    /*!
+     * \brief Инициализация количеством нетерминальных символов грамматики.
+     *
+     * \param num_of_nonterms количество нетерминальных символов грамматики.
+     */
+    void Init( RuleId num_of_nonterms ) {
+      nonterm_vector_.resize(num_of_nonterms);
+    }
+
+    /*!
+     * \brief Возвращает ссылку на список правил для переданного нетерминала.
+     *
+     * \param   id          Идентификатор нетерминала.
+     * \return  RuleIdList  Список правил грамматики для переданного нетерминала.
+     */
+    RuleIdList& GetSymRules( RuleId id ) {
+      return nonterm_vector_[id];
+    }
+
+    /*!
+     * \brief Добавление правила для данного нетерминала.
+     *
+     * \param sym_id  Идентификатор символа, для которого добавляется правило.
+     * \param rule_id Идентификатор добавляемого правила.
+     */
+    void AddSymRule( SymbolId sym_id, RuleId rule_id ) {
+      nonterm_vector_[sym_id].push_back(rule_id);
+    }
+  };
 
   typedef std::vector< int > int_table_t;
+
+  //! Идентификатор "плохого символа" грамматики.
+  static const SymbolId kBadSymbolId = 0;
 
   int        start_symbol_index_;      // start symbol index of grammar
   int        max_symbol_id_;          // max symbol id (it can be more then number of symbols)
