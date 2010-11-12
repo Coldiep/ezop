@@ -52,7 +52,7 @@ struct item{
   int        order_number_;  // the order number of the item in the state
   int        state_number_;  // the order number of the item in the state
 
-  void      print( grammar*, std::ostream& );  // print the item
+  void      print( Grammar*, std::ostream& );  // print the item
 };
 
 // the operation needed to 
@@ -88,7 +88,7 @@ struct state{
                                 
   token            token_;            // the state token
   
-  grammar*          grammar_;          // the CF grammar
+  Grammar*          grammar_;          // the CF grammar
   earley_parser*        parser_;          // the parser reference
 
   // intialization/uninitialization
@@ -96,7 +96,7 @@ struct state{
   state();
   ~state();
 
-  void            init( earley_parser*, grammar*, int, token );
+  void            init( earley_parser*, Grammar*, int, token );
   void            uninit();
 
   // the method adds a new member to the state
@@ -177,7 +177,7 @@ class earley_parser{
   item_queue_t        nonhandled_items_;      // the queue of unhandled items
   state_vector_t        states_;          // the states of the algorithm
   
-  grammar*          grammar_;          // the CF grammar
+  Grammar*          grammar_;          // the CF grammar
   lexer*            lexer_;            // the lexical analyzer
   
   parser::allocator< item >  items_pool_;        // the pool of items
@@ -222,7 +222,7 @@ class earley_parser{
   void            print_tree( parse_tree_t*, std::ostream& );
 
 public:
-  earley_parser( grammar*, lexer*, struct semantics*, int = 3 );
+  earley_parser( Grammar*, lexer*, struct semantics*, int = 3 );
   ~earley_parser();
 
   bool            parse();          // the parsing of the input string

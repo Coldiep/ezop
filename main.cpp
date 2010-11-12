@@ -19,9 +19,7 @@ int main() {
   try {
     PublicGrammar gr( "c" );
     c_grammar::init_grammar(&gr);
-
-    grammar grr;
-    grr.initialize(&gr);
+    Grammar grr(&gr);
 
     c_grammar::lexer lex("./tt.c");
     excel_semantics es;
