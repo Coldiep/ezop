@@ -65,7 +65,7 @@ void PublicGrammar::AddNonterminal( MapId id, const char* name ) {
   }
 
   // Добавляем символ в грамматику.
-  symbols_[id] = Symbol(name, false);
+  symbols_[id] = Symbol(name, true);
 
   // Меняем минимальных и максимальные значения идентификаторов, если необходимо.
   if (max_sym_id_ < id) max_sym_id_ = id;

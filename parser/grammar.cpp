@@ -48,20 +48,22 @@ void Grammar::Initialize() {
 
   // Проходим по таблице символов и получаем идентификаторы терминалов.
   const PublicGrammar::SymbolTable& sym_table = public_grammar_->GetSymbolTable();
-  for (PublicGrammar::SymbolTable::const_iterator sym_it = sym_table.begin(); sym_it != sym_table.end(); ++sym_it, ++cur_sym_index) {
+  for (PublicGrammar::SymbolTable::const_iterator sym_it = sym_table.begin(); sym_it != sym_table.end(); ++sym_it) {
     // Добавляем только терминалы.
     if (not sym_it->second.nonterminal_) {
       symbols_[cur_sym_index] = sym_it->first;
       external_to_internal_symbols_map_[sym_it->first - min_symbol_id_ ] = cur_sym_index;
+      ++cur_sym_index;
     }
   }
 
   // Проходим по таблице символов и получаем идентификаторы нетерминальных символов.
-  for (PublicGrammar::SymbolTable::const_iterator sym_it = sym_table.begin(); sym_it != sym_table.end(); ++sym_it, ++cur_sym_index) {
+  for (PublicGrammar::SymbolTable::const_iterator sym_it = sym_table.begin(); sym_it != sym_table.end(); ++sym_it) {
     // Добавляем только нетерминальные символы.
     if (sym_it->second.nonterminal_) {
       symbols_[cur_sym_index] = sym_it->first;
       external_to_internal_symbols_map_[sym_it->first - min_symbol_id_ ] = cur_sym_index;
+      ++cur_sym_index;
     }
   }
 
@@ -86,8 +88,9 @@ void Grammar::Initialize() {
   internal_rule_to_id_map_.resize(num_of_rules_);
   id_to_internal_rule_map_.resize(public_grammar_->GetRuleIdInterval() + 1);
 
-  // Не забываем инициализировать кэш Predictor.
-  predict_cache_.Init(num_of_nonterminals_);
+  // Не забываем инициализировать кэш Predictor. Мы начинаем нумеровать символы с единицы,
+  // поэтому передаем на единицу больше.
+  predict_cache_.Init(num_of_nonterminals_ + 1);
 
   RuleId cur_rule_id = kBadSymbolId; // Идентифкатор правила.
   size_t cur_rule_offset = 0; // Смещение от начала массива правил.
@@ -106,12 +109,13 @@ void Grammar::Initialize() {
     id_to_internal_rule_map_[rule_it->first - min_rule_id_] = cur_rule_id;
 
     // Проходим по правой части правила и добавляем соответствующие индексы в таблицу.
-    for (PublicGrammar::MapIdList::const_iterator ls_it = rule_it->second.rhs_list_.begin(); ls_it != rule_it->second.rhs_list_.end(); ++ls_it, ++cur_rule_id) {
+    for (PublicGrammar::MapIdList::const_iterator ls_it = rule_it->second.rhs_list_.begin(); ls_it != rule_it->second.rhs_list_.end(); ++ls_it) {
       rules_[cur_rule_offset] = GetInternalSymbolByExtrernalId(*ls_it);
+      ++cur_rule_offset;
     }
 
     // Необходимо отметить конец правила.
-    rules_[cur_rule_offset] = kBadSymbolId;
+    rules_[cur_rule_offset++] = kBadSymbolId;
   }
 
   // Задаем идентификатор начального нетерминала грамматики.

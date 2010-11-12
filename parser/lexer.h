@@ -6,7 +6,7 @@
 #include <vector>
 #include "token.h"
 
-namespace parser{
+namespace parser {
 
 struct lexer{
 

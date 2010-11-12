@@ -81,7 +81,7 @@ void private_::item::print( Grammar* _grammar, std::ostream& out )
   bool dot_printed = false;
   out << state_number_ << "." << order_number_ << " ";
   out << "[ " << _grammar->GetSymbolName( _grammar->GetLhsOfRule( rule_num_ ) ) << " --> ";
-  for( int rule_pos = 0; _grammar->GetRhsOfRule( rule_num_, rule_pos ) != -1; ++ rule_pos )
+  for( int rule_pos = 0; _grammar->GetRhsOfRule( rule_num_, rule_pos ) != Grammar::kBadSymbolId; ++ rule_pos )
   {
     if( rhs_pos_ == rule_pos )
     {
@@ -213,7 +213,7 @@ inline private_::item* private_::state::add_item( int _rule_num, int _rhs_pos, i
   state_items_.push_back( _item );
 
   // we have rule kind of A --> epsilon
-  if( _rhs_pos == 0 && symbol_index == -1 )
+  if( _rhs_pos == 0 && symbol_index == Grammar::kBadSymbolId )
   {
     int empty_rule_sym_index = grammar_->GetLhsOfRule( _rule_num ) - grammar_->GetNumOfTerminals();
     state::item_list& er_item_list = items_with_empty_rules_[ empty_rule_sym_index ];
@@ -232,7 +232,7 @@ inline private_::item* private_::state::add_item( int _rule_num, int _rhs_pos, i
   
   // we have rule A --> alpha * B beta. So, add items with rule B --> epsilon to the list of
   // nonhandled ones.
-  else if( symbol_index != -1 && grammar_->IsNonterminal( symbol_index ) )
+  else if( symbol_index != Grammar::kBadSymbolId && grammar_->IsNonterminal( symbol_index ) )
   {
     int nonterm = symbol_index - grammar_->GetNumOfTerminals();
     state::item_list& er_item_list = items_with_empty_rules_[ nonterm ];
@@ -372,20 +372,15 @@ inline bool   earley_parser::error_scanner()
   return true;
 }
 
-inline void earley_parser::closure()
-{
-  while( ! nonhandled_items_.empty() )
-  {
+inline void earley_parser::closure() {
+  while (not nonhandled_items_.empty()) {
     item* _item = nonhandled_items_.pop();
-    int sym_index = grammar_->GetRhsOfRule( _item->rule_num_, _item->rhs_pos_ );
+    int sym_index = grammar_->GetRhsOfRule(_item->rule_num_, _item->rhs_pos_);
 
-    if( sym_index == -1 )
-    {
+    if (sym_index == Grammar::kBadSymbolId) {
       completer( _item );
-    }
-    else if( grammar_->IsNonterminal( sym_index ) )
-    {
-      predictor( _item );
+    } else if (grammar_->IsNonterminal(sym_index)) {
+      predictor(_item);
     }
   }
 }

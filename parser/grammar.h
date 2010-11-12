@@ -102,7 +102,7 @@ public:
    *
    * \param[in] public_grammar Указатель на объект PublicGrammar.
    */
-  Grammar( const PublicGrammar* public_grammar );
+  explicit Grammar( const PublicGrammar* public_grammar );
 
   //! Проверка, является ли данный символ нетерминальным.
   bool IsNonterminal( SymbolId id ) const { return id >= num_of_terminals_; }
