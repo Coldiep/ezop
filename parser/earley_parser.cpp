@@ -2,177 +2,184 @@
 
 #include "earley_parser.h"
 #include "semantics.h"
-using namespace parser;
+using parser::EarleyParser;
 
-//#define PRINT_ADDING
-
-private_::state::item_list::item_list()
-  :
-  handled_by_predictor_(false)
-{}
-
-void private_::state::item_list::uninit( earley_parser* _parser )
-{
-  while( ! elems_.empty() )
-  {
-    _parser->items_pool_.elem_free( elems_.pop_back() );
-  }
-
-  handled_by_predictor_ = false;
+bool EarleyParser::Item::operator==( const Item& rhs ) {
+  return rule_id_ == rhs.rule_id_ and rhs_pos_ == rhs.rhs_pos_ and origin_ == rhs.origin_ and lptr_ == rhs.lptr_;
 }
 
-private_::state::state()
-  :
-  num_of_items_(0),
-  state_number_(-1),
-  grammar_(0),
-  parser_(0),
-  is_completed_(false),
-  token_(-1)
-{}
-
-void private_::state::uninit()
-{
-  for( int ind = 0; ind < (int)items_.size(); ++ ind )
-  {
-    items_[ ind ].uninit( parser_ );
-  }
-  
-  for( int ind = 0; ind < (int)items_with_empty_rules_.size(); ++ ind )
-  {
-    items_with_empty_rules_[ ind ].uninit( parser_ );
-  }
-  
-  num_of_items_ = 0;
-  state_number_ = -1;
-  grammar_ = 0;
-  parser_ = 0;
-  token_ = token(-1);
-  is_completed_ = false;
-}
-
-private_::state::~state()
-{
-  uninit();
-}
-
-void private_::state::init( earley_parser* _parser, Grammar* _grammar, int _state_number, token _token )
-{
-  grammar_ = _grammar;
-  parser_ = _parser;
-  state_number_ = _state_number;
-  num_of_items_ = 0;
-  token_ = _token;
-  is_completed_ = false;
-  
-  items_.resize( grammar_->GetNumOfTerminals() + grammar_->GetNumOfNonterminals() + 1 ) ;
-  items_with_empty_rules_.resize( grammar_->GetNumOfNonterminals() );
-}
-
-bool private_::operator == ( const private_::item& _left, const private_::item& _right )
-{
-  return _left.rule_num_ == _right.rule_num_ && _left.rhs_pos_ == _right.rhs_pos_ &&
-        _left.origin_ == _right.origin_ && _left.lptr_ == _right.lptr_;
-}
-
-
-void private_::item::print( Grammar* _grammar, std::ostream& out )
-{
+void EarleyParser::Item::Print( Grammar* grammar, std::ostream& out ) {
   bool dot_printed = false;
   out << state_number_ << "." << order_number_ << " ";
-  out << "[ " << _grammar->GetSymbolName( _grammar->GetLhsOfRule( rule_num_ ) ) << " --> ";
-  for( int rule_pos = 0; _grammar->GetRhsOfRule( rule_num_, rule_pos ) != Grammar::kBadSymbolId; ++ rule_pos )
-  {
-    if( rhs_pos_ == rule_pos )
-    {
+  out << "[ " << grammar->GetSymbolName(grammar->GetLhsOfRule(rule_num_)) << " --> ";
+  for (unsigned rule_pos = 0; grammar->GetRhsOfRule(rule_id_, rule_pos) != Grammar::kBadSymbolId; ++rule_pos) {
+    if (rhs_pos_ == rule_pos) {
       out << "* ";
       dot_printed = true;
     }
-    out << _grammar->GetSymbolName( _grammar->GetRhsOfRule( rule_num_, rule_pos ) );
+    out << grammar->GetSymbolName(grammar->GetRhsOfRule(rule_num_, rule_pos));
     out << " ";
   }
 
-  if( ! dot_printed ) out << " * ";
+  if (not dot_printed) out << " * ";
   out << ", " << origin_ << ", ";
-  
-  if( lptr_ )
-  {
-    out << lptr_->state_number_ << "." << lptr_->order_number_;
-  }
-  else
-  {
-    out << "null";
-  }
-  
+
+  if (lptr_) out << lptr_->state_number_ << "." << lptr_->order_number_;
+  else out << "null";
+
   out << ", ";
-  
-  if( ! rptrs_.empty() )
-  {
+  if (not rptrs_.empty()) {
     out << "<";
-    for( item* cur = rptrs_.get_first(); cur ; )
-    {
+    for (item* cur = rptrs_.get_first(); cur;) {
       out << cur->state_number_ << "." << cur->order_number_;
-      
-      if( cur = rptrs_.get_next() )  out << ",";
+      if (cur = rptrs_.get_next())  out << ",";
     }
     out << ">";
-  }
-  else
-  {
+  } else {
     out << "<null>";
   }
 
   out << ", ";
-  
-  out << (int)error_ <<  " ]\n";
+  out << (unsigned)error_ <<  " ]\n";
 }
 
+EarleyParser::State::SymbolItemList::SymbolItemList()
+  : handled_by_predictor_(false)
+{}
 
-void private_::state::print( std::ostream& out )
-{
+void EarleyParser::State::SymbolItemList::Uninit( EarleyParser* parser ) {
+  while (not elems_.empty()) {
+    parser->items_pool_.elem_free(elems_.pop_back());
+  }
+  handled_by_predictor_ = false;
+}
+
+EarleyParser::State::State()
+  : num_of_items_(0)
+  , state_number_(0)
+  , grammar_(NULL)
+  , parser_(NULL)
+  , is_completed_(false)
+{}
+
+void EarleyParser::State::Uninit() {
+  for (size_t i = 0; i < items_.size(); ++i) {
+    items_[i].Uninit(parser_);
+  }
+
+  for (size_t i = 0; i < items_with_empty_rules_.size(); ++i) {
+    items_with_empty_rules_[i].uninit(parser_);
+  }
+
+  num_of_items_ = 0;
+  state_number_ = 0;
+  grammar_      = NULL;
+  parser_       = NULL;
+  token_        = Token();
+  is_completed_ = false;
+}
+
+EarleyParser::State::~State() {
+  Uninit();
+}
+
+void EarleyParser::State::Init( EarleyParser* parser, Grammar* grammar, size_t id, Token token ) {
+  grammar_      = grammar;
+  parser_       = parser;
+  state_number_ = id;
+  num_of_items_ = 0;
+  token_        = token;
+  is_completed_ = false;
+
+  // Число списков для символов -- это число символов + 1 для метки в конце правила. Для этого
+  // специального случая используется список с нулевым индексом.
+  items_.resize(grammar_->GetNumOfTerminals() + grammar_->GetNumOfNonterminals() + 1);
+
+  // Ситуаций для правил с пустой правой частью ровно столько, сколько нетерминальных символов в грамматике.
+  items_with_empty_rules_.resize(grammar_->GetNumOfNonterminals());
+}
+
+inline EarleyParser::State::Item* EarleyParser::State::AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, unsigned char error = 0 ) {
+  // Получаем идентификатор символа в правой части правила. Если метка стоит в конце правила, то
+  // будет возвращен 0, который используется как индекс для меток в конце правила.
+  Grammar::SymbolId symbol_id = grammar_->GetRhsOfRule(rule_id, dot);
+
+  // Инициализируем ситуацию.
+  Item* item = parser_->items_pool_.elem_alloc();
+  item->rule_num_   = rule_id;
+  item->rhs_pos_    = dot;
+  item->origin_     = origin;
+  item->lptr_       = lptr;
+  item->error_      = error;
+  item->handled_    = false;
+  if (rptr) item->rptrs_.push_back(rptr);
+  item->order_number_ = num_of_items_;
+  item->state_number_ = state_number_;
+
+  // И добавляем ее в соответствующий список.
+  SymbolItemList& sym_list = items_[symbol_id];
+  items_[symbol_id].elems_.push_back(item);
+  state_items_.push_back(item);
+  ++num_of_items_;
+
+  // Если символ в левой части правила -- начальный и метка в конце правила, то выставляем соответствующий флаг.
+  if (grammar_->GetLhsOfRule(item->rule_id_) == grammar_->GetStartSymbol() and item->origin_ == 0)
+      is_completed_ = true;
+
+  // Проверка на правило вида A --> epsilon.
+  if (dot == 0 and symbol_id == Grammar::kBadSymbolId) {
+    SymbolItemList& er_item_list = items_with_empty_rules_[grammar_->GetLhsOfRule(rule_id) - grammar_->GetNumOfTerminals()];
+    for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
+      if (*item == *cur) {
+        return item;
+      }
+    }
+    er_item_list.elems_.push_back(item);
+  }
+
+  // Правило -- это правило вида A --> alpha * B beta. Надо добавить ситуацию для правила B --> epsilon в список
+  // необработанных ситуаций.
+  else if (symbol_id != Grammar::kBadSymbolId and grammar_->IsNonterminal(symbol_id)) {
+    SymboltemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals()];
+    for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
+      parser_->PutItemToNonhandledList(cur, true);
+    }
+  }
+
+  return item;
+}
+
+void EarleyParser::State::::Print( std::ostream& out ) {
   out << "\n****** State number = " << state_number_ << " *** Number of items = " << num_of_items_ << " ******\n";
-
-  for( item* cur = state_items_.get_first(); cur ; cur = state_items_.get_next() )
-  {
-    cur->print( grammar_, out );
+  for (Item* item = state_items_.get_first(); item; item = state_items_.get_next()) {
+    item->Print(grammar_, out);
   }
 }
 
-earley_parser::earley_parser( Grammar* _grammar, lexer* _lexer, semantics* _semantics, int _max_error_value )
-  :
-  grammar_(_grammar),
-  lexer_(_lexer),
-  max_error_value_(_max_error_value),
-  semantics_(_semantics),
-  cur_token_(-1)
+EarleyParser::EarleyParser( Grammar* grammar, Lexer* lexer, semantics* semantics, unsigned max_error_value )
+  : grammar_(grammar)
+  , lexer_(lexer)
+  , max_error_value_(max_error_value)
+  , semantics_(semantics)
 {
-  items_pool_.init( 1024*1024 );
+  items_pool_.init(1024*1024);
 }
 
-inline void parser::earley_parser::put_item_to_nonhandled_list( item* _item, bool _check )
-{
-  if( _check && nonhandled_items_.find( _item ) )
-  {
-    return;
-  }
-  
-  nonhandled_items_.push( _item );
+inline void parser::EarleyParser::PutItemToNonhandledList( Item* item, bool check ) {
+  if (not check or not nonhandled_items_.find(item)) nonhandled_items_.push(item);
 }
 
-inline bool parser::earley_parser::is_item_in_list( state::item_list& _item_list, item* _item, item* _rptr )
-{
-  item itm;
-  itm.rhs_pos_ = _item->rhs_pos_ + 1;
-  itm.rule_num_ = _item->rule_num_;
-  itm.origin_ = _item->origin_;
-  itm.lptr_ = _item;
+inline bool parser::EarleyParser::IsItemInList( State::SymbolItemList& item_list, Item* item, Item* rptr ) {
+  Item tmp_item;
+  tmp_item.rhs_pos_   = item->rhs_pos_ + 1;
+  tmp_item.rule_num_  = item->rule_num_;
+  tmp_item.origin_    = item->origin_;
+  tmp_item.lptr_      = item;
 
-  for( item* cur = _item_list.elems_.get_first(); cur ; cur = _item_list.elems_.get_next() )
-  {
+  for (Item* cur = item_list.elems_.get_first(); cur; cur = item_list.elems_.get_next()) {
     // we already have this item in the set
-    if( itm == *cur )
-    {
-      cur->rptrs_.push_back( _rptr );
+    if (tmp_item == *cur) {
+      cur->rptrs_.push_back(rptr);
       return true;
     }
   }
@@ -180,97 +187,24 @@ inline bool parser::earley_parser::is_item_in_list( state::item_list& _item_list
   return false;
 }
 
-inline private_::item* private_::state::add_item( int _rule_num, int _rhs_pos, int _origin, item* _lptr, item* _rptr, int _error )
-{
-  int symbol_index = grammar_->GetRhsOfRule( _rule_num, _rhs_pos );
-  int list_index = symbol_index + 1;
+inline void EarleyParser::Completer( Item* item ) {
+  State& cur_state = *states_[states_.size() - 1];
+  State& origin_state = *states_[item->origin_];
+  State::SymbolItemList& or_item_list = origin_state.items_[grammar_->GetLhsOfRule(item->rule_num_) + 1];
 
-  item* _item = parser_->items_pool_.elem_alloc();
-  _item->rule_num_ = _rule_num;
-  _item->rhs_pos_ = _rhs_pos;
-  _item->origin_ = _origin;
-  _item->lptr_ = _lptr;
-  _item->error_ = _error;
-  _item->handled_ = false;
-  if( _rptr )
-  {
-    _item->rptrs_.push_back( _rptr );
-  }
-  
-  _item->order_number_ = num_of_items_;
-  _item->state_number_ = state_number_;
-
-  item_list& item_list = items_[ list_index ];
-  item_list.elems_.push_back( _item );
-  
-  ++ num_of_items_;
-  
-  if( grammar_->GetLhsOfRule( _item->rule_num_ ) == grammar_->GetStartSymbol() && _item->origin_ == 0 )
-  {
-    is_completed_ = true;
-  }
-  
-  state_items_.push_back( _item );
-
-  // we have rule kind of A --> epsilon
-  if( _rhs_pos == 0 && symbol_index == Grammar::kBadSymbolId )
-  {
-    int empty_rule_sym_index = grammar_->GetLhsOfRule( _rule_num ) - grammar_->GetNumOfTerminals();
-    state::item_list& er_item_list = items_with_empty_rules_[ empty_rule_sym_index ];
-
-    for( item* cur = er_item_list.elems_.get_first(); cur ; cur = er_item_list.elems_.get_next() )
-    {
-      // we already have this item in the list
-      if( *_item == *cur )
-      {
-        return _item;
-      }
-    }
-
-    er_item_list.elems_.push_back( _item );
-  }
-  
-  // we have rule A --> alpha * B beta. So, add items with rule B --> epsilon to the list of
-  // nonhandled ones.
-  else if( symbol_index != Grammar::kBadSymbolId && grammar_->IsNonterminal( symbol_index ) )
-  {
-    int nonterm = symbol_index - grammar_->GetNumOfTerminals();
-    state::item_list& er_item_list = items_with_empty_rules_[ nonterm ];
-
-    for( item* cur = er_item_list.elems_.get_first(); cur ; cur = er_item_list.elems_.get_next() )
-    {
-      parser_->put_item_to_nonhandled_list( cur, true );
-    }
-  }
-
-  return _item;
-}
-
-inline void earley_parser::completer( item* _item )
-{
-  state& cur_state = *states_[ states_.size() - 1 ];
-  state& origin_state = *states_[ _item->origin_ ];
-  state::item_list& or_item_list = origin_state.items_[ grammar_->GetLhsOfRule( _item->rule_num_ ) + 1 ];
-
-  for( item* cur = or_item_list.elems_.get_first(); cur ; cur = or_item_list.elems_.get_next() )
-  {
-    int comp_item_index = grammar_->GetRhsOfRule( cur->rule_num_, cur->rhs_pos_ + 1 ) + 1;
-    state::item_list& comp_item_list = cur_state.items_[ comp_item_index ];
-
-    if( ! is_item_in_list( comp_item_list, cur, _item ) )
-    {
-      item* new_item = cur_state.add_item( cur->rule_num_, cur->rhs_pos_ + 1, cur->origin_, cur, _item, cur->error_ ); 
-      put_item_to_nonhandled_list( new_item, true );
+  for (Item* cur = or_item_list.elems_.get_first(); cur; cur = or_item_list.elems_.get_next()) {
+    if (not IsItemInList(cur_state.items_[grammar_->GetRhsOfRule(cur->rule_num_, cur->rhs_pos_ + 1) + 1], cur, item)) {
+      Item* new_item = cur_state.AddItem(cur->rule_num_, cur->rhs_pos_ + 1, cur->origin_, cur, item, cur->error_);
+      PutItemToNonhandledList(new_item, true);
 
 #ifdef PRINT_ADDING
-      new_item->print( grammar_, std::cout );
+      new_item->Print(grammar_, std::cout);
 #endif
     }
   }
 }
 
-inline void earley_parser::predictor( item* _item )
-{
+inline void EarleyParser::Predictor( Item* item ) {
   int sym_after_dot = grammar_->GetRhsOfRule( _item->rule_num_, _item->rhs_pos_ );
   state& cur_state = *states_[states_.size() - 1];
   

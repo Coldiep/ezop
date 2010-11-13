@@ -22,214 +22,236 @@
 
 //#define PRINT_STATS
 
-namespace parser{
+namespace parser {
 
+/*!
+ * \brief Реализация алгоритма Эрли, модифицированного для обработки неоднозначностей.
+ *
+ * Класс реализует модификацию классического алгоритма Эрли, сделанную для корректного
+ * построения всевозможных деревьев порождения для данной грамматики и данной входной
+ * цепочки. Модификация заключается в расширении структуры ситуации Эрли и алгоритме
+ * построения всевозможных деревьев порождения для данной цепочки.
+ */
+class EarleyParser {
+  //! Тип списка ситуаций Эрли.
+  typedef parser::list<struct Item*> ItemList;
 
-class earley_parser;
+  /*!
+   * \brief Тип, реализующий расширенную ситуацию Эрли.
+   *
+   * В классическом определении ситуация содержит помеченное правило грамматики (правило с
+   * точкой где-то в правой части) и номер состояния Эрли, в котором эта ситуация была
+   * порождена. Модифицированный алгоритм оперирует расширенными состояниями Эрли, в которые
+   * добавлены еще указатели на ситуации, приведшие к добавлению данной ситуации в состояние.
+   */
+  struct Item {
+    // Элементы ситуации из классифеского определения.
+    Grammar::RuleId rule_id_; //!< Идентификатор правила.
+    unsigned        rhs_pos_; //!< Позиция метки в правой части правила.
+    size_t          origin_;  //!< Номер состояния, в котором данная ситуация была порождена.
 
-namespace private_{
+    // Элементы ситуации из расширенного определения.
+    Item*     lptr_;  //!< Указатель на ситуацию, у которой метка стоит на символ левее.
+    ItemList  rptrs_; //!< Список указателей на ситуации, которые послужили причиной сдвига метки.
 
-// the list of Earley's items
-typedef list< struct item* >    item_list_t;
+    // Служебные поля.
+    unsigned char error_;       //!< Номер ошибки, если анализатор работает в режиме восстановления после ошибок.
+    bool          handled_;     //!< Флаг обработки ситуации при проходе построении дерева.
+    size_t        order_number_;//!< Порядковый номер данной ситуации в состоянии.
+    size_t        state_number_;//!< Номер состояния, котроому принадлежит ситуация.
 
-// Earley's algorithm item.
-// each item consists of dotted rule, origin number, left pointer, list of right pointers and
-// some other specific members
-struct item{
+    /*!
+     * \brief Печать содержимого ситуации.
+     *
+     * \param[in] grammar Указатель на объект грамматики, у которой берутся символьные имена элементов.
+     * \param[in] out Поток для вывода.
+     */
+    void Print( Grammar* grammar, std::ostream& out );
 
-  // the Earley's algorithm base memebers 
-  int        rule_num_;    // the rule's number
-  int        rhs_pos_;    // the dot position
-  int        origin_;    // the origin state number
-  
-  // the extended memebers for adapted algorithm
-  item*      lptr_;      // the pointer to the item with dot on symbol on the left
-  item_list_t    rptrs_;      // the list of pointers to "rigtht" items, used when ambiguity is occured
-  
-  // some specific members for optimization purpose
-  unsigned char  error_;      // the error level
-  bool      handled_;    // has the item been handled in parse tree building?
-  int        order_number_;  // the order number of the item in the state
-  int        state_number_;  // the order number of the item in the state
-
-  void      print( Grammar*, std::ostream& );  // print the item
-};
-
-// the operation needed to 
-bool        operator == ( const item& _left, const item& _right );
-
-// the Earley's state - the list of items
-struct state{
-
-  // the list of items in the state. It is created for each symbol of the grammar and one symbol more
-  // to be for each symbol after the dot on rhs of the rule.
-  struct item_list{
-    item_list_t    elems_;            // the items list
-    bool      handled_by_predictor_;    // set to true when the nonteminal is handled by Predictor
-
-    item_list();
-
-    // uninitialization procedure needed to do uninitialization but not free the memory
-    void uninit( earley_parser* );
-  };
-  
-  // the vector of items. It's needed to be vector to be indexed
-  typedef std::vector< item_list >  item_list_vector_t;
-
-  item_list_vector_t      items_;            // the list of items of the state
-  item_list_vector_t      items_with_empty_rules_;  // the list of items with empty rules
-  
-  item_list_t          state_items_;        // the list of items of the state in adding order
-
-  int              num_of_items_;        // the number of items in the state
-  int              state_number_;        // the state number
-  int              is_completed_;        // does the state contain item [S--> alpha *, 0, ...]?
-                              // S - start nonterminal of the grammar
-                                
-  token            token_;            // the state token
-  
-  Grammar*          grammar_;          // the CF grammar
-  earley_parser*        parser_;          // the parser reference
-
-  // intialization/uninitialization
-  
-  state();
-  ~state();
-
-  void            init( earley_parser*, Grammar*, int, token );
-  void            uninit();
-
-  // the method adds a new member to the state
-  inline item*        add_item( int, int, int, item*, item*, int = 0 );
-
-  // print the state to the stream passed
-  void            print( std::ostream& );
-};
-
-// the stack to keep elemens of parse tree's level
-struct rhs_stack_element{
-
-  // the element may be item, the list of references or the symbol
-  enum rhs_stack_type{ eItem = 1, eRptrs, eSymbol };
-  
-  // the stack element type
-  rhs_stack_type    type_;
-  
-  // the element' data
-  union{
-    item*      item_;
-    item_list_t*  rptrs_;
-    int        symbol_;
+    //! Оператор сравнения.
+    bool operator==( const item& rhs );
   };
 
-};
+  /*!
+   * \brief Реализация состояния Эрли.
+   *
+   * Состояние Эрли представляет собой список ситуаций Эрли. В целях оптимизации этот список разделен
+   * на несколько списков, по собственному списку для каждого символа грамматики. Это позволяет
+   * оптимизировать поиск ситуаций для операций Scanner и Completer.
+   */
+  struct State {
+    /*!
+     * \brief Реализация списка ситуаций с меткой перед конкретным символом.
+     *
+     * Кроме, собственно, спсика ситуаций, структура содержит поле handled_by_predictor_, которое
+     * позволяет не обрабатывать несколько раз одну и ту ситуацию операцией Predictor.
+     */
+    struct SymbolItemList {
+      ItemList  elems_;                 //!< Список ситуаций.
+      bool      handled_by_predictor_;  //!< Флаг обработки операцией Predictor.
 
-// parse tree element's class
-struct parse_tree_element{
+      //! Конструктор по умолчанию необходим для стандартных контейнеров.
+      SymbolItemList();
 
-  // typedefs
-  typedef parser::tree_node< int >      tree_node_t;
-  typedef parser::tree< int, tree_node_t >  tree_t;
+      //! Аналог деструктора, используется т.к. память реально не освобождается.
+      void Uninit( EarleyParser* parser );
+    };
 
-  tree_t*                    tree_; // the pointer to the
-  tree_node_t*                node_;
-  
-  parse_tree_element( tree_t* _tree, tree_node_t* _node )
-  :
-  tree_(_tree),
-  node_(_node)
-  {}
-  
-  parse_tree_element()
-  :
-  tree_(0),
-  node_(0)
-  {}
-};
+    //! Индексированный список списков ситуаций для каждого символа.
+    typedef std::vector<SymbolItemList>  ItemVector;
 
+    ItemVector items_;                  //!< Список ситуаций для каждого символа грамматики.
+    ItemVector items_with_empty_rules_; //!< Список ситуаций для правил с пустой правой частью.
+    ItemList   state_items_;            //!< Список ситуаций в порядке их добавления в состояние.
+    size_t     num_of_items_;           //!< Число элементов в состоянии.
+    size_t     state_number_;           //!< Номер данного состояния.
+    bool       is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
+    Token      token_;                  //!< Токен, послуживший инициатором создания этого состояния.
+    Grammar*   grammar_;                //!< Указатель на объект грамматики.
+    EarleyParser* parser_;              //!< Указатель на объект парсера.
 
-} // namespace private_
+    //! Конструктор по умолчанию.
+    State();
 
-typedef queue< private_::item* >                          item_queue_t;
-typedef parser::stack< private_::rhs_stack_element >                rhs_stack_t;
-typedef std::deque< private_::state* >                        state_vector_t;
-typedef tree_node< int >                              parse_tree_node_t;
-typedef parser::tree< parse_tree_node_t::tree_node_element_t, parse_tree_node_t >  parse_tree_t; 
-typedef parser::list< parse_tree_t* >                        parse_tree_list_t;
-typedef list< private_::parse_tree_element >                    parse_tree_node_stack_t;
+    //! Деструктор.
+    ~State();
 
-using namespace private_;
+    /*!
+     * \brief Инициализация состояния.
+     *
+     * \param[in] parser  Указатель на объект парсера.
+     * \param[in] grammar Указатель на объект грамматики.
+     * \param[in] id      Номер состояния.
+     * \param[in] token   Токен для данного состояния.
+     */
+    void Init( EarleyParser* parser, Grammar* grammar, size_t id, Token token );
 
-class earley_parser{
+    //! Деинициализация состояния.
+    void Uninit();
+
+    /*!
+     * \brief Добавление новой систуации в состояние.
+     *
+     * \param[in] rule_id   Идентификатор правила для данной ситуации.
+     * \param[in] dot       Позиция метки в правой части правила.
+     * \param[in] origin    Номер состояния, в которое данная ситуация была первоначально добавлена.
+     * \param[in] lptr      Указатель на ситуацию с меткой на символ левее.
+     * \param[in] rptr      Указатель на ситуацию, послужившую причиной сдвига нетерминала слева от метки.
+     * \param[in] error     Уровень ошибки, если анализатор работает в режиме восстановления после ошибок.
+     */
+    inline Item* AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, unsigned char error = 0 );
+
+    //! Печать содержимого состояния.
+    void Print( std::ostream& out );
+  };
+
+  //! Стек для элементов, используемый при анализе.
+  struct RhsStackElement {
+    //! Элемент может быть ситуацией, списком указателей на ситуации или символом.
+    enum RhsStackType {
+      kItem = 1,//!< Ситуация.
+      kRptrs,   //!< Список ссылок на ситуации.
+      kSymbol   //!< Символ грамматики.
+    };
+
+    //! Тип элемента списка.
+    RhsStackType type_;
+
+    //! Данные элемента.
+    union {
+      Item*             item_;  //!< Указатель на элемент.
+      ItemList*         rptrs_; //!< Указатель на список элементов.
+      Grammar::SymbolId symbol_;//!< Символ.
+    };
+  };
+
+  //! Тип элемента дерева порождения.
+  struct ParseTreeElement {
+    // typedefs
+    typedef parser::tree_node<unsigned>       TreeNode;
+    typedef parser::tree<unsigned, TreeNode>  Tree;
+
+    Tree*     tree_; // the pointer to the
+    TreeNode* node_;
+
+    ParseTreeElement( Tree* tree, TreeNode* node )
+      : tree_(tree)
+      , node_(node)
+    {}
+
+    ParseTreeElement()
+      : tree_(NULL)
+      , node_(NULL)
+    {}
+  };
+
+  typedef queue<Item*>                          ItemQueue;
+  typedef parser::stack<RhsStackElement>        RhsStack;
+  typedef std::deque<State*>                    StateVector;
+  typedef tree_node<unsigned>                   ParseTreeNode;
+  typedef parser::tree<ParseTreeNode::tree_node_element_t, ParseTreeNode> ParseTree; 
+  typedef parser::list<ParseTree*>              ParseTreeList;
+  typedef parser::list<ParseTreeElement>        ParseTreeNodeStack;
 
 //////////////////////////////////////////////////////////////////////////
 // friend declarations
 //////////////////////////////////////////////////////////////////////////
 
-  friend struct private_::state;
-  friend struct private_::state::item_list;
-  friend struct private_::item;
+  friend struct State;
+  friend struct State::SymbolItemList;
+  friend struct Item;
 
 //////////////////////////////////////////////////////////////////////////
 // variables
 //////////////////////////////////////////////////////////////////////////
 
-  item_queue_t        nonhandled_items_;      // the queue of unhandled items
-  state_vector_t        states_;          // the states of the algorithm
-  
+  ItemQueue        nonhandled_items_;      // the queue of unhandled items
+  StateVector      states_;          // the states of the algorithm
   Grammar*          grammar_;          // the CF grammar
-  lexer*            lexer_;            // the lexical analyzer
-  
-  parser::allocator< item >  items_pool_;        // the pool of items
-  
-  parse_tree_list_t      parse_tree_list_;      // the list of parse trees
-  
-  int              max_error_value_;      // the maximum error value
-  
-  struct semantics*      semantics_;          // the opointer to semantic interface
-  
-  token            cur_token_;          // the current token
-  
-  
+  Lexer*            lexer_;            // the lexical analyzer
+  parser::allocator<Item>  items_pool_;        // the pool of items
+  ParseTreeList     parse_tree_list_;      // the list of parse trees
+  unsigned          max_error_value_;      // the maximum error value
+  Token             cur_token_;          // the current token
+
 //////////////////////////////////////////////////////////////////////////
 // methods
 //////////////////////////////////////////////////////////////////////////
 
-  inline void          completer( item* );      // the Completer algorithm operation
-  inline void          predictor( item* );      // the Predictor algorithm operation
-  inline bool          scanner();          // the Scanner algorithm operation
-  
-  inline bool          error_scanner();      // the function runs when scanner method is erred
+  inline void Completer( Item* item );      // the Completer algorithm operation
+  inline void Predictor( Item* item );      // the Predictor algorithm operation
+  inline bool Scanner();          // the Scanner algorithm operation
 
-  inline void          closure();          // the Closure algorithm operation
-  inline bool          init_first_set();      // the first set initialization
-  
-  inline void          put_item_to_nonhandled_list( item*, bool );  // put the item to the unhandled items list
+  inline bool ErrorScanner();      // the function runs when scanner method is erred
+
+  inline void Closure();          // the Closure algorithm operation
+  inline bool InitFirstSet();      // the first set initialization
+
+  inline void PutItemToNonhandledlist( Item* item, bool );  // put the item to the unhandled items list
                                       // if it is not there already
-  inline bool          is_item_in_list(  state::item_list&, item*, item* );
-  
-  inline void          fill_rhs_stack( item*, rhs_stack_t& );  // fill rhs stack ot the passed item
-  
-  void            build_parse_trees( state& );
-  inline void          build_parse_trees( item*, parse_tree_node_t*, parse_tree_t& );
-  
-  void            build_ast_trees( state& );
-  inline void          build_ast_trees_recursive( item*, parse_tree_node_t*, parse_tree_t& );
-  void            build_ast_trees_iterative( item*, parse_tree_node_t*, parse_tree_t& );
-  
-  
-  void            print_tree( parse_tree_node_t*, int, std::ostream& );
-  void            print_tree( parse_tree_t*, std::ostream& );
+  inline bool IsItemInList( State::SymbolItemList&, item*, item* );
+
+  inline void FillRhsStack( Item*, RhsStack& );  // fill rhs stack ot the passed item
+
+  void BuildParseTrees( State& );
+  inline void BuildParseTrees( Item*, ParseTreeNode*, ParseTree& );
+
+  void BuildAstTrees( State& );
+  inline void BuildAstTreesRecursive( Item*, ParseTreeNode*, ParseTree& );
+  void BuildAstTreesIterative( Item*, ParseTreeNode*, ParseTree& );
+
+  void PrintTree( ParseTreeNode*, unsigned, std::ostream& );
+  void PrintTree( ParseTree*, std::ostream& );
 
 public:
-  earley_parser( Grammar*, lexer*, struct semantics*, int = 3 );
-  ~earley_parser();
+  Earleyparser( Grammar* grammar, Lexer* lexer, unsigned = 3 );
+  ~EarleyParser();
 
-  bool            parse();          // the parsing of the input string
-  void            reset();          // reset parser object to init state 
-  
-  void            print( std::ostream& );      // print the items
-  void            print_trees( std::ostream& );  // print parse trees
+  bool Parse();          // the parsing of the input string
+  void Reset();          // reset parser object to init state 
+
+  void Print( std::ostream& );      // print the items
+  void PrintTrees( std::ostream& );  // print parse trees
 };
 
 } // namespace parser
