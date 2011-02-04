@@ -30,9 +30,9 @@ void EarleyParser::Item::Print( Grammar* grammar, std::ostream& out ) {
   out << ", ";
   if (not rptrs_.empty()) {
     out << "<";
-    for (item* cur = rptrs_.get_first(); cur;) {
+    for (Item* cur = rptrs_.item_.get_first(); cur;) {
       out << cur->state_number_ << "." << cur->order_number_;
-      if (cur = rptrs_.get_next())  out << ",";
+      if (cur = rptrs_.get_next()) out << ",";
     }
     out << ">";
   } else {
@@ -99,7 +99,8 @@ void EarleyParser::State::Init( EarleyParser* parser, Grammar* grammar, size_t i
   items_with_empty_rules_.resize(grammar_->GetNumOfNonterminals());
 }
 
-inline EarleyParser::State::Item* EarleyParser::State::AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, unsigned char error = 0 ) {
+inline EarleyParser::State::Item* EarleyParser::State::AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, 
+                                                                Item* lptr, Item* rptr, Context* context, unsigned char error = 0 ) {
   // Получаем идентификатор символа в правой части правила. Если метка стоит в конце правила, то
   // будет возвращен 0, который используется как индекс для меток в конце правила.
   Grammar::SymbolId symbol_id = grammar_->GetRhsOfRule(rule_id, dot);
@@ -112,7 +113,7 @@ inline EarleyParser::State::Item* EarleyParser::State::AddItem( Grammar::RuleId 
   item->lptr_       = lptr;
   item->error_      = error;
   item->handled_    = false;
-  if (rptr) item->rptrs_.push_back(rptr);
+  if (rptr) item->rptrs_.push_back(Rptr(contex, rptr));
   item->order_number_ = num_of_items_;
   item->state_number_ = state_number_;
 
@@ -169,7 +170,7 @@ inline void parser::EarleyParser::PutItemToNonhandledList( Item* item, bool chec
   if (not check or not nonhandled_items_.find(item)) nonhandled_items_.push(item);
 }
 
-inline bool parser::EarleyParser::IsItemInList( State::SymbolItemList& item_list, Item* item, Item* rptr ) {
+inline bool EarleyParser::IsItemInList( State::SymbolItemList& item_list, Item* item, Item* rptr ) {
   Item tmp_item;
   tmp_item.rhs_pos_   = item->rhs_pos_ + 1;
   tmp_item.rule_num_  = item->rule_num_;
@@ -225,11 +226,11 @@ inline void EarleyParser::Predictor( Item* item ) {
   }
 }
 
-inline bool earley_parser::scanner()
+inline bool EarleyParser::Scanner()
 {
   cur_token_ = lexer_->get_token();
-  if( lexer_->is_end() ) return false;
-  
+  if (lexer_->is_end()) return false;
+
   int next_sym_id = cur_token_.type_;
   int cur_term = grammar_->GetInternalSymbolByExtrernalId( next_sym_id );
 
@@ -401,196 +402,5 @@ void earley_parser::print( std::ostream& _out )
   {
     states_[ i ]->print( _out );
   }
-}
-
-void earley_parser::print_trees( std::ostream& _out )
-{
-  for( parse_tree_t* _tree = parse_tree_list_.get_first(); _tree; _tree = parse_tree_list_.get_next() )
-  {
-    print_tree( _tree, _out );
-  }
-}
-
-inline void earley_parser::fill_rhs_stack( item* _item, rhs_stack_t& _stack )
-{
-  for( item* cur_item = _item; cur_item->rhs_pos_ > 0; cur_item = cur_item->lptr_ )
-  {
-    private_::rhs_stack_element stack_elem;
-    
-    int symbol_index = grammar_->GetRhsOfRule( cur_item->rule_num_, cur_item->rhs_pos_-1 );
-    if( grammar_->IsNonterminal( symbol_index ) )
-    {
-      if( cur_item->rptrs_.size() > 1 )
-      {
-        stack_elem.type_ = private_::rhs_stack_element::eRptrs;
-        stack_elem.rptrs_ = &cur_item->rptrs_;
-      }
-      else
-      {
-        stack_elem.type_ = private_::rhs_stack_element::eItem;
-        stack_elem.item_ = cur_item->rptrs_.front();
-      }
-    }
-    else
-    {
-      stack_elem.type_ = private_::rhs_stack_element::eSymbol;
-      stack_elem.symbol_ = symbol_index;
-    }
-    
-    _stack.push( stack_elem );
-  }
-}
-
-// parameters:
-// item* _item - the item needed to be handled
-// parse_tree_node_t* _parent - the parent node
-// parse_tree_t& _tree - the parse tree
-inline void  earley_parser::build_parse_trees( item* _item, parse_tree_node_t* _parent, parse_tree_t& _tree )
-{
-  // fill rhs stack for this item
-  rhs_stack_t item_rhs_stack;
-  fill_rhs_stack( _item, item_rhs_stack );
-  
-  parse_tree_node_stack_t parse_roots_;
-  parse_roots_.push_back( parse_tree_element( &_tree, _parent ) );
-  
-  // go through the stack
-  for( ; ! item_rhs_stack.empty(); item_rhs_stack.pop() )
-  {
-    rhs_stack_element cur_stack_element = item_rhs_stack.top();
-    
-    switch( cur_stack_element.type_ )
-    {
-      case rhs_stack_element::eSymbol:
-      {
-        parse_tree_element cur_elem = parse_roots_.get_first();
-        for( ; ! parse_roots_.is_end(); cur_elem = parse_roots_.get_next() )
-        {
-          cur_elem.node_->add_child( cur_stack_element.symbol_ );
-        }
-        
-        break;
-      }
-      case rhs_stack_element::eItem:
-      {
-        item* cur_item = cur_stack_element.item_;
-        int symbol = grammar_->GetLhsOfRule( cur_item->rule_num_ );
-        
-        parse_tree_element cur_elem = parse_roots_.get_first();
-        for( ; ! parse_roots_.is_end(); cur_elem = parse_roots_.get_next() )
-        {
-          parse_tree_node_t* new_tree_node = cur_elem.node_->add_child( symbol );
-
-          cur_item->handled_ = true;
-          build_parse_trees( cur_item, new_tree_node, _tree );
-          cur_item->handled_ = false;
-        }
-        
-        break;
-      }
-      case rhs_stack_element::eRptrs:
-      {
-        bool first = true;
-        parse_tree_node_stack_t new_nodes;
-        
-        item_list_t* rptrs = cur_stack_element.rptrs_;
-        for( item* cur_item = rptrs->get_first(); cur_item; cur_item = rptrs->get_next() )
-        {
-          if( ! cur_item->handled_ )
-          {
-            parse_tree_node_stack_t cur_nodes;
-            
-            if( first )
-            {
-              parse_tree_element cur_elem = parse_roots_.get_first();
-              for( ; ! parse_roots_.is_end(); cur_elem = parse_roots_.get_next() )
-              {
-                cur_nodes.push_back( cur_elem );
-              }
-
-              first = false;
-            }
-            else
-            {
-              parse_tree_element cur_elem = parse_roots_.get_first();
-              for( ; ! parse_roots_.is_end(); cur_elem = parse_roots_.get_next() )
-              {
-                parse_tree_element new_elem;
-                new_elem.tree_ = cur_elem.tree_->clone( cur_elem.node_, new_elem.node_ );
-                parse_tree_list_.push_back( new_elem.tree_ );
-                
-                cur_nodes.push_back( new_elem );
-                new_nodes.push_back( new_elem );
-              }
-            }
-
-            int symbol = grammar_->GetLhsOfRule( cur_item->rule_num_ );
-            
-            parse_tree_element cur_elem = cur_nodes.get_first();
-            for( ; ! cur_nodes.is_end(); cur_elem = cur_nodes.get_next() )
-            {
-              parse_tree_node_t* new_tree_node = cur_elem.node_->add_child( symbol );
-
-              cur_item->handled_ = true;
-              build_parse_trees( cur_item, new_tree_node, *cur_elem.tree_ );
-              cur_item->handled_ = false;
-            }
-          }
-        }
-        
-        parse_tree_element cur_elem = new_nodes.get_first();
-        for( ; ! new_nodes.is_end(); cur_elem = new_nodes.get_next() )
-        {
-          parse_roots_.push_back( cur_elem );
-        }
-        break;
-      }
-    }
-  }
-}
-
-void earley_parser::build_parse_trees( state& _state )
-{
-  state::item_list& completed_items_list = _state.items_[ 0 ];
-  
-  item* cur_item = completed_items_list.elems_.get_first();
-  for( ; cur_item ; cur_item = completed_items_list.elems_.get_next() )
-  {
-    // we have item kind of [S --> alpha *, 0, ...]
-    if( grammar_->GetStartSymbol() == grammar_->GetLhsOfRule( cur_item->rule_num_ ) && cur_item->origin_ == 0 )
-    {
-      
-      parse_tree_t* parse_tree = new parse_tree_t();
-      parse_tree_node_t* tree_head = parse_tree->add_head( grammar_->GetStartSymbol() );
-      parse_tree_list_.push_back( parse_tree );
-      
-      cur_item->handled_ = true;
-      build_parse_trees( cur_item, tree_head, *parse_tree );
-      cur_item->handled_ = false;
-    }
-  }
-}
-
-void earley_parser::print_tree( parse_tree_node_t* _node, int _level, std::ostream& _out )
-{
-  for( int i = 0; i < _level; ++ i )
-  {
-    _out << "   ";
-  }
-
-  _out << grammar_->GetSymbolName( _node->element_ ) << std::endl;
-
-  parse_tree_node_t* iter_node = _node->level_.get_last();
-  for( ; ! _node->level_.is_end(); iter_node = _node->level_.get_prev() )
-  {
-    print_tree( iter_node, _level + 1, _out );
-  }
-}
-
-void earley_parser::print_tree( parse_tree_t* _tree, std::ostream& _out )
-{
-  _out << std::endl;
-  if( _tree->get_head() )  print_tree( _tree->get_head(), 0, _out );
-  _out << std::endl;
 }
 

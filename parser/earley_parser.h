@@ -33,9 +33,14 @@ namespace parser {
  * построения всевозможных деревьев порождения для данной цепочки.
  */
 class EarleyParser {
-  //! Тип списка ситуаций Эрли.
-  typedef parser::list<struct Item*> ItemList;
+public:
+  //! Абстрактный интерфейс для взаимодействия с интерпретатором.
+  struct Context {
+    //! Виртуальный деструктор т.к. класс -- абстрактный интерфейс.
+    virtual ~Context() {}
+  };
 
+private:
   /*!
    * \brief Тип, реализующий расширенную ситуацию Эрли.
    *
@@ -45,20 +50,40 @@ class EarleyParser {
    * добавлены еще указатели на ситуации, приведшие к добавлению данной ситуации в состояние.
    */
   struct Item {
+    //! Структура для хранения пар (контекст, указатель на ситуацию "ниже").
+    struct Rptr {
+      Context*  context_; //!< Указатель на предоставляемый интерпретатором объект контекста.
+      Item*     item_;    //!< Указатель на объект класса ситуации Эрли.
+
+      //! Инициализация по умолчанию.
+      Rptr()
+        : context_(NULL)
+        , item_(NULL)
+      {}
+
+      //! Инициализация всех полей.
+      Rptr( Context* context, Item* item )
+        : context_(contex)
+        , item_(item)
+      {}
+    };
+
+    //! Тип списка объектов Rptr.
+    typedef parser::list<Rptr> Rptrs;
+
     // Элементы ситуации из классифеского определения.
-    Grammar::RuleId rule_id_; //!< Идентификатор правила.
-    unsigned        rhs_pos_; //!< Позиция метки в правой части правила.
-    size_t          origin_;  //!< Номер состояния, в котором данная ситуация была порождена.
+    Grammar::RuleId rule_id_;     //!< Идентификатор правила.
+    unsigned        rhs_pos_;     //!< Позиция метки в правой части правила.
+    size_t          origin_;      //!< Номер состояния, в котором данная ситуация была порождена.
 
     // Элементы ситуации из расширенного определения.
-    Item*     lptr_;  //!< Указатель на ситуацию, у которой метка стоит на символ левее.
-    ItemList  rptrs_; //!< Список указателей на ситуации, которые послужили причиной сдвига метки.
+    Item*           lptr_;        //!< Указатель на ситуацию, у которой метка стоит на символ левее.
+    Rptrs           rptrs_;       //!< Список указателей на ситуации, которые послужили причиной сдвига метки.
 
     // Служебные поля.
-    unsigned char error_;       //!< Номер ошибки, если анализатор работает в режиме восстановления после ошибок.
-    bool          handled_;     //!< Флаг обработки ситуации при проходе построении дерева.
-    size_t        order_number_;//!< Порядковый номер данной ситуации в состоянии.
-    size_t        state_number_;//!< Номер состояния, котроому принадлежит ситуация.
+    unsigned char   error_;       //!< Номер ошибки, если анализатор работает в режиме восстановления после ошибок.
+    size_t          order_number_;//!< Порядковый номер данной ситуации в состоянии.
+    size_t          state_number_;//!< Номер состояния, котроому принадлежит ситуация.
 
     /*!
      * \brief Печать содержимого ситуации.
@@ -69,7 +94,77 @@ class EarleyParser {
     void Print( Grammar* grammar, std::ostream& out );
 
     //! Оператор сравнения.
-    bool operator==( const item& rhs );
+    bool operator==( const Item& rhs );
+  };
+
+  //! Тип списка объектов ситуаций Эрли.
+  typedef parser::list<Item*> ItemList;
+
+  //! Диспетчер ситуаций Эрли, выделяет и освобождает память для ситуаций.
+  struct ItemDispatcher {
+    //! Тип блока ситуаций Эрли.
+    typedef std::vector<Item> ItemBlock;
+
+    //! Тип списка блоков ситуаций Эрли.
+    typedef std::deque<ItemBlock> BlockList;
+
+    BlockList block_list_;  //!< Список блоков ситуаций Эрли.
+    size_t    block_size_;  //!< Размер блока.
+    ItemList  free_list_;   //!< Список свободных ситуаций Эрли.
+    size_t    block_pos_;   //!< Текущая позиция свободного элемента в блоке.
+
+    /*!
+     * \brief При инициализации передается размер репозитория.
+     *
+     * \param[in] sz размер репозитория в элементах.
+     */
+    ItemDispatcher( size_t sz )
+      : block_size_(sz)
+      , block_pos_(0)
+    {}
+
+    /*!
+     * \brief Выделение памяти под ситуацию.
+     *
+     * \param[in] rule_id   Идентификатор правила для данной ситуации.
+     * \param[in] dot       Позиция метки в правой части правила.
+     * \param[in] origin    Номер состояния, в которое данная ситуация была первоначально добавлена.
+     * \param[in] lptr      Указатель на ситуацию с меткой на символ левее.
+     */
+    inline Item* GetItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr ) {
+      Item* item = NULL;
+
+      // Проверяем свободную память.
+      if (not free_list_.empty()) {
+        item = free_list_.back();
+        free_list_.pop_back();
+      } else {
+        // Выделяем память для ситуации, если это необходимо.
+        if (block_pos_ >= block_size_ or block_list_.empty()) {
+          block_list_.push_back(ItemBlock());
+          block_list_[block_list_.size()-1].resize(block_size_);
+          block_pos_ = 0;
+        }
+
+        item =  block_list_[block_list_.size()-1][block_pos_++];
+      }
+
+      item->rule_id_  = rule_id;
+      item->rhs_pos_  = dot;
+      item->origin_   = origin;
+      item->lptr_     = lptr;
+
+      return item;
+    }
+
+    /*!
+     * \brief Освободить память, используемую под ситуацию.
+     *
+     * \param[in] item Указатель на ситуацию.
+     */
+    void FreeItem( Item* item ) {
+      free_list_.push_front(item);
+    }
   };
 
   /*!
@@ -80,10 +175,13 @@ class EarleyParser {
    * оптимизировать поиск ситуаций для операций Scanner и Completer.
    */
   struct State {
+    //! Тип умного указателя на состояние.
+    typedef std::tr1::shared_ptr<State> Ptr;
+
     /*!
      * \brief Реализация списка ситуаций с меткой перед конкретным символом.
      *
-     * Кроме, собственно, спсика ситуаций, структура содержит поле handled_by_predictor_, которое
+     * Кроме, собственно, списка ситуаций, структура содержит поле handled_by_predictor_, которое
      * позволяет не обрабатывать несколько раз одну и ту ситуацию операцией Predictor.
      */
     struct SymbolItemList {
@@ -103,8 +201,7 @@ class EarleyParser {
     ItemVector items_;                  //!< Список ситуаций для каждого символа грамматики.
     ItemVector items_with_empty_rules_; //!< Список ситуаций для правил с пустой правой частью.
     ItemList   state_items_;            //!< Список ситуаций в порядке их добавления в состояние.
-    size_t     num_of_items_;           //!< Число элементов в состоянии.
-    size_t     state_number_;           //!< Номер данного состояния.
+    size_t     num_of_items_;           //!< Число ситуаций в состоянии.
     bool       is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
     Token      token_;                  //!< Токен, послуживший инициатором создания этого состояния.
     Grammar*   grammar_;                //!< Указатель на объект грамматики.
@@ -121,10 +218,10 @@ class EarleyParser {
      *
      * \param[in] parser  Указатель на объект парсера.
      * \param[in] grammar Указатель на объект грамматики.
-     * \param[in] id      Номер состояния.
+     * \param[in] id      Уникальный идентификатор состояния.
      * \param[in] token   Токен для данного состояния.
      */
-    void Init( EarleyParser* parser, Grammar* grammar, size_t id, Token token );
+    void Init( EarleyParser* parser, Grammar* grammar, unsigned id, Token token );
 
     //! Деинициализация состояния.
     void Uninit();
@@ -137,61 +234,26 @@ class EarleyParser {
      * \param[in] origin    Номер состояния, в которое данная ситуация была первоначально добавлена.
      * \param[in] lptr      Указатель на ситуацию с меткой на символ левее.
      * \param[in] rptr      Указатель на ситуацию, послужившую причиной сдвига нетерминала слева от метки.
+     * \param[in] context   Указатель на контекст интерпретатора.
      * \param[in] error     Уровень ошибки, если анализатор работает в режиме восстановления после ошибок.
      */
-    inline Item* AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, unsigned char error = 0 );
+    inline Item* AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context, unsigned char error = 0 );
 
     //! Печать содержимого состояния.
     void Print( std::ostream& out );
   };
 
-  //! Стек для элементов, используемый при анализе.
-  struct RhsStackElement {
-    //! Элемент может быть ситуацией, списком указателей на ситуации или символом.
-    enum RhsStackType {
-      kItem = 1,//!< Ситуация.
-      kRptrs,   //!< Список ссылок на ситуации.
-      kSymbol   //!< Символ грамматики.
-    };
+  //! Диспетчер состояний, управляет временем жизни состояний.
+  struct StateDispatcher {
+    //! Тип репозитория состояний.
+    typedef std::deque<State> StateRepo;
 
-    //! Тип элемента списка.
-    RhsStackType type_;
-
-    //! Данные элемента.
-    union {
-      Item*             item_;  //!< Указатель на элемент.
-      ItemList*         rptrs_; //!< Указатель на список элементов.
-      Grammar::SymbolId symbol_;//!< Символ.
-    };
-  };
-
-  //! Тип элемента дерева порождения.
-  struct ParseTreeElement {
-    // typedefs
-    typedef parser::tree_node<unsigned>       TreeNode;
-    typedef parser::tree<unsigned, TreeNode>  Tree;
-
-    Tree*     tree_; // the pointer to the
-    TreeNode* node_;
-
-    ParseTreeElement( Tree* tree, TreeNode* node )
-      : tree_(tree)
-      , node_(node)
-    {}
-
-    ParseTreeElement()
-      : tree_(NULL)
-      , node_(NULL)
-    {}
+    //! Тип спика состояний.
+    typedef parser::list<State*> StateList;
   };
 
   typedef queue<Item*>                          ItemQueue;
-  typedef parser::stack<RhsStackElement>        RhsStack;
   typedef std::deque<State*>                    StateVector;
-  typedef tree_node<unsigned>                   ParseTreeNode;
-  typedef parser::tree<ParseTreeNode::tree_node_element_t, ParseTreeNode> ParseTree; 
-  typedef parser::list<ParseTree*>              ParseTreeList;
-  typedef parser::list<ParseTreeElement>        ParseTreeNodeStack;
 
 //////////////////////////////////////////////////////////////////////////
 // friend declarations
@@ -210,7 +272,6 @@ class EarleyParser {
   Grammar*          grammar_;          // the CF grammar
   Lexer*            lexer_;            // the lexical analyzer
   parser::allocator<Item>  items_pool_;        // the pool of items
-  ParseTreeList     parse_tree_list_;      // the list of parse trees
   unsigned          max_error_value_;      // the maximum error value
   Token             cur_token_;          // the current token
 
@@ -231,27 +292,14 @@ class EarleyParser {
                                       // if it is not there already
   inline bool IsItemInList( State::SymbolItemList&, item*, item* );
 
-  inline void FillRhsStack( Item*, RhsStack& );  // fill rhs stack ot the passed item
-
-  void BuildParseTrees( State& );
-  inline void BuildParseTrees( Item*, ParseTreeNode*, ParseTree& );
-
-  void BuildAstTrees( State& );
-  inline void BuildAstTreesRecursive( Item*, ParseTreeNode*, ParseTree& );
-  void BuildAstTreesIterative( Item*, ParseTreeNode*, ParseTree& );
-
-  void PrintTree( ParseTreeNode*, unsigned, std::ostream& );
-  void PrintTree( ParseTree*, std::ostream& );
-
 public:
-  Earleyparser( Grammar* grammar, Lexer* lexer, unsigned = 3 );
+  EarleyParser( Grammar* grammar, Lexer* lexer, unsigned = 3 );
   ~EarleyParser();
 
   bool Parse();          // the parsing of the input string
-  void Reset();          // reset parser object to init state 
+  void Reset();          // reset parser object to init state
 
   void Print( std::ostream& );      // print the items
-  void PrintTrees( std::ostream& );  // print parse trees
 };
 
 } // namespace parser
