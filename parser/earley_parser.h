@@ -71,7 +71,7 @@ private:
     //! Тип списка объектов Rptr.
     typedef parser::list<Rptr> Rptrs;
 
-    // Элементы ситуации из классифеского определения.
+    // Элементы ситуации из классического определения.
     Grammar::RuleId rule_id_;     //!< Идентификатор правила.
     unsigned        rhs_pos_;     //!< Позиция метки в правой части правила.
     size_t          origin_;      //!< Номер состояния, в котором данная ситуация была порождена.
@@ -81,7 +81,6 @@ private:
     Rptrs           rptrs_;       //!< Список указателей на ситуации, которые послужили причиной сдвига метки.
 
     // Служебные поля.
-    unsigned char   error_;       //!< Номер ошибки, если анализатор работает в режиме восстановления после ошибок.
     size_t          order_number_;//!< Порядковый номер данной ситуации в состоянии.
     size_t          state_number_;//!< Номер состояния, котроому принадлежит ситуация.
 
@@ -94,7 +93,12 @@ private:
     void Print( Grammar* grammar, std::ostream& out );
 
     //! Оператор сравнения.
-    bool operator==( const Item& rhs );
+    bool operator==( const Item& rhs ) {
+        return  rule_id_ == rhs.rule_id_
+                and rhs_pos_ == rhs.rhs_pos_ 
+                and origin_ == rhs.origin_ 
+                and lptr_ == rhs.lptr_;
+    }
   };
 
   //! Тип списка объектов ситуаций Эрли.
@@ -164,6 +168,7 @@ private:
      */
     void FreeItem( Item* item ) {
       free_list_.push_front(item);
+      item->
     }
   };
 
@@ -175,9 +180,6 @@ private:
    * оптимизировать поиск ситуаций для операций Scanner и Completer.
    */
   struct State {
-    //! Тип умного указателя на состояние.
-    typedef std::tr1::shared_ptr<State> Ptr;
-
     /*!
      * \brief Реализация списка ситуаций с меткой перед конкретным символом.
      *
@@ -192,20 +194,22 @@ private:
       SymbolItemList();
 
       //! Аналог деструктора, используется т.к. память реально не освобождается.
-      void Uninit( EarleyParser* parser );
+      void Uninit( ItemDispatcher* disp );
     };
 
     //! Индексированный список списков ситуаций для каждого символа.
     typedef std::vector<SymbolItemList>  ItemVector;
 
-    ItemVector items_;                  //!< Список ситуаций для каждого символа грамматики.
-    ItemVector items_with_empty_rules_; //!< Список ситуаций для правил с пустой правой частью.
-    ItemList   state_items_;            //!< Список ситуаций в порядке их добавления в состояние.
-    size_t     num_of_items_;           //!< Число ситуаций в состоянии.
-    bool       is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
-    Token      token_;                  //!< Токен, послуживший инициатором создания этого состояния.
-    Grammar*   grammar_;                //!< Указатель на объект грамматики.
-    EarleyParser* parser_;              //!< Указатель на объект парсера.
+    ItemVector      items_;                  //!< Список ситуаций для каждого символа грамматики.
+    ItemVector      items_with_empty_rules_; //!< Список ситуаций для правил с пустой правой частью.
+    ItemList        state_items_;            //!< Список ситуаций в порядке их добавления в состояние.
+    size_t          num_of_items_;           //!< Число ситуаций в состоянии.
+    bool            is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
+    size_t          id_;                     //!< Уникальный идентификатор данного состояния.
+    Token           token_;                  //!< Токен, послуживший инициатором создания этого состояния.
+    Grammar*        grammar_;                //!< Указатель на объект грамматики.
+    ItemDispatcher* disp_;                   //!< Указатель на объект диспетчера ситуаций.
+    bool            valid_;                  //!< Установлен в true, если состояние рабочее.
 
     //! Конструктор по умолчанию.
     State();
@@ -216,12 +220,12 @@ private:
     /*!
      * \brief Инициализация состояния.
      *
-     * \param[in] parser  Указатель на объект парсера.
+     * \param[in] disp    Указатель на объект диспетчера ситуаций.
      * \param[in] grammar Указатель на объект грамматики.
      * \param[in] id      Уникальный идентификатор состояния.
      * \param[in] token   Токен для данного состояния.
      */
-    void Init( EarleyParser* parser, Grammar* grammar, unsigned id, Token token );
+    void Init( ItemDispatcher* disp, Grammar* grammar, size_t id, Token token );
 
     //! Деинициализация состояния.
     void Uninit();
@@ -248,52 +252,119 @@ private:
     //! Тип репозитория состояний.
     typedef std::deque<State> StateRepo;
 
-    //! Тип спика состояний.
-    typedef parser::list<State*> StateList;
+    //! Тип пары (указатель на объект состояния, индекс состояния).
+    typedef std::pair<State*, size_t> StatePnt;
+
+    //! Тип списка состояний.
+    typedef parser::list<StatePnt> StateList;
+
+    StateRepo       repo_;        //!< Репозиторий состояний.
+    StateList       free_states_; //!< Список свободных состояний.
+    ItemDispatcher* disp_;        //!< Указатель на объект диспетчера ситуаций.
+    Grammar*        grammar_;     //!< Указатель на объект грамматики.
+
+    /*!
+     * \brief Конструктор репозитория.
+     *
+     * \param disp    Указатель на объект диспетчера ситуаций.
+     * \param grammar Указатель на объект грамматики.
+     */
+    StateRepo( ItemDispatcher* disp, Grammar* grammar )
+      : disp_(disp)
+      , grammar_(grammar)
+    {}
+
+    /*!
+     * \brief Получение состояния по индексу.
+     *
+     * \param[in] index Индекс состояния.
+     * \return          Указатель на объект состояния или нуль.
+     */
+    State* GetState( size_t index ) {
+      if (index >= repo_.size()) {
+        return NULL;
+      }
+
+      if (repo_[index].valid_) {
+        return &repo_[index];
+      }
+
+      return NULL;
+    }
+
+    /*!
+     * \brief Создание нового состояния.
+     * 
+     * \return Индекс нового состояния.
+     */
+    size_t AddState( Token token ) {
+      if (not free_states_.empty()) {
+        size_t index = free_states_.back().second;
+        State* state = free_states_.back().first;
+        state->Init(disp_, grammar_, token);
+        free_states_.pop_back();
+        return index;
+      }
+
+      repo_.push_back(State());
+      repo.back().Init(disp_, grammar_, token);
+      return repo_.size() - 1;
+    }
   };
 
-  typedef queue<Item*>                          ItemQueue;
-  typedef std::deque<State*>                    StateVector;
+  typedef queue<Item*> ItemQueue;
 
-//////////////////////////////////////////////////////////////////////////
-// friend declarations
-//////////////////////////////////////////////////////////////////////////
+  StateDispatcher  state_disp_;       //!< Диспетчер состояний.
+  ItemDispatcher   item_disp_;        //!< Диспетчер ситуаций.
+  Grammar*         grammar_;          //!< Указатель на объект грамматики.
+  Lexer*           lexer_;            //!< Указатель на объект лексического анализатора.
+  ItemQueue        nonhandled_items_; //!< Очередь необработанных ситуаций.
 
-  friend struct State;
-  friend struct State::SymbolItemList;
-  friend struct Item;
+  /*!
+   * \brief Реализация операции Completer.
+   *
+   * \param[in] item Ситуация, которую необходимо обработать.
+   */
+  inline void Completer( Item* item );
 
-//////////////////////////////////////////////////////////////////////////
-// variables
-//////////////////////////////////////////////////////////////////////////
+  /*!
+   * \brief Реализацию операции Predictor.
+   *
+   * \param[in] item Ситуация, которую необходимо обработать.
+   */
+  inline void Predictor( Item* item );
 
-  ItemQueue        nonhandled_items_;      // the queue of unhandled items
-  StateVector      states_;          // the states of the algorithm
-  Grammar*          grammar_;          // the CF grammar
-  Lexer*            lexer_;            // the lexical analyzer
-  parser::allocator<Item>  items_pool_;        // the pool of items
-  unsigned          max_error_value_;      // the maximum error value
-  Token             cur_token_;          // the current token
+  /*!
+   * \brief реализация процедуры Scanner.
+   *
+   * \return true если в результате было добавлено хотя бы одно новое состояние.
+   */
+  inline bool Scanner();
 
-//////////////////////////////////////////////////////////////////////////
-// methods
-//////////////////////////////////////////////////////////////////////////
+  //! Итеративное выполнение операций Completer и Predictor.
+  inline void Closure();
 
-  inline void Completer( Item* item );      // the Completer algorithm operation
-  inline void Predictor( Item* item );      // the Predictor algorithm operation
-  inline bool Scanner();          // the Scanner algorithm operation
+  //! Инициализация начального множества.
+  inline bool InitFirstSet();
 
-  inline bool ErrorScanner();      // the function runs when scanner method is erred
-
-  inline void Closure();          // the Closure algorithm operation
-  inline bool InitFirstSet();      // the first set initialization
-
+  /*!
+   * \brief 
+   *
+   *
+   *
+   */
   inline void PutItemToNonhandledlist( Item* item, bool );  // put the item to the unhandled items list
                                       // if it is not there already
-  inline bool IsItemInList( State::SymbolItemList&, item*, item* );
+                                      //
+  /*!
+   * \brief Проверка на присутствие состояния в переданном списке.
+   *
+   *
+   */
+  inline bool IsItemInList( State::SymbolItemList&, Item*, Item* );
 
 public:
-  EarleyParser( Grammar* grammar, Lexer* lexer, unsigned = 3 );
+  EarleyParser( Grammar* grammar, Lexer* lexer );
   ~EarleyParser();
 
   bool Parse();          // the parsing of the input string

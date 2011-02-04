@@ -4,10 +4,6 @@
 #include "semantics.h"
 using parser::EarleyParser;
 
-bool EarleyParser::Item::operator==( const Item& rhs ) {
-  return rule_id_ == rhs.rule_id_ and rhs_pos_ == rhs.rhs_pos_ and origin_ == rhs.origin_ and lptr_ == rhs.lptr_;
-}
-
 void EarleyParser::Item::Print( Grammar* grammar, std::ostream& out ) {
   bool dot_printed = false;
   out << state_number_ << "." << order_number_ << " ";
@@ -47,29 +43,32 @@ EarleyParser::State::SymbolItemList::SymbolItemList()
   : handled_by_predictor_(false)
 {}
 
-void EarleyParser::State::SymbolItemList::Uninit( EarleyParser* parser ) {
+void EarleyParser::State::SymbolItemList::Uninit( ItemDispatcher* disp ) {
   while (not elems_.empty()) {
-    parser->items_pool_.elem_free(elems_.pop_back());
+    disp->FreeItem(elems_.pop_back());
   }
   handled_by_predictor_ = false;
 }
 
 EarleyParser::State::State()
   : num_of_items_(0)
-  , state_number_(0)
-  , grammar_(NULL)
-  , parser_(NULL)
   , is_completed_(false)
+  , id_(0)
+  , grammar_(NULL)
+  , disp_(NULL)
+  , valid_(false)
 {}
 
 void EarleyParser::State::Uninit() {
   for (size_t i = 0; i < items_.size(); ++i) {
-    items_[i].Uninit(parser_);
+    items_[i].Uninit(disp_);
   }
+  items_.clear();
 
   for (size_t i = 0; i < items_with_empty_rules_.size(); ++i) {
-    items_with_empty_rules_[i].uninit(parser_);
+    items_with_empty_rules_[i].Uninit(disp_);
   }
+  items_with_empty_rules_.clear();
 
   num_of_items_ = 0;
   state_number_ = 0;
