@@ -84,13 +84,15 @@ private:
     size_t          order_number_;//!< Порядковый номер данной ситуации в состоянии.
     size_t          state_number_;//!< Номер состояния, котроому принадлежит ситуация.
 
+#   ifdef DUMP_CONTENT
     /*!
      * \brief Печать содержимого ситуации.
      *
      * \param[in] grammar Указатель на объект грамматики, у которой берутся символьные имена элементов.
      * \param[in] out Поток для вывода.
      */
-    void Print( Grammar* grammar, std::ostream& out );
+    void Dump( Grammar* grammar, std::ostream& out );
+#   endif // DUMP_CONTENT
 
     //! Оператор сравнения.
     bool operator==( const Item& rhs ) {
@@ -191,10 +193,17 @@ private:
       bool      handled_by_predictor_;  //!< Флаг обработки операцией Predictor.
 
       //! Конструктор по умолчанию необходим для стандартных контейнеров.
-      SymbolItemList();
+      SymbolItemList()
+        : handled_by_predictor_(false) {
+      }
 
       //! Аналог деструктора, используется т.к. память реально не освобождается.
-      void Uninit( ItemDispatcher* disp );
+      void Uninit( ItemDispatcher* disp ) {
+        while (not elems_.empty()) {
+          disp->FreeItem(elems_.pop_back());
+        }
+        handled_by_predictor_ = false;
+      }
     };
 
     //! Индексированный список списков ситуаций для каждого символа.
@@ -207,15 +216,19 @@ private:
     bool            is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
     size_t          id_;                     //!< Уникальный идентификатор данного состояния.
     Token           token_;                  //!< Токен, послуживший инициатором создания этого состояния.
-    Grammar*        grammar_;                //!< Указатель на объект грамматики.
     ItemDispatcher* disp_;                   //!< Указатель на объект диспетчера ситуаций.
+    Grammar*        grammar_;                //!< Указатель на объект грамматики.
     bool            valid_;                  //!< Установлен в true, если состояние рабочее.
 
     //! Конструктор по умолчанию.
-    State();
-
-    //! Деструктор.
-    ~State();
+    State()
+      : num_of_items_(0)
+      , is_completed_(false)
+      , id_(0)
+      , disp_(NULL)
+      , grammar_(NULL)
+      , valid_(false)
+    {}
 
     /*!
      * \brief Инициализация состояния.
@@ -225,26 +238,66 @@ private:
      * \param[in] id      Уникальный идентификатор состояния.
      * \param[in] token   Токен для данного состояния.
      */
-    void Init( ItemDispatcher* disp, Grammar* grammar, size_t id, Token token );
+    void Init( ItemDispatcher* disp, Grammar* grammar, size_t id, Token token ) {
+      num_of_items_ = 0;
+      is_completed_ = false;
+      id_           = id;
+      token_        = token;
+      disp_         = disp;
+      grammar_      = grammar;
+      valid_        = true;
+
+      // Число списков для символов -- это число символов + 1 для метки в конце правила. Для этого
+      // специального случая используется список с нулевым индексом.
+      items_.resize(grammar_->GetNumOfTerminals() + grammar_->GetNumOfNonterminals() + 1);
+
+      // Ситуаций для правил с пустой правой частью ровно столько, сколько нетерминальных символов в грамматике.
+      items_with_empty_rules_.resize(grammar_->GetNumOfNonterminals());
+    }
 
     //! Деинициализация состояния.
-    void Uninit();
+    void Uninit() {
+      for (size_t i = 0; i < items_.size(); ++i) {
+        items_[i].Uninit(disp_);
+      }
+      items_.clear();
+
+      for (size_t i = 0; i < items_with_empty_rules_.size(); ++i) {
+        items_with_empty_rules_[i].Uninit(disp_);
+      }
+      items_with_empty_rules_.clear();
+
+      num_of_items_ = 0;
+      is_completed_ = false;
+      id_           = 0;
+      token_        = Token();
+      disp_         = NULL;
+      grammar_      = NULL;
+      valid_        = false;
+    }
 
     /*!
      * \brief Добавление новой систуации в состояние.
      *
+     * \param[in] parser    Указатель на объект парсера.
      * \param[in] rule_id   Идентификатор правила для данной ситуации.
      * \param[in] dot       Позиция метки в правой части правила.
      * \param[in] origin    Номер состояния, в которое данная ситуация была первоначально добавлена.
      * \param[in] lptr      Указатель на ситуацию с меткой на символ левее.
      * \param[in] rptr      Указатель на ситуацию, послужившую причиной сдвига нетерминала слева от метки.
      * \param[in] context   Указатель на контекст интерпретатора.
-     * \param[in] error     Уровень ошибки, если анализатор работает в режиме восстановления после ошибок.
      */
-    inline Item* AddItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context, unsigned char error = 0 );
+    inline Item* AddItem( EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context );
 
+#   ifdef DUMP_CONTENT
     //! Печать содержимого состояния.
-    void Print( std::ostream& out );
+    void Dump( std::ostream& out ) {
+      out << "\n****** State number = " << id_ << " *** Number of items = " << num_of_items_ << " ******\n";
+      for (Item* item = state_items_.get_first(); item; item = state_items_.get_next()) {
+        item->Dump(grammar_, out);
+      }
+    }
+#   endif // DUMP_CONTENT
   };
 
   //! Диспетчер состояний, управляет временем жизни состояний.
@@ -313,64 +366,105 @@ private:
   };
 
   typedef queue<Item*> ItemQueue;
+  typedef parser::list<size_t> StateList;
 
-  StateDispatcher  state_disp_;       //!< Диспетчер состояний.
-  ItemDispatcher   item_disp_;        //!< Диспетчер ситуаций.
-  Grammar*         grammar_;          //!< Указатель на объект грамматики.
-  Lexer*           lexer_;            //!< Указатель на объект лексического анализатора.
-  ItemQueue        nonhandled_items_; //!< Очередь необработанных ситуаций.
+  StateDispatcher   state_disp_;       //!< Диспетчер состояний.
+  ItemDispatcher    item_disp_;        //!< Диспетчер ситуаций.
+  Grammar*          grammar_;          //!< Указатель на объект грамматики.
+  Lexer*            lexer_;            //!< Указатель на объект лексического анализатора.
+  ItemQueue         nonhandled_items_; //!< Очередь необработанных ситуаций.
 
   /*!
    * \brief Реализация операции Completer.
    *
-   * \param[in] item Ситуация, которую необходимо обработать.
+   * \param[in] state_id  Идентификатор состояния, которому принадлежит ситуация.
+   * \param[in] item      Ситуация, которую необходимо обработать.
    */
-  inline void Completer( Item* item );
+  inline void Completer( size_t state_id, Item* item );
 
   /*!
    * \brief Реализацию операции Predictor.
    *
-   * \param[in] item Ситуация, которую необходимо обработать.
+   * \param[in] state_id  Идентификатор состояния, которому принадлежит ситуация.
+   * \param[in] item      Ситуация, которую необходимо обработать.
    */
-  inline void Predictor( Item* item );
+  inline void Predictor( size_t state_id, Item* item );
 
   /*!
    * \brief реализация процедуры Scanner.
    *
-   * \return true если в результате было добавлено хотя бы одно новое состояние.
+   * \param[in] state_id      Идентификатор состояния, для которого вызывается процедура.
+   * \param[in] token         Токен для обработки.
+   * \param[in] new_state_id  Идентификатор состояния, которое было добавлено в результате выполнения процедуры.
+   * \return                  true если в результате было добавлено новое состояние.
    */
-  inline bool Scanner();
+  inline bool Scanner( size_t state_id, Token token, size_t& new_state_id );
 
   //! Итеративное выполнение операций Completer и Predictor.
-  inline void Closure();
+  inline void Closure( size_t state_id );
 
-  //! Инициализация начального множества.
-  inline bool InitFirstSet();
+  //! Инициализация начального состояния.
+  inline bool InitFirstState( size_t& state_id );
 
   /*!
-   * \brief 
+   * \brief Положить ситуацию в список необработанных с необязательной проверкой на присутствие в списке.
    *
-   *
-   *
+   * \param[in] item  Указатель на объект стиуации.
+   * \param[in] check Проверять или нет присутствие ситуации в списке.
    */
-  inline void PutItemToNonhandledlist( Item* item, bool );  // put the item to the unhandled items list
-                                      // if it is not there already
-                                      //
+  inline void PutItemToNonhandledlist( Item* item, bool check ) {
+    if (not check or not nonhandled_items_.find(item)) {
+      nonhandled_items_.push(item);
+    }
+  }
+
   /*!
    * \brief Проверка на присутствие состояния в переданном списке.
    *
-   *
+   * \param[in] item_list Список ситуаций, в котором надо произвести поиск.
+   * \param[in] item      Ситуация, которую надо искать.
+   * \param[in] rptr      Ситуация для добавления, если искомая ситуация найдена.
+   * \return              true если ситауация найдена.
    */
-  inline bool IsItemInList( State::SymbolItemList&, Item*, Item* );
+  inline bool IsItemInList( State::SymbolItemList& item_list, Item* item, Item* rptr ) {
+    Item tmp_item;
+    tmp_item.rhs_pos_   = item->rhs_pos_ + 1;
+    tmp_item.rule_num_  = item->rule_num_;
+    tmp_item.origin_    = item->origin_;
+    tmp_item.lptr_      = item;
+
+    for (Item* cur = item_list.elems_.get_first(); cur; cur = item_list.elems_.get_next()) {
+      if (tmp_item == *cur) {
+        cur->rptrs_.push_back(rptr);
+        return true;
+      }
+    }
+    return false;
+  }
 
 public:
+  /*!
+   * \brief Конструктор класса.
+   *
+   * \param grammar Указатель на объект грамматики.
+   * \param lexer   Указатель на объект лексического анализатора.
+   */
   EarleyParser( Grammar* grammar, Lexer* lexer );
-  ~EarleyParser();
+    : grammar_(grammar)
+    , lexer_(lexer) {
+  }
 
-  bool Parse();          // the parsing of the input string
-  void Reset();          // reset parser object to init state
+  /*!
+   * \brief Синтаксический анализ потока терминальных символов, предоставляемого объектом Lexer.
+   *
+   * \return true если входная цепочка разобрана.
+   */
+  bool Parse();
 
-  void Print( std::ostream& );      // print the items
+  /*!
+   * \brief Освобождение всех ресурсов, выделенных под предыдущий запуск Parse.
+   */
+  void Reset();
 };
 
 } // namespace parser
