@@ -40,6 +40,15 @@ struct Token {
     , abs_pos_(0)
     , length_(0) {
   }
+
+  //! Инициализация лексическим типом.
+  explicit Token(const Grammar::SymbolId& type)
+    : type_(type)
+    , line_pos_(0)
+    , col_pos_(0)
+    , abs_pos_(0)
+    , length_(0) {
+  }
 };
 
 } // namespace parser

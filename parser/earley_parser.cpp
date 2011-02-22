@@ -1,4 +1,7 @@
 
+
+#define DUMP_CONTENT
+
 #include "earley_parser.h"
 using parser::EarleyParser;
 
@@ -25,17 +28,18 @@ void EarleyParser::Item::Dump(Grammar* grammar, std::ostream& out) {
   out << ", ";
   if (not rptrs_.empty()) {
     out << "<";
-    for (Item* cur = rptrs_.item_.get_first(); cur;) {
-      out << cur->state_number_ << "." << cur->order_number_;
+#if 0
+    for (Rptr cur = rptrs_.get_first(); cur;) {
+      out << cur->item_->state_number_ << "." << cur->item_->order_number_;
       if (cur = rptrs_.get_next()) out << ",";
     }
+#endif
     out << ">";
   } else {
     out << "<null>";
   }
 
-  out << ", ";
-  out << (unsigned)error_ <<  " ]\n";
+  out << " ]\n";
 }
 #endif // DUMP_CONTENT
 
@@ -77,7 +81,7 @@ inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Gr
   else if (symbol_id != Grammar::kBadSymbolId and grammar_->IsNonterminal(symbol_id)) {
     SymbolItemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals()];
     for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
-      parser->PutItemToNonhandledlist(cur, true);
+      parser->PutItemToNonhandledList(cur, true);
     }
   }
 
@@ -91,7 +95,7 @@ inline void EarleyParser::Completer(size_t state_id, Item* item) {
     State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_id_) + 1];
     for (Item* cur = or_item_list.elems_.get_first(); cur; cur = or_item_list.elems_.get_next()) {
       if (not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1) + 1], cur, item)) {
-        Item* new_item = cur_state->AddItem(cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item);
+        Item* new_item = cur_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item, NULL);
         PutItemToNonhandledList(new_item, true);
 #       ifdef DUMP_CONTENT
         new_item->Dump(grammar_, std::cout);
@@ -130,7 +134,7 @@ inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new
       new_state_id = state_disp_.AddState(token);
       State* next_state = state_disp_.GetState(new_state_id);
       for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
-        Item* new_item = next_state->AddItem(cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, 0);
+        Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, 0, NULL);
         PutItemToNonhandledList(new_item, false);
 
 #       ifdef DUMP_CONTENT

@@ -684,7 +684,7 @@ enum{
 
 typedef std::map< std::string, int >  keywords_t;
 
-class lexer : public parser::lexer{
+class CLexer : public parser::Lexer {
   int              cur_char_;      // the current character
   std::ifstream        in_;        // input file
   unsigned int        pos_;        // current position

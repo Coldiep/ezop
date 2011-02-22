@@ -20,8 +20,6 @@
 #include <deque>
 #include <iostream>
 
-//#define PRINT_STATS
-
 namespace parser {
 
 /*!
@@ -412,7 +410,7 @@ private:
    * \param[in] item  Указатель на объект стиуации.
    * \param[in] check Проверять или нет присутствие ситуации в списке.
    */
-  inline void PutItemToNonhandledlist(Item* item, bool check) {
+  inline void PutItemToNonhandledList(Item* item, bool check) {
     if (not check or not nonhandled_items_.find(item)) {
       nonhandled_items_.push(item);
     }
@@ -435,7 +433,7 @@ private:
 
     for (Item* cur = item_list.elems_.get_first(); cur; cur = item_list.elems_.get_next()) {
       if (tmp_item == *cur) {
-        cur->rptrs_.push_back(rptr);
+        cur->rptrs_.push_back(Item::Rptr(NULL, rptr));
         return true;
       }
     }

@@ -6,14 +6,10 @@
 #include "lexer.h"
 #include "earley_parser.h"
 #include "allocator.h"
-#include "excel_semantics.h"
 using namespace parser;
 
 #include <exception>
 #include <iostream>
-
-#include "c_grammar.h"
-using namespace c_grammar;
 
 #include <time.h>
 
@@ -69,31 +65,31 @@ int main() {
     pg.SetStartSymbolId(4);
 
     pg.Print(std::cout);
+    std::cout << "\n\n";
 
-    std::cerr << "1\n";
     Grammar gr(&pg);
-    std::cerr << "2\n";
 
-    struct TestLexer : public parser::lexer {
-      std::vector<unsigned> tokens_;
-      unsigned cur_tok_index_;
+    struct TestLexer : public parser::Lexer {
+      std::vector<Grammar::SymbolId> tokens_;
+      Grammar::SymbolId cur_tok_index_;
 
       TestLexer()
         : cur_tok_index_(0)
       {}
 
-      // return the current token
-      token get_token() {
+      TokenList GetTokens(Token::Ptr token) {
         if (cur_tok_index_ < tokens_.size()) {
-            return token(tokens_[cur_tok_index_++]);
+          TokenList tokens;
+          tokens.push_back(Token::Ptr(new Token(tokens_[cur_tok_index_++])));
+          return tokens;
         }
 
-        return token();
+        return TokenList();
       }
 
       // is th end of input?
-      bool is_end() {
-          return cur_tok_index_ >=  tokens_.size();
+      bool IsEnd() {
+        return cur_tok_index_ >= tokens_.size();
       }
     };
 
@@ -102,13 +98,12 @@ int main() {
     lexer.tokens_.push_back(2);
     lexer.tokens_.push_back(3);
 
-    excel_semantics es;
-    earley_parser parser(&gr, &lexer, &es);
+    EarleyParser parser(&gr, &lexer);
 
-    if (parser.parse()) {
-      parser.print_trees( std::cout );
+    if (parser.Parse()) {
+        std::cout << "parse successful\n";
     } else {
-      std::cout << "there is an error during parsing.";
+      std::cout << "there is an error during parsing.\n";
     }
   } catch (std::exception& err) {
     std::cout << err.what() << std::endl;
