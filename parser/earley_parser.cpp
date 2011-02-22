@@ -3,16 +3,16 @@
 using parser::EarleyParser;
 
 #ifdef DUMP_CONTENT
-void EarleyParser::Item::Dump( Grammar* grammar, std::ostream& out ) {
+void EarleyParser::Item::Dump(Grammar* grammar, std::ostream& out) {
   bool dot_printed = false;
   out << state_number_ << "." << order_number_ << " ";
-  out << "[ " << grammar->GetSymbolName(grammar->GetLhsOfRule(rule_num_)) << " --> ";
+  out << "[ " << grammar->GetSymbolName(grammar->GetLhsOfRule(rule_id_)) << " --> ";
   for (unsigned rule_pos = 0; grammar->GetRhsOfRule(rule_id_, rule_pos) != Grammar::kBadSymbolId; ++rule_pos) {
     if (rhs_pos_ == rule_pos) {
       out << "* ";
       dot_printed = true;
     }
-    out << grammar->GetSymbolName(grammar->GetRhsOfRule(rule_num_, rule_pos));
+    out << grammar->GetSymbolName(grammar->GetRhsOfRule(rule_id_, rule_pos));
     out << " ";
   }
 
@@ -39,14 +39,14 @@ void EarleyParser::Item::Dump( Grammar* grammar, std::ostream& out ) {
 }
 #endif // DUMP_CONTENT
 
-inline EarleyParser::Item* EarleyParser::State::AddItem( EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context ) {
+inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context) {
   // Получаем идентификатор символа в правой части правила. Если метка стоит в конце правила, то
   // будет возвращен 0, который используется как индекс для меток в конце правила.
   Grammar::SymbolId symbol_id = grammar_->GetRhsOfRule(rule_id, dot);
 
   // Инициализируем ситуацию.
   Item* item = disp_->GetItem(rule_id, dot, origin, lptr);
-  if (rptr) item->rptrs_.push_back(Rptr(contex, rptr));
+  if (rptr) item->rptrs_.push_back(Item::Rptr(context, rptr));
   item->order_number_ = num_of_items_;
   item->state_number_ = id_;
 
@@ -75,23 +75,23 @@ inline EarleyParser::Item* EarleyParser::State::AddItem( EarleyParser* parser, G
   // Правило -- это правило вида A --> alpha * B beta. Надо добавить ситуацию для правила B --> epsilon в список
   // необработанных ситуаций.
   else if (symbol_id != Grammar::kBadSymbolId and grammar_->IsNonterminal(symbol_id)) {
-    SymboltemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals()];
+    SymbolItemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals()];
     for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
-      parser->PutItemToNonhandledList(cur, true);
+      parser->PutItemToNonhandledlist(cur, true);
     }
   }
 
   return item;
 }
 
-inline void EarleyParser::Completer( size_t state_id, Item* item ) {
+inline void EarleyParser::Completer(size_t state_id, Item* item) {
   State* cur_state = state_disp_.GetState(state_id);
   State* origin_state = state_disp_.GetState(item->origin_);
   if (cur_state and origin_state) {
-    State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_num_) + 1];
+    State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_id_) + 1];
     for (Item* cur = or_item_list.elems_.get_first(); cur; cur = or_item_list.elems_.get_next()) {
-      if (not IsItemInList(cur_state.items_[grammar_->GetRhsOfRule(cur->rule_num_, cur->rhs_pos_ + 1) + 1], cur, item)) {
-        Item* new_item = cur_state.AddItem(cur->rule_num_, cur->rhs_pos_ + 1, cur->origin_, cur, item);
+      if (not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1) + 1], cur, item)) {
+        Item* new_item = cur_state->AddItem(cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item);
         PutItemToNonhandledList(new_item, true);
 #       ifdef DUMP_CONTENT
         new_item->Dump(grammar_, std::cout);
@@ -101,14 +101,14 @@ inline void EarleyParser::Completer( size_t state_id, Item* item ) {
   }
 }
 
-inline void EarleyParser::Predictor( size_t state_id, Item* item ) {
+inline void EarleyParser::Predictor(size_t state_id, Item* item) {
   State* cur_state = state_disp_.GetState(state_id);
-  unsigned sym_after_dot = grammar_->GetRhsOfRule(item->rule_num_, item->rhs_pos_);
+  unsigned sym_after_dot = grammar_->GetRhsOfRule(item->rule_id_, item->rhs_pos_);
 
   if (cur_state and not cur_state->items_[sym_after_dot + 1].handled_by_predictor_) {
     Grammar::RuleIdList& rules_list = grammar_->GetSymRules(sym_after_dot - grammar_->GetNumOfTerminals());
-    for (unsigned cur = rules_list.get_first(); not rules_list.is_end() ; cur = rules_list.get_next()) {
-      Item* new_item = cur_state->AddItem(cur, 0, states_.size() - 1, 0, 0);
+    for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
+      Item* new_item = cur_state->AddItem(this, cur, 0, cur_state->id_, 0, 0, NULL);
       PutItemToNonhandledList(new_item, false);
 
 #     ifdef DUMP_CONTENT
@@ -120,17 +120,17 @@ inline void EarleyParser::Predictor( size_t state_id, Item* item ) {
   }
 }
 
-inline bool EarleyParser::Scanner( size_t state_id, Token token, size_t& new_state_id ) {
-  unsigned next_sym_id = cur_token_.type_;
+inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id) {
+  unsigned next_sym_id = token->type_;
   unsigned cur_term = grammar_->GetInternalSymbolByExtrernalId(next_sym_id);
 
   if (State* cur_state = state_disp_.GetState(state_id)) {
-    state::item_list& term_item_list = cur_state->items_[cur_term + 1];
+    State::SymbolItemList& term_item_list = cur_state->items_[cur_term + 1];
     if (term_item_list.elems_.size() > 0) {
       new_state_id = state_disp_.AddState(token);
       State* next_state = state_disp_.GetState(new_state_id);
       for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
-        Item* new_item = new_state->AddItem(cur->rule_num_, cur->rhs_pos_ + 1, cur->origin_, cur, 0);
+        Item* new_item = next_state->AddItem(cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, 0);
         PutItemToNonhandledList(new_item, false);
 
 #       ifdef DUMP_CONTENT
@@ -144,10 +144,10 @@ inline bool EarleyParser::Scanner( size_t state_id, Token token, size_t& new_sta
   return false;
 }
 
-inline void EarleyParser::Closure( size_t state_id ) {
+inline void EarleyParser::Closure(size_t state_id) {
   while (not nonhandled_items_.empty()) {
     Item* item = nonhandled_items_.pop();
-    unsigned sym_index = grammar_->GetRhsOfRule(item->rule_num_, item->rhs_pos_);
+    unsigned sym_index = grammar_->GetRhsOfRule(item->rule_id_, item->rhs_pos_);
     if (sym_index == Grammar::kBadSymbolId) {
       Completer(state_id, item);
     } else if (grammar_->IsNonterminal(sym_index)) {
@@ -156,8 +156,8 @@ inline void EarleyParser::Closure( size_t state_id ) {
   }
 }
 
-inline bool EarleyParser::InitFirstState( size_t& state_id ) {
-  state_id = state_disp_.AddState(Token());
+inline bool EarleyParser::InitFirstState(size_t& state_id) {
+  state_id = state_disp_.AddState(Token::Ptr(new Token()));
   State* next_state = state_disp_.GetState(state_id);
   Grammar::RuleIdList& rules_list = grammar_->GetSymRules(grammar_->GetStartSymbol() - grammar_->GetNumOfTerminals());
 
@@ -166,7 +166,7 @@ inline bool EarleyParser::InitFirstState( size_t& state_id ) {
   }
 
   for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
-    Item* new_item = next_state.AddItem(cur, 0, 0, 0, 0, 0);
+    Item* new_item = next_state->AddItem(this, cur, 0, 0, 0, 0, 0);
     PutItemToNonhandledList(new_item, false);
 
 #   ifdef DUMP_CONTENT
@@ -188,7 +188,7 @@ bool EarleyParser::Parse() {
   // Проходим по цепочке (дереву при неоднозначности) терминалов, возвращаемой лексическим анализатором.
   StateList cur_gen_states;
   cur_gen_states.push_back(first_state_id);
-  while (not lexer->IsEnd()) {
+  while (not lexer_->IsEnd()) {
     // Если мы не дошли до конца потока, но список состояний пуст, то значит, цепочка не разобрана, возвращаем false.
     if (cur_gen_states.empty()) {
       return false;
@@ -201,12 +201,11 @@ bool EarleyParser::Parse() {
       State* state = state_disp_.GetState(state_id);
 
       // Получаем список токенов, идущих за данным.
-      TokenList tokens;
-      lexer->GetTokens(state->token_, tokens);
-      for (Token token = tokens.get_first(); not tokens.is_end(); token = tokens.get_next()) {
+      Lexer::TokenList tokens = lexer_->GetTokens(state->token_);
+      for (size_t i = 0; i < tokens.size(); ++i) {
         // Для каждого токена осуществляем сдвиг и итеративно применяем операции Completer и Predictor.
         size_t new_state_id = 0;
-        if (Scanner(state_id, token, new_state_id)) {
+        if (Scanner(state_id, tokens[i], new_state_id)) {
           Closure(new_state_id);
           next_gen_states.push_back(new_state_id);
         }
@@ -264,11 +263,11 @@ inline bool   earley_parser::error_scanner()
     if( new_error_cost <= max_error_value_ )
     {
       // deletion
-      item* new_item = new_state.add_item( cur->rule_num_, cur->rhs_pos_, cur->origin_, 0, 0, new_error_cost );
+      item* new_item = new_state.add_item( cur->rule_id_, cur->rhs_pos_, cur->origin_, 0, 0, new_error_cost );
       put_item_to_nonhandled_list( new_item, false );
       
       // insertion
-      new_item = new_state.add_item( cur->rule_num_, cur->rhs_pos_ + 1, cur->origin_, cur, 0, new_error_cost );
+      new_item = new_state.add_item( cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, 0, new_error_cost );
       put_item_to_nonhandled_list( new_item, false );
     }
   }

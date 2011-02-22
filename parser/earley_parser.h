@@ -63,7 +63,7 @@ private:
 
       //! Инициализация всех полей.
       Rptr( Context* context, Item* item )
-        : context_(contex)
+        : context_(context)
         , item_(item)
       {}
     };
@@ -152,7 +152,7 @@ private:
           block_pos_ = 0;
         }
 
-        item =  block_list_[block_list_.size()-1][block_pos_++];
+        item = &block_list_[block_list_.size()-1][block_pos_++];
       }
 
       item->rule_id_  = rule_id;
@@ -170,7 +170,6 @@ private:
      */
     void FreeItem( Item* item ) {
       free_list_.push_front(item);
-      item->
     }
   };
 
@@ -215,7 +214,7 @@ private:
     size_t          num_of_items_;           //!< Число ситуаций в состоянии.
     bool            is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
     size_t          id_;                     //!< Уникальный идентификатор данного состояния.
-    Token           token_;                  //!< Токен, послуживший инициатором создания этого состояния.
+    Token::Ptr      token_;                  //!< Токен, послуживший инициатором создания этого состояния.
     ItemDispatcher* disp_;                   //!< Указатель на объект диспетчера ситуаций.
     Grammar*        grammar_;                //!< Указатель на объект грамматики.
     bool            valid_;                  //!< Установлен в true, если состояние рабочее.
@@ -238,7 +237,7 @@ private:
      * \param[in] id      Уникальный идентификатор состояния.
      * \param[in] token   Токен для данного состояния.
      */
-    void Init( ItemDispatcher* disp, Grammar* grammar, size_t id, Token token ) {
+    void Init(ItemDispatcher* disp, Grammar* grammar, size_t id, Token::Ptr token) {
       num_of_items_ = 0;
       is_completed_ = false;
       id_           = id;
@@ -270,7 +269,7 @@ private:
       num_of_items_ = 0;
       is_completed_ = false;
       id_           = 0;
-      token_        = Token();
+      token_        = Token::Ptr(new Token());
       disp_         = NULL;
       grammar_      = NULL;
       valid_        = false;
@@ -322,7 +321,7 @@ private:
      * \param disp    Указатель на объект диспетчера ситуаций.
      * \param grammar Указатель на объект грамматики.
      */
-    StateRepo( ItemDispatcher* disp, Grammar* grammar )
+    StateDispatcher(ItemDispatcher* disp, Grammar* grammar)
       : disp_(disp)
       , grammar_(grammar)
     {}
@@ -333,7 +332,7 @@ private:
      * \param[in] index Индекс состояния.
      * \return          Указатель на объект состояния или нуль.
      */
-    State* GetState( size_t index ) {
+    State* GetState(size_t index) {
       if (index >= repo_.size()) {
         return NULL;
       }
@@ -350,28 +349,29 @@ private:
      * 
      * \return Индекс нового состояния.
      */
-    size_t AddState( Token token ) {
+    size_t AddState(Token::Ptr token) {
       if (not free_states_.empty()) {
-        size_t index = free_states_.back().second;
+        size_t id = free_states_.back().second;
         State* state = free_states_.back().first;
-        state->Init(disp_, grammar_, token);
+        state->Init(disp_, grammar_, id, token);
         free_states_.pop_back();
-        return index;
+        return id;
       }
 
       repo_.push_back(State());
-      repo.back().Init(disp_, grammar_, token);
-      return repo_.size() - 1;
+      size_t id = repo_.size() - 1;
+      repo_[id].Init(disp_, grammar_, id, token);
+      return id;
     }
   };
 
   typedef queue<Item*> ItemQueue;
   typedef parser::list<size_t> StateList;
 
-  StateDispatcher   state_disp_;       //!< Диспетчер состояний.
-  ItemDispatcher    item_disp_;        //!< Диспетчер ситуаций.
   Grammar*          grammar_;          //!< Указатель на объект грамматики.
   Lexer*            lexer_;            //!< Указатель на объект лексического анализатора.
+  StateDispatcher   state_disp_;       //!< Диспетчер состояний.
+  ItemDispatcher    item_disp_;        //!< Диспетчер ситуаций.
   ItemQueue         nonhandled_items_; //!< Очередь необработанных ситуаций.
 
   /*!
@@ -380,7 +380,7 @@ private:
    * \param[in] state_id  Идентификатор состояния, которому принадлежит ситуация.
    * \param[in] item      Ситуация, которую необходимо обработать.
    */
-  inline void Completer( size_t state_id, Item* item );
+  inline void Completer(size_t state_id, Item* item);
 
   /*!
    * \brief Реализацию операции Predictor.
@@ -388,7 +388,7 @@ private:
    * \param[in] state_id  Идентификатор состояния, которому принадлежит ситуация.
    * \param[in] item      Ситуация, которую необходимо обработать.
    */
-  inline void Predictor( size_t state_id, Item* item );
+  inline void Predictor(size_t state_id, Item* item);
 
   /*!
    * \brief реализация процедуры Scanner.
@@ -398,13 +398,13 @@ private:
    * \param[in] new_state_id  Идентификатор состояния, которое было добавлено в результате выполнения процедуры.
    * \return                  true если в результате было добавлено новое состояние.
    */
-  inline bool Scanner( size_t state_id, Token token, size_t& new_state_id );
+  inline bool Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id);
 
   //! Итеративное выполнение операций Completer и Predictor.
-  inline void Closure( size_t state_id );
+  inline void Closure(size_t state_id);
 
   //! Инициализация начального состояния.
-  inline bool InitFirstState( size_t& state_id );
+  inline bool InitFirstState(size_t& state_id);
 
   /*!
    * \brief Положить ситуацию в список необработанных с необязательной проверкой на присутствие в списке.
@@ -412,7 +412,7 @@ private:
    * \param[in] item  Указатель на объект стиуации.
    * \param[in] check Проверять или нет присутствие ситуации в списке.
    */
-  inline void PutItemToNonhandledlist( Item* item, bool check ) {
+  inline void PutItemToNonhandledlist(Item* item, bool check) {
     if (not check or not nonhandled_items_.find(item)) {
       nonhandled_items_.push(item);
     }
@@ -426,10 +426,10 @@ private:
    * \param[in] rptr      Ситуация для добавления, если искомая ситуация найдена.
    * \return              true если ситауация найдена.
    */
-  inline bool IsItemInList( State::SymbolItemList& item_list, Item* item, Item* rptr ) {
+  inline bool IsItemInList(State::SymbolItemList& item_list, Item* item, Item* rptr) {
     Item tmp_item;
     tmp_item.rhs_pos_   = item->rhs_pos_ + 1;
-    tmp_item.rule_num_  = item->rule_num_;
+    tmp_item.rule_id_   = item->rule_id_;
     tmp_item.origin_    = item->origin_;
     tmp_item.lptr_      = item;
 
@@ -449,9 +449,11 @@ public:
    * \param grammar Указатель на объект грамматики.
    * \param lexer   Указатель на объект лексического анализатора.
    */
-  EarleyParser( Grammar* grammar, Lexer* lexer );
+  EarleyParser(Grammar* grammar, Lexer* lexer)
     : grammar_(grammar)
-    , lexer_(lexer) {
+    , lexer_(lexer)
+    , state_disp_(&item_disp_, grammar_)
+    , item_disp_(1024*1024) {
   }
 
   /*!

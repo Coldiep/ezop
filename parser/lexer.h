@@ -8,15 +8,19 @@
 
 namespace parser {
 
-struct lexer{
+struct Lexer {
+  //! Тип списка токенов.
+  typedef std::vector<Token::Ptr> TokenList;
 
-  // return the current token
-  virtual token        get_token() = 0;
-  
-  // is th end of input?
-  virtual bool        is_end() = 0;
+  //! Возврат списка токенов, следующих за переданным в качестве параметра.
+  virtual TokenList GetTokens(Token::Ptr token) = 0;
 
-  virtual ~lexer(){}
+  //! Возвращает true, если достигнут конец потока.
+  virtual bool IsEnd() = 0;
+
+  //! Тип абстрактный.
+  virtual ~Lexer() {
+  }
 };
 
 } // parser
