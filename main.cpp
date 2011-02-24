@@ -37,7 +37,7 @@ int main() {
     PublicGrammar pg("test");
     pg.AddTerminal(1, "N");
     pg.AddTerminal(2, "+");
-    pg.AddTerminal(3, "*");
+    pg.AddTerminal(3, "x");
 
     pg.AddNonterminal(4, "A");
     pg.AddNonterminal(5, "M");
@@ -52,7 +52,7 @@ int main() {
     pg.AddLhsSymbol(2, 4);
     pg.AddRhsSymbol(2, 5);
 
-    pg.AddRule(3, "M --> N * M");
+    pg.AddRule(3, "M --> N x M");
     pg.AddLhsSymbol(3, 5);
     pg.AddRhsSymbol(3, 1);
     pg.AddRhsSymbol(3, 3);
@@ -96,7 +96,7 @@ int main() {
     TestLexer lexer;
     lexer.tokens_.push_back(1);
     lexer.tokens_.push_back(2);
-    lexer.tokens_.push_back(3);
+    lexer.tokens_.push_back(1);
 
     EarleyParser parser(&gr, &lexer);
 

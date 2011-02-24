@@ -12,61 +12,57 @@ class list{
     list_node*      next_;
     list_node*      prev_;
 
-    list_node():next_(0), prev_(0){}
+    list_node()
+      : next_(0)
+      , prev_(0) {
+    }
   };
 
   list_node*        head_;
   list_node*        last_;
-  
+  unsigned          size_;
   list_node*        iter_;
-  
-  int            size_;
 
 public:
-  list():head_(0), last_(0), size_(0), iter_(0) {}
+  list()
+    : head_(0)
+    , last_(0)
+    , size_(0)
+    , iter_(0) {
+  }
 
-  void push_front( Element elem )
-  {
+  void push_front( Element elem ) {
     list_node* new_node = new list_node();
     new_node->elem_ = elem;
     new_node->prev_ = 0;
     new_node->next_ = head_;
 
-    if( head_ )
-    {
+    if (head_) {
       head_->prev_ = new_node;
-    }
-    else
-    {
+    } else {
       last_ = new_node;
     }
 
     head_ = new_node;
-    
     ++ size_;
   }
 
-  void push_back( Element elem )
-  {
+  void push_back( Element elem ) {
     list_node* new_node = new list_node();
     new_node->elem_ = elem;
     new_node->next_ = 0;
     new_node->prev_ = last_;
 
-    if( last_ )
-    {
+    if (last_) {
       last_->next_ = new_node;
-    }
-    else
-    {
+    } else {
       head_ = new_node;
     }
 
     last_ = new_node;
-    
-    ++ size_;
+    ++size_;
   }
-  
+
   Element pop_front()
   {
     if( head_ )

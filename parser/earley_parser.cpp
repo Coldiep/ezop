@@ -55,7 +55,6 @@ inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Gr
   item->state_number_ = id_;
 
   // И добавляем ее в соответствующий список.
-  SymbolItemList& sym_list = items_[symbol_id];
   items_[symbol_id].elems_.push_back(item);
   state_items_.push_back(item);
   ++num_of_items_;
@@ -92,9 +91,10 @@ inline void EarleyParser::Completer(size_t state_id, Item* item) {
   State* cur_state = state_disp_.GetState(state_id);
   State* origin_state = state_disp_.GetState(item->origin_);
   if (cur_state and origin_state) {
-    State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_id_) + 1];
+    Grammar::SymbolId sid = grammar_->GetLhsOfRule(item->rule_id_);
+    State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_id_)];
     for (Item* cur = or_item_list.elems_.get_first(); cur; cur = or_item_list.elems_.get_next()) {
-      if (not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1) + 1], cur, item)) {
+      if (not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1)], cur, item)) {
         Item* new_item = cur_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item, NULL);
         PutItemToNonhandledList(new_item, true);
 #       ifdef DUMP_CONTENT
@@ -109,10 +109,10 @@ inline void EarleyParser::Predictor(size_t state_id, Item* item) {
   State* cur_state = state_disp_.GetState(state_id);
   unsigned sym_after_dot = grammar_->GetRhsOfRule(item->rule_id_, item->rhs_pos_);
 
-  if (cur_state and not cur_state->items_[sym_after_dot + 1].handled_by_predictor_) {
+  if (cur_state and not cur_state->items_[sym_after_dot].handled_by_predictor_) {
     Grammar::RuleIdList& rules_list = grammar_->GetSymRules(sym_after_dot - grammar_->GetNumOfTerminals());
     for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
-      Item* new_item = cur_state->AddItem(this, cur, 0, cur_state->id_, 0, 0, NULL);
+      Item* new_item = cur_state->AddItem(this, cur, 0, cur_state->id_, NULL, NULL, NULL);
       PutItemToNonhandledList(new_item, false);
 
 #     ifdef DUMP_CONTENT
@@ -120,7 +120,7 @@ inline void EarleyParser::Predictor(size_t state_id, Item* item) {
 #     endif
     }
 
-    cur_state->items_[sym_after_dot + 1].handled_by_predictor_ = true;
+    cur_state->items_[sym_after_dot].handled_by_predictor_ = true;
   }
 }
 
@@ -129,12 +129,12 @@ inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new
   unsigned cur_term = grammar_->GetInternalSymbolByExtrernalId(next_sym_id);
 
   if (State* cur_state = state_disp_.GetState(state_id)) {
-    State::SymbolItemList& term_item_list = cur_state->items_[cur_term + 1];
+    State::SymbolItemList& term_item_list = cur_state->items_[cur_term];
     if (term_item_list.elems_.size() > 0) {
       new_state_id = state_disp_.AddState(token);
       State* next_state = state_disp_.GetState(new_state_id);
       for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
-        Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, 0, NULL);
+        Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
         PutItemToNonhandledList(new_item, false);
 
 #       ifdef DUMP_CONTENT
@@ -170,7 +170,7 @@ inline bool EarleyParser::InitFirstState(size_t& state_id) {
   }
 
   for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
-    Item* new_item = next_state->AddItem(this, cur, 0, 0, 0, 0, 0);
+    Item* new_item = next_state->AddItem(this, cur, 0, state_id, NULL, NULL, NULL);
     PutItemToNonhandledList(new_item, false);
 
 #   ifdef DUMP_CONTENT
@@ -178,7 +178,7 @@ inline bool EarleyParser::InitFirstState(size_t& state_id) {
 #   endif
   }
 
-  next_state->items_[grammar_->GetStartSymbol() + 1].handled_by_predictor_ = true;
+  next_state->items_[grammar_->GetStartSymbol()].handled_by_predictor_ = true;
 
   return true;
 }
