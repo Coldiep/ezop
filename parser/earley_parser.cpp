@@ -26,18 +26,19 @@ void EarleyParser::Item::Dump(Grammar* grammar, std::ostream& out) {
   else out << "null";
 
   out << ", ";
+#if 0
   if (not rptrs_.empty()) {
     out << "<";
-#if 0
     for (Rptr cur = rptrs_.get_first(); cur;) {
       out << cur->item_->state_number_ << "." << cur->item_->order_number_;
       if (cur = rptrs_.get_next()) out << ",";
     }
-#endif
     out << ">";
   } else {
     out << "<null>";
   }
+#endif
+  out << "<null>";
 
   out << " ]\n";
 }
@@ -88,13 +89,21 @@ inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Gr
 }
 
 inline void EarleyParser::Completer(size_t state_id, Item* item) {
+  // Текущее состояние.
   State* cur_state = state_disp_.GetState(state_id);
+
+  // Состояние, в котором была порождена ситуация.
   State* origin_state = state_disp_.GetState(item->origin_);
+
+  // Начинаем обработку только, если определены текущее состояние и состояние, где была
+  // порождена данная ситуация.
   if (cur_state and origin_state) {
-    Grammar::SymbolId sid = grammar_->GetLhsOfRule(item->rule_id_);
+    // Список ситуаций с точкой перед символом в левой части правила переданной ситуации.
     State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_id_)];
     for (Item* cur = or_item_list.elems_.get_first(); cur; cur = or_item_list.elems_.get_next()) {
+      // В случае неоднозначности одна и та же ситуация может обрабатываться несколько раз, проверяем это.
       if (not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1)], cur, item)) {
+        // Сдвигаем символ после точки в обрабатываемой ситуации и добавляем ее в текущее состояние.
         Item* new_item = cur_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item, NULL);
         PutItemToNonhandledList(new_item, true);
 #       ifdef DUMP_CONTENT
@@ -106,12 +115,18 @@ inline void EarleyParser::Completer(size_t state_id, Item* item) {
 }
 
 inline void EarleyParser::Predictor(size_t state_id, Item* item) {
+  // Текущее состояние.
   State* cur_state = state_disp_.GetState(state_id);
+
+  // Символ после точки в правой части правила ситуации.
   unsigned sym_after_dot = grammar_->GetRhsOfRule(item->rule_id_, item->rhs_pos_);
 
+  // Если текущая ситуация еще не была обработана операцией Predictor, то обрабатываем ее.
   if (cur_state and not cur_state->items_[sym_after_dot].handled_by_predictor_) {
+    // Получаем список правил, в которых данный символ стоит в левой части.
     Grammar::RuleIdList& rules_list = grammar_->GetSymRules(sym_after_dot - grammar_->GetNumOfTerminals());
     for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
+      // Добавляем ситуацию на основе этого правила.
       Item* new_item = cur_state->AddItem(this, cur, 0, cur_state->id_, NULL, NULL, NULL);
       PutItemToNonhandledList(new_item, false);
 
@@ -125,23 +140,27 @@ inline void EarleyParser::Predictor(size_t state_id, Item* item) {
 }
 
 inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id) {
-  unsigned next_sym_id = token->type_;
-  unsigned cur_term = grammar_->GetInternalSymbolByExtrernalId(next_sym_id);
+  // Идентификатор символа, по которому будет производиться сдвиг.
+  unsigned cur_symbol_id = grammar_->GetInternalSymbolByExtrernalId(token->type_);
 
   if (State* cur_state = state_disp_.GetState(state_id)) {
-    State::SymbolItemList& term_item_list = cur_state->items_[cur_term];
+    // Получаем список ситуаций, у которых точка стоит перед данным символом.
+    State::SymbolItemList& term_item_list = cur_state->items_[cur_symbol_id];
     if (term_item_list.elems_.size() > 0) {
+      // Создаем новое состояние для данного символа.
       new_state_id = state_disp_.AddState(token);
-      State* next_state = state_disp_.GetState(new_state_id);
-      for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
-        Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
-        PutItemToNonhandledList(new_item, false);
+      if (State* next_state = state_disp_.GetState(new_state_id)) {
+        for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
+          // Добавляем новую ситуацию со сдвинутой точкой в новое состояние.
+          Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
+          PutItemToNonhandledList(new_item, false);
 
 #       ifdef DUMP_CONTENT
-        new_item->Dump(grammar_, std::cout);
+          new_item->Dump(grammar_, std::cout);
 #       endif
+        }
+        return true;
       }
-      return true;
     }
   }
 
@@ -149,11 +168,14 @@ inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new
 }
 
 inline void EarleyParser::Closure(size_t state_id) {
+  // Проходим по необработанным ситуациям и обрабатываем их операциями Completer или Predictor.
   while (not nonhandled_items_.empty()) {
     Item* item = nonhandled_items_.pop();
     unsigned sym_index = grammar_->GetRhsOfRule(item->rule_id_, item->rhs_pos_);
+    // Если у ситуации точка в конце правила, то надо применить операцию Completer.
     if (sym_index == Grammar::kBadSymbolId) {
       Completer(state_id, item);
+    // Если символ после точки нетерминал, то применяем операцию Predictor.
     } else if (grammar_->IsNonterminal(sym_index)) {
       Predictor(state_id, item);
     }
@@ -186,7 +208,9 @@ inline bool EarleyParser::InitFirstState(size_t& state_id) {
 bool EarleyParser::Parse() {
   // Инициализируем начальное состояние.
   size_t first_state_id = 0;
-  bool result = InitFirstState(first_state_id);
+  if (not InitFirstState(first_state_id)) {
+    return false;
+  }
   Closure(first_state_id);
 
   // Проходим по цепочке (дереву при неоднозначности) терминалов, возвращаемой лексическим анализатором.
