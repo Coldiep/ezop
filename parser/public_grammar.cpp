@@ -18,7 +18,8 @@ PublicGrammar::PublicGrammar( const char* desc )
   , min_rule_id_(kUnknownMapId)
   , num_of_terms_(0)
   , num_of_nonterms_(0)
-{}
+  , start_symbol_(kUnknownMapId) {
+}
 
 /*!
  * \brief Добавление терминального символа.
