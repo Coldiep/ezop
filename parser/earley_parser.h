@@ -1,4 +1,3 @@
-
 /**************************************************************************************************************
   Earley's algorithm implementation declarations.
 **************************************************************************************************************/
@@ -15,6 +14,10 @@
 #include "lexer.h"
 #include "allocator.h"
 #include "ast.h"
+
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 #include <vector>
 #include <deque>
@@ -89,15 +92,51 @@ private:
      * \param[in] grammar Указатель на объект грамматики, у которой берутся символьные имена элементов.
      * \param[in] out Поток для вывода.
      */
-    void Dump( Grammar* grammar, std::ostream& out );
+	void Dump( Grammar* grammar, std::ostream& out )
+	{
+		bool dot_printed = false;
+		out << state_number_ << "." << order_number_ << " ";
+		out << "[ " << grammar->GetSymbolName(grammar->GetLhsOfRule(rule_id_)) << " --> ";
+		for (unsigned rule_pos = 0; grammar->GetRhsOfRule(rule_id_, rule_pos) != Grammar::kBadSymbolId; ++rule_pos) {
+			if (rhs_pos_ == rule_pos) {
+				out << "* ";
+				dot_printed = true;
+			}
+			out << grammar->GetSymbolName(grammar->GetRhsOfRule(rule_id_, rule_pos));
+			out << " ";
+		}
+
+		if (! dot_printed) out << " * ";
+		out << ", " << origin_ << ", ";
+
+		if (lptr_) out << lptr_->state_number_ << "." << lptr_->order_number_;
+		else out << "null";
+
+		out << ", ";
+#if 0
+		if (not rptrs_.empty()) {
+			out << "<";
+			for (Rptr cur = rptrs_.get_first(); cur;) {
+				out << cur->item_->state_number_ << "." << cur->item_->order_number_;
+				if (cur = rptrs_.get_next()) out << ",";
+			}
+			out << ">";
+		} else {
+			out << "<null>";
+		}
+#endif
+		out << "<null>";
+
+		out << " ]\n";
+	};
 #   endif // DUMP_CONTENT
 
     //! Оператор сравнения.
     bool operator==( const Item& rhs ) {
         return  rule_id_ == rhs.rule_id_
-                and rhs_pos_ == rhs.rhs_pos_ 
-                and origin_ == rhs.origin_ 
-                and lptr_ == rhs.lptr_;
+                && rhs_pos_ == rhs.rhs_pos_ 
+                && origin_ == rhs.origin_ 
+                && lptr_ == rhs.lptr_;
     }
   };
 
@@ -139,12 +178,12 @@ private:
       Item* item = NULL;
 
       // Проверяем свободную память.
-      if (not free_list_.empty()) {
+      if (! free_list_.empty()) {
         item = free_list_.back();
         free_list_.pop_back();
       } else {
         // Выделяем память для ситуации, если это необходимо.
-        if (block_pos_ >= block_size_ or block_list_.empty()) {
+        if (block_pos_ >= block_size_ || block_list_.empty()) {
           block_list_.push_back(ItemBlock());
           block_list_[block_list_.size()-1].resize(block_size_);
           block_pos_ = 0;
@@ -196,7 +235,7 @@ private:
 
       //! Аналог деструктора, используется т.к. память реально не освобождается.
       void Uninit( ItemDispatcher* disp ) {
-        while (not elems_.empty()) {
+        while (! elems_.empty()) {
           disp->FreeItem(elems_.pop_back());
         }
         handled_by_predictor_ = false;
@@ -284,7 +323,51 @@ private:
      * \param[in] rptr      Указатель на ситуацию, послужившую причиной сдвига нетерминала слева от метки.
      * \param[in] context   Указатель на контекст интерпретатора.
      */
-    inline Item* AddItem( EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context );
+
+	inline Item* AddItem( EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context )
+	{
+		// Получаем идентификатор символа в правой части правила. Если метка стоит в конце правила, то
+		// будет возвращен 0, который используется как индекс для меток в конце правила.
+		Grammar::SymbolId symbol_id = grammar_->GetRhsOfRule(rule_id, dot);
+
+		// Инициализируем ситуацию.
+		Item* item = disp_->GetItem(rule_id, dot, origin, lptr);
+		if (rptr) item->rptrs_.push_back(Item::Rptr(context, rptr));
+		item->order_number_ = num_of_items_;
+		item->state_number_ = id_;
+
+		// И добавляем ее в соответствующий список.
+		items_[symbol_id].elems_.push_back(item);
+		state_items_.push_back(item);
+		++num_of_items_;
+
+		// Если символ в левой части правила -- начальный и метка в конце правила, то выставляем соответствующий флаг.
+		if (grammar_->GetLhsOfRule(item->rule_id_) == grammar_->GetStartSymbol() && item->origin_ == 0) {
+			is_completed_ = true;
+		}
+
+		// Проверка на правило вида A --> epsilon.
+		if (dot == 0 && symbol_id == Grammar::kBadSymbolId) {
+			SymbolItemList& er_item_list = items_with_empty_rules_[grammar_->GetLhsOfRule(rule_id) - grammar_->GetNumOfTerminals() - 1];
+			for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
+				if (*item == *cur) {
+					return item;
+				}
+			}
+			er_item_list.elems_.push_back(item);
+		}
+
+		// Правило -- это правило вида A --> alpha * B beta. Надо добавить ситуацию для правила B --> epsilon в список
+		// необработанных ситуаций.
+		else if (symbol_id != Grammar::kBadSymbolId && grammar_->IsNonterminal(symbol_id)) {
+			SymbolItemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals() - 1];
+			for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
+				parser->PutItemToNonhandledList(cur, true);
+			}
+		}
+
+		return item;
+	};
 
 #   ifdef DUMP_CONTENT
     //! Печать содержимого состояния.
@@ -348,7 +431,7 @@ private:
      * \return Индекс нового состояния.
      */
     size_t AddState(Token::Ptr token) {
-      if (not free_states_.empty()) {
+      if (! free_states_.empty()) {
         size_t id = free_states_.back().second;
         State* state = free_states_.back().first;
         state->Init(disp_, grammar_, id, token);
@@ -396,7 +479,35 @@ private:
    * \param[in] new_state_id  Идентификатор состояния, которое было добавлено в результате выполнения процедуры.
    * \return                  true если в результате было добавлено новое состояние.
    */
-  inline bool Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id);
+  inline bool Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id)
+  {
+	  // Идентификатор символа, по которому будет производиться сдвиг.
+	  unsigned cur_symbol_id = grammar_->GetInternalSymbolByExtrernalId(token->type_);
+
+	  if (State* cur_state = state_disp_.GetState(state_id)) {
+		  // Получаем список ситуаций, у которых точка стоит перед данным символом.
+		  State::SymbolItemList& term_item_list = cur_state->items_[cur_symbol_id];
+		  if (term_item_list.elems_.size() > 0) {
+			  // Создаем новое состояние для данного символа.
+			  new_state_id = state_disp_.AddState(token);
+			  if (State* next_state = state_disp_.GetState(new_state_id)) {
+				  for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
+					  // Добавляем новую ситуацию со сдвинутой точкой в новое состояние.
+					  Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
+					  PutItemToNonhandledList(new_item, false);
+
+#       ifdef DUMP_CONTENT
+					  new_item->Dump(grammar_, std::cout);
+#       endif
+				  }
+				  return true;
+			  }
+		  }
+	  }
+
+	  return false;
+  }
+	  ;
 
   //! Итеративное выполнение операций Completer и Predictor.
   inline void Closure(size_t state_id);
@@ -411,7 +522,7 @@ private:
    * \param[in] check Проверять или нет присутствие ситуации в списке.
    */
   inline void PutItemToNonhandledList(Item* item, bool check) {
-    if (not check or not nonhandled_items_.find(item)) {
+    if (! check || ! nonhandled_items_.find(item)) {
       nonhandled_items_.push(item);
     }
   }
@@ -438,6 +549,23 @@ private:
       }
     }
     return false;
+  }
+
+    /*!
+   * \brief Обработка токена.
+   *
+   * \param[in] state_id		Идентификатор состояния, для которого вызывается процедура.
+   * \param[in] token			Токен для обработки.
+   * \param[in] next_gen_states	Список состояний для следующего шага.
+   */
+  inline void ManageToken(size_t state_id, Token::Ptr token, StateList* next_gen_states)
+  {
+	  size_t new_state_id = 0;
+	  if (Scanner(state_id, token, new_state_id)) 
+	  {
+		  Closure(new_state_id);
+		  next_gen_states->push_back(new_state_id);
+	  }
   }
 
 public:
@@ -470,4 +598,3 @@ public:
 } // namespace parser
 
 #endif // EARLEY_PARSER_H__
-

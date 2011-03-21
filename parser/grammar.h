@@ -23,7 +23,6 @@ class Grammar {
   typedef PublicGrammar::MapId SymbolId;          //!< Тип идентификаторов символа.
   typedef parser::list<RuleId> RuleIdList;        //!< Тип списка правил грамматики.
   typedef std::vector<RuleIdList> NontermVector;  //!< Тип вектора списка правил.
-
   /*!
    * \brief Класс представляет кэш помеченных правил, используемых в операции predictor.
    *
@@ -102,10 +101,20 @@ public:
    *
    * \param[in] public_grammar Указатель на объект PublicGrammar.
    */
-  explicit Grammar( const PublicGrammar* public_grammar );
+  explicit Grammar( const PublicGrammar* public_grammar )
+	  {
+		start_symbol_index_ = kBadSymbolId;
+		max_symbol_id_ = kBadSymbolId;
+		max_rule_id_ = kBadSymbolId;
+		num_of_terminals_ = kBadSymbolId;
+		num_of_rules_ = kBadSymbolId;
+		rules_space_ = kBadSymbolId;
+		public_grammar_ = public_grammar;
+		Initialize();
+	};
 
   //! Проверка, является ли данный символ нетерминальным.
-  bool IsNonterminal( SymbolId id ) const { return id >= num_of_terminals_; }
+  bool IsNonterminal( SymbolId id ) const { return id > num_of_terminals_; }
 
   //! Получение начального нетерминала грамматики.
   SymbolId GetStartSymbol() const { return start_symbol_index_; }

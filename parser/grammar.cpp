@@ -9,18 +9,8 @@ using parser::Grammar;
  *
  * \param[in] public_grammar Указатель на объект PublicGrammar.
  */
-Grammar::Grammar( const PublicGrammar* public_grammar )
-  : start_symbol_index_(kBadSymbolId)
-  , max_symbol_id_(kBadSymbolId)
-  , max_rule_id_(kBadSymbolId)
-  , num_of_terminals_(kBadSymbolId)
-  , num_of_nonterminals_(kBadSymbolId)
-  , num_of_rules_(kBadSymbolId)
-  , rules_space_(kBadSymbolId)
-  , public_grammar_(public_grammar)
-{
-    Initialize();
-}
+
+
 
 
 //! Инициалиизация грамматики -- преобразование из PublicGrammar.
@@ -50,7 +40,7 @@ void Grammar::Initialize() {
   const PublicGrammar::SymbolTable& sym_table = public_grammar_->GetSymbolTable();
   for (PublicGrammar::SymbolTable::const_iterator sym_it = sym_table.begin(); sym_it != sym_table.end(); ++sym_it) {
     // Добавляем только терминалы.
-    if (not sym_it->second.nonterminal_) {
+    if (! sym_it->second.nonterminal_) {
       symbols_[cur_sym_index] = sym_it->first;
       external_to_internal_symbols_map_[sym_it->first - min_symbol_id_ ] = cur_sym_index;
       ++cur_sym_index;

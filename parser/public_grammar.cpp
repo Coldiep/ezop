@@ -126,7 +126,7 @@ void PublicGrammar::AddLhsSymbol( MapId rule_id, MapId sym_id ) {
   }
 
   // Необходимо проверить, является ли символ нетерминальным.
-  if (not symbol_it->second.nonterminal_) {
+  if (! symbol_it->second.nonterminal_) {
     std::stringstream st;
     st << "The symbol with id = \"" << sym_id << "\" is not nonterminal";
     throw std::invalid_argument( st.str().c_str() );
