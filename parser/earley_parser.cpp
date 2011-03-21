@@ -131,9 +131,9 @@ bool EarleyParser::Parse() {
 			for (size_t i = 0; i < tokens.size(); ++i) 
 			{
 				
-				//boost::thread* thread = threads.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
-				//io_service.post(boost::bind(&parser::EarleyParser::ManageToken, this, state_id, tokens[i], &next_gen_states));		
-				ManageToken(state_id, tokens[i], &next_gen_states);
+				boost::thread* thread = threads.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
+				io_service.post(boost::bind(&parser::EarleyParser::ManageToken, this, state_id, tokens[i], &next_gen_states));		
+				//ManageToken(state_id, tokens[i], &next_gen_states);
 			}
 			io_service.stop();
 			threads.join_all();
