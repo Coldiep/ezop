@@ -1,4 +1,3 @@
-
 #define PRINT_ADDING
 
 #include "public_grammar.h"
@@ -34,6 +33,7 @@ int main() {
                       << ", position: " << lex.get_pos() << std::endl;
     }
 */
+	  /*
     PublicGrammar pg("test");
     pg.AddTerminal(1, "N");
     pg.AddTerminal(2, "+");
@@ -63,7 +63,32 @@ int main() {
     pg.AddRhsSymbol(4, 1);
 
     pg.SetStartSymbolId(4);
+	*/
+	  
+	PublicGrammar pg("test");
+    pg.AddTerminal(1, "a");
+    pg.AddTerminal(2, "b");
 
+    pg.AddNonterminal(3, "S");
+	pg.AddNonterminal(4, "A");
+
+    pg.AddRule(1, "S --> ab");
+    pg.AddLhsSymbol(1, 3);
+    pg.AddRhsSymbol(1, 1);
+    pg.AddRhsSymbol(1, 2);
+    
+	pg.AddRule(2, "S --> A");
+    pg.AddLhsSymbol(2, 3);
+    pg.AddRhsSymbol(2, 4);
+    
+	pg.AddRule(3, "A --> ab");
+    pg.AddLhsSymbol(3, 4);
+    pg.AddRhsSymbol(3, 1);
+	pg.AddRhsSymbol(3, 2);
+    
+
+    pg.SetStartSymbolId(3);
+	
     pg.Print(std::cout);
     std::cout << "\n\n";
 
@@ -96,12 +121,15 @@ int main() {
     TestLexer lexer;
     lexer.tokens_.push_back(1);
     lexer.tokens_.push_back(2);
-    lexer.tokens_.push_back(1);
+	
 
     EarleyParser parser(&gr, &lexer);
 
+	int time1 = time(0);
     if (parser.Parse()) {
         std::cout << "parse successful\n";
+		int time2 = time(0);
+		std::cout << "Time is " << (time2-time1) << "\n";
     } else {
       std::cout << "there is an error during parsing.\n";
     }
