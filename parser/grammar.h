@@ -105,7 +105,7 @@ public:
   explicit Grammar( const PublicGrammar* public_grammar );
 
   //! Проверка, является ли данный символ нетерминальным.
-  bool IsNonterminal( SymbolId id ) const { return id >= num_of_terminals_; }
+  bool IsNonterminal( SymbolId id ) const { return id > num_of_terminals_; }
 
   //! Получение начального нетерминала грамматики.
   SymbolId GetStartSymbol() const { return start_symbol_index_; }

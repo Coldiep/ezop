@@ -67,7 +67,7 @@ inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Gr
 
   // Проверка на правило вида A --> epsilon.
   if (dot == 0 and symbol_id == Grammar::kBadSymbolId) {
-    SymbolItemList& er_item_list = items_with_empty_rules_[grammar_->GetLhsOfRule(rule_id) - grammar_->GetNumOfTerminals()];
+    SymbolItemList& er_item_list = items_with_empty_rules_[grammar_->GetLhsOfRule(rule_id) - grammar_->GetNumOfTerminals() - 1];
     for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
       if (*item == *cur) {
         return item;
@@ -79,7 +79,7 @@ inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Gr
   // Правило -- это правило вида A --> alpha * B beta. Надо добавить ситуацию для правила B --> epsilon в список
   // необработанных ситуаций.
   else if (symbol_id != Grammar::kBadSymbolId and grammar_->IsNonterminal(symbol_id)) {
-    SymbolItemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals()];
+    SymbolItemList& er_item_list = items_with_empty_rules_[symbol_id - grammar_->GetNumOfTerminals() - 1];
     for (Item* cur = er_item_list.elems_.get_first(); cur; cur = er_item_list.elems_.get_next()) {
       parser->PutItemToNonhandledList(cur, true);
     }
