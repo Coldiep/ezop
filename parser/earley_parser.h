@@ -212,7 +212,7 @@ private:
     size_t          num_of_items_;           //!< Число ситуаций в состоянии.
     bool            is_completed_;           //!< Флаг того, что состояние содержит ситуацию вида [S--> alpha *, 0, ...].
     size_t          id_;                     //!< Уникальный идентификатор данного состояния.
-    Token::Ptr      token_;                  //!< Токен, послуживший инициатором создания этого состояния.
+    token*      token_;                  //!< Токен, послуживший инициатором создания этого состояния.
     ItemDispatcher* disp_;                   //!< Указатель на объект диспетчера ситуаций.
     Grammar*        grammar_;                //!< Указатель на объект грамматики.
     bool            valid_;                  //!< Установлен в true, если состояние рабочее.
@@ -235,7 +235,7 @@ private:
      * \param[in] id      Уникальный идентификатор состояния.
      * \param[in] token   Токен для данного состояния.
      */
-    void Init(ItemDispatcher* disp, Grammar* grammar, size_t id, Token::Ptr token) {
+    void Init(ItemDispatcher* disp, Grammar* grammar, size_t id, token* token) {
       num_of_items_ = 0;
       is_completed_ = false;
       id_           = id;
@@ -267,7 +267,7 @@ private:
       num_of_items_ = 0;
       is_completed_ = false;
       id_           = 0;
-      token_        = Token::Ptr(new Token());
+      token_        = (new token());
       disp_         = NULL;
       grammar_      = NULL;
       valid_        = false;
@@ -347,7 +347,7 @@ private:
      * 
      * \return Индекс нового состояния.
      */
-    size_t AddState(Token::Ptr token) {
+    size_t AddState(token* token) {
       if (not free_states_.empty()) {
         size_t id = free_states_.back().second;
         State* state = free_states_.back().first;
@@ -367,7 +367,7 @@ private:
   typedef parser::list<size_t> StateList;
 
   Grammar*          grammar_;          //!< Указатель на объект грамматики.
-  Lexer*            lexer_;            //!< Указатель на объект лексического анализатора.
+  lexer*            lexer_;            //!< Указатель на объект лексического анализатора.
   StateDispatcher   state_disp_;       //!< Диспетчер состояний.
   ItemDispatcher    item_disp_;        //!< Диспетчер ситуаций.
   ItemQueue         nonhandled_items_; //!< Очередь необработанных ситуаций.
@@ -396,7 +396,7 @@ private:
    * \param[in] new_state_id  Идентификатор состояния, которое было добавлено в результате выполнения процедуры.
    * \return                  true если в результате было добавлено новое состояние.
    */
-  inline bool Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id);
+  inline bool Scanner(size_t state_id, token* token, size_t& new_state_id);
 
   //! Итеративное выполнение операций Completer и Predictor.
   inline void Closure(size_t state_id);
@@ -447,9 +447,9 @@ public:
    * \param grammar Указатель на объект грамматики.
    * \param lexer   Указатель на объект лексического анализатора.
    */
-  EarleyParser(Grammar* grammar, Lexer* lexer)
+  EarleyParser(Grammar* grammar, lexer* l)
     : grammar_(grammar)
-    , lexer_(lexer)
+    , lexer_(l)
     , state_disp_(&item_disp_, grammar_)
     , item_disp_(1024*1024) {
   }

@@ -139,9 +139,9 @@ inline void EarleyParser::Predictor(size_t state_id, Item* item) {
   }
 }
 
-inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new_state_id) {
+inline bool EarleyParser::Scanner(size_t state_id, token* token, size_t& new_state_id) {
   // Идентификатор символа, по которому будет производиться сдвиг.
-  unsigned cur_symbol_id = grammar_->GetInternalSymbolByExtrernalId(token->type_);
+  unsigned cur_symbol_id = grammar_->GetInternalSymbolByExtrernalId(token->terminal_symbol_id);
 
   if (State* cur_state = state_disp_.GetState(state_id)) {
     // Получаем список ситуаций, у которых точка стоит перед данным символом.
@@ -183,7 +183,7 @@ inline void EarleyParser::Closure(size_t state_id) {
 }
 
 inline bool EarleyParser::InitFirstState(size_t& state_id) {
-  state_id = state_disp_.AddState(Token::Ptr(new Token()));
+  state_id = state_disp_.AddState(new token());
   State* next_state = state_disp_.GetState(state_id);
   Grammar::RuleIdList& rules_list = grammar_->GetSymRules(grammar_->GetStartSymbol() - grammar_->GetNumOfTerminals());
 
@@ -229,11 +229,11 @@ bool EarleyParser::Parse() {
       State* state = state_disp_.GetState(state_id);
 
       // Получаем список токенов, идущих за данным.
-      Lexer::TokenList tokens = lexer_->GetTokens(state->token_);
-      for (size_t i = 0; i < tokens.size(); ++i) {
+      std::set <token*> tokens = lexer_->get_tokens(state->token_); 
+      for (std::set <token*>::iterator it = tokens.begin(); it != tokens.end(); ++it)  {
         // Для каждого токена осуществляем сдвиг и итеративно применяем операции Completer и Predictor.
         size_t new_state_id = 0;
-        if (Scanner(state_id, tokens[i], new_state_id)) {
+        if (Scanner(state_id, (*it), new_state_id)) {
           Closure(new_state_id);
           next_gen_states.push_back(new_state_id);
         }

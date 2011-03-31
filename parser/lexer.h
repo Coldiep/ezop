@@ -1,29 +1,45 @@
-
-
-#ifndef LEXER_H__
-#define LEXER_H__
-
+#include <list>
 #include <vector>
+#include "scanner.h"
+#include "dfa.h"
 #include "token.h"
+#include "public_grammar.h"
 
 namespace parser {
 
-struct Lexer {
-  //! Тип списка токенов.
-  typedef std::vector<Token::Ptr> TokenList;
+  struct lex_type
+  {
+    int id;
+    std::string name;
+    std::string regexp;
+    dfa* d;
+    bool valid;
+    bool is_returned;
+    int priority;
+  };
 
-  //! Возврат списка токенов, следующих за переданным в качестве параметра.
-  virtual TokenList GetTokens(Token::Ptr token) = 0;
+  class lexer
+  {
+  public:
+    lexer();
+    lexer(const PublicGrammar* public_grammar);
+    ~lexer();
+    std::string stream;
+    std::set <lex_type*> lex_types;
+    int types_no;
+    token_tree* tree;
+    int cur_pos;
 
-  //! Возвращает true, если достигнут конец потока.
-  virtual bool IsEnd() = 0;
+    void add_type(std::string name, std::string regexp,int priority, bool ret = true, int id = -1);
+    void set_stream(std::string s);
+    void set_stream_file(std::string f, std::string tail);
+    void analyze();
+    std::set <token*> get_tokens(token* tok);
+    std::set <token*> get_tokens(int pos);
+    void reset();
+    std::string strip(std::string str);
+    bool IsEnd();
+  };
 
-  //! Тип абстрактный.
-  virtual ~Lexer() {
-  }
-};
 
-} // parser
-
-#endif // LEXER_H__
-
+}

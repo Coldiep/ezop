@@ -39,6 +39,7 @@ public:
    */
   struct Symbol {
     const char* name_;        //!> Имя символа в человекочитаемом виде.
+  const char* regex_;       //!> Регулярное выражение для терминального символа.
     bool        nonterminal_; //!< Признак того, что данный символ нетерминал.
 
     //! Конструктор по умолчанию.
@@ -46,13 +47,21 @@ public:
       : name_(NULL)
     {}
 
-    //! Полная инициализация.
+    //! Инициализация без регулярного выражения.
     Symbol( const char* name, bool nonterminal )
       : name_(name)
       , nonterminal_(nonterminal)
+    {
+    if (!nonterminal)
+      regex_ = name;
+  }
+  //! Полная инициализация.
+  Symbol( const char* name, bool nonterminal , const char* regex)
+      : name_(name)
+      , nonterminal_(nonterminal),
+    regex_(regex)
     {}
   };
-
   /*!
    * \brief Класс, представляющий правило контекстно-свободной грамматики.
    *
@@ -129,6 +138,15 @@ public:
    * \param name  Имя символа для человека.
    */
   void AddTerminal( MapId id, const char* name );
+
+  /*!
+   * \brief Добавление терминального символа.
+   *
+   * \param id    Идентификатор символа.
+   * \param name  Имя символа для человека.
+   * \param regex Регулярное выражение для символа.
+   */
+  void AddTerminal( MapId id, const char* name, const char* regex );
 
   /*!
    * \brief Добавление нетерминального символа.

@@ -50,6 +50,35 @@ void PublicGrammar::AddTerminal( MapId id, const char* name ) {
 }
 
 /*!
+ * \brief Добавление терминального символа.
+ *
+ * \param id    Идентификатор символа.
+ * \param name  Имя символа для человека.
+ * \param regex Регулярное выражение для символа.
+ */
+void PublicGrammar::AddTerminal( MapId id, const char* name, const char* regex ) {
+  // Проверяем, присутствует ли символ уже в грамматике или нет.
+  SymbolTable::iterator it = symbols_.find(id);
+  if (it != symbols_.end()) {
+    std::stringstream st;
+    st << "The symbol with id = \"" << id
+       << "\" is already in the grammar's symbol set under the name \"" << it->second.name_ << "\"";
+    throw std::invalid_argument(st.str().c_str());
+  }
+
+  // Добавляем символ в грамматику.
+  symbols_[id] = Symbol(name, false, regex);
+
+  // Меняем минимальных и максимальные значения идентификаторов, если необходимо.
+  if (max_sym_id_ < id) max_sym_id_ = id;
+  if (min_sym_id_ == kUnknownMapId) min_sym_id_ = id;
+  else if (min_sym_id_ > id) min_sym_id_ = id;
+
+  // Увеличиваем количество терминальных символов.
+  ++num_of_terms_;
+}
+
+/*!
  * \brief Добавление нетерминального символа.
  *
  * \param id    Идентификатор символа.
