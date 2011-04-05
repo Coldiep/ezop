@@ -1,5 +1,5 @@
 #include "error_thrower.h"
-#include "token.h"
+#include "open_token.h"
 
 token::token(int t, int s, int f, std::string st, bool ret, int term_sym_id)
 {

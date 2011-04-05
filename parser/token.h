@@ -1,32 +1,56 @@
-#include <set>
-#include <map>
-#include <vector>
-#include <string>
 
-class token
-{
-public:
-  token() {start = -1; finish = -1;};
-  token(int t, int s, int f, std::string st, bool ret, int term_sym_id = 0);
-  token(token* t);
-  int type;
-  int start;
-  int finish;
-  bool is_returned;
-  int terminal_symbol_id;
-  std::string id;
-  std::string str;
-  std::set<token*> children;
-  std::string print(int level, std::map <unsigned int, std::string> types);
-  std::string print_gv(std::map <unsigned int, std::string> types, std::string par = "");
-  std::string print_xml(std::map <unsigned int, std::string> types);
 
+#ifndef TOKEN_H__
+#define TOKEN_H__
+
+#include <boost/shared_ptr.hpp>
+#include "grammar.h"
+
+namespace parser {
+
+//! Определение класса токена.
+struct Token {
+  //! Тип умного указателя на объект класса.
+  typedef boost::shared_ptr<Token> Ptr;
+
+  Grammar::SymbolId type_;      //!< Символ грамматики, связанный с данным токеном (лексический тип).
+  unsigned          line_pos_;  //!< Номер строки.
+  unsigned          col_pos_;   //!< Номер позиции в строке.
+  unsigned          abs_pos_;   //!< Абсолютная позиция токена в исходном коде.
+  unsigned          length_;    //!< Длина токена в символах.
+  std::string       text_;      //!< Текст токена.
+
+  /*!
+   * \brief Конструктор для инициализации всех полей класса.
+   */
+  Token(const Grammar::SymbolId& type, const unsigned& col_pos, const unsigned& line_pos, const unsigned& abs_pos, const unsigned& length, const std::string& text)
+    : type_(type)
+    , line_pos_(line_pos)
+    , col_pos_(col_pos)
+    , abs_pos_(abs_pos)
+    , length_(length)
+    , text_(text) {
+  }
+
+  //! Инициализация по умолчанию -- пустой токен.
+  Token()
+    : type_(Grammar::kBadSymbolId)
+    , line_pos_(0)
+    , col_pos_(0)
+    , abs_pos_(0)
+    , length_(0) {
+  }
+
+  //! Инициализация лексическим типом.
+  explicit Token(const Grammar::SymbolId& type)
+    : type_(type)
+    , line_pos_(0)
+    , col_pos_(0)
+    , abs_pos_(0)
+    , length_(0) {
+  }
 };
 
-class token_tree
-{
-public:
-  token* root;
-  token_tree();
-  void add_node(token* node);
-};
+} // namespace parser
+
+#endif // TOKEN_H__

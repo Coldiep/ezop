@@ -1,10 +1,14 @@
-#include "lexer.h"
+#include "open_lexer.h"
 #include <string>
 #pragma warning(disable: 4996)
 #include "error_thrower.h"
 
 using parser::lexer;
 
+/*!
+* \brief Конструктор по умолчанию.
+*
+*/
 lexer::lexer()
 {
   cur_pos = 0;
@@ -12,20 +16,25 @@ lexer::lexer()
   tree = new token_tree();
   stream = "";
   lex_type* lt = new lex_type();
-  lt->id = 0;
+  lt->id = -1;
   lt->name = "ERROR";
   lt->valid = false;
   lex_types.insert(lt);
   
 }
+/*!
+* \brief Конструктор инициализируются объектом PublicGrammar.
+*
+* \param[in] public_grammar Указатель на объект PublicGrammar.
+*/
 lexer::lexer(const parser::PublicGrammar* public_grammar)
 {
-  cur_pos = 0;
+	cur_pos = 0;
     types_no = 0; 
     tree = new token_tree();
     stream = "";
     lex_type* lt = new lex_type();
-    lt->id = 0;
+    lt->id = -1;
     lt->name = "ERROR";
     lt->valid = false;
     lex_types.insert(lt);
@@ -33,20 +42,29 @@ lexer::lexer(const parser::PublicGrammar* public_grammar)
     for (PublicGrammar::SymbolTable::const_iterator sym_it = sym_table.begin(); sym_it != sym_table.end(); ++sym_it) 
     {
       if (! sym_it->second.nonterminal_) 
-        this->add_type(sym_it->second.name_, sym_it->second.regex_, 0, true, sym_it->first);
+        this->add_type(sym_it->second.name_, sym_it->second.regex_, 0, true, sym_it->first /*- public_grammar->GetMinSymbolId()*/);
     }
 }
+/*!
+* \brief Деструктор.
+*
+*/
 lexer::~lexer()
 {
   for (std::set <lex_type*>::iterator it = this->lex_types.begin(); it!= this->lex_types.end(); ++it)
   {
   lex_type* lt = (*it);
-    if (lt->id != 0)
+    if (lt->id != -1)
       delete lt->d;
     delete lt;
   }
   delete this->tree;
 }
+/*!
+* \brief Обработка входной строки для удаления лишних символов
+*
+* \param[in] str Строка для обработки.
+*/
 std::string lexer::strip(std::string str)
 {
   /*
@@ -63,10 +81,20 @@ std::string lexer::strip(std::string str)
   return tmp.c_str();*/
   return str;
 }
+/*!
+* \brief Обработка входной строки для удаления лишних символов
+*
+* \param[in] str Строка для обработки.
+*/
 void lexer::set_stream(std::string s)
 {
   stream = strip(s);
 }
+/*!
+* \brief Обработка входной строки для удаления лишних символов
+*
+* \param[in] str Строка для обработки.
+*/
 void lexer::set_stream_file(std::string filename, std::string tail)
 {
   FILE*f = fopen(filename.c_str(),"r");
@@ -83,6 +111,15 @@ void lexer::set_stream_file(std::string filename, std::string tail)
   stream.append(tail);
   stream = strip(stream);
 }
+/*!
+* \brief Добавление лексического типа.
+*
+* \param[in] name		Название типа.
+* \param[in] regexp		Регулярное выражение.
+* \param[in] priority	Приоритет типа.
+* \param[in] ret		Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
+* \param[in] id			Идентификатор типа.
+*/
 void lexer::add_type(std::string name, std::string regexp,int priority, bool ret, int id_)
 {
   lex_type* lt = new lex_type();
@@ -106,6 +143,10 @@ void lexer::add_type(std::string name, std::string regexp,int priority, bool ret
   lex_types.insert(lt);
   delete t;
 }
+/*!
+* \brief Проведение лексического анализа.
+*
+*/
 void lexer::analyze()
 {
   int id = 0;
@@ -126,21 +167,26 @@ void lexer::analyze()
     }
   }
 }
+/*!
+* \brief Сброс параметров всех лексических типов в начальные.
+*
+*/
 void lexer::reset()
 {
   for (std::set <lex_type*>::iterator it = lex_types.begin(); it != lex_types.end(); ++it)
   {
   lex_type* lt = (*it);
-    if (lt->id == 0)
+    if (lt->id == -1)
       continue;
     lt->valid = true;
     lt->d->curr_state = lt->d->get_start_state();
   }
 }
-std::set <token*> lexer::get_tokens(token* tok)
-{
-  return get_tokens(tok->finish);
-}
+/*!
+* \brief Получение списка токенов, начинающихся с заданной позиции.
+*
+* \param[in] pos Позиция во входном потоке.
+*/
 std::set <token*> lexer::get_tokens(int pos)
 {
   std::map <unsigned int, bool> types_returned;
@@ -194,13 +240,37 @@ std::set <token*> lexer::get_tokens(int pos)
     if (add)
       result.insert(new token((*it).first,pos,(*it).second,stream.substr(pos,(*it).second-pos+1),types_returned[(*it).first],(*it).first));
   }
-  if(accepted_types.empty() && stream[pos]!=NULL)
+  if(accepted_types.empty() && i < stream.length())
     result.insert(new token(0,pos,(int)stream.length()-1,stream.substr(pos,(int)stream.length()-pos),true));
   reset();
   return result;
 }
-
+/*!
+* \brief Проверка, достигнут ли конец потока.
+*
+*/
 bool lexer::IsEnd()
 {
   return (cur_pos++ >= stream.length());
+}
+/*!
+* \brief Получение списка токенов, следующих за данным.
+*
+* \param[in] t Токен, список последователей которого необходимо получить.
+*/
+parser::Lexer::TokenList parser::lexer::GetTokens(Token::Ptr t)
+{
+	int abs_pos_ = t->abs_pos_;
+	int length_ = t->length_;
+	std::set <token*> next_tokens = get_tokens(abs_pos_ + length_ - 1);
+	TokenList tokens_to_return;
+	for (std::set <token*>::iterator it = next_tokens.begin(); it!=next_tokens.end(); ++it)
+	{
+		Token::Ptr new_token = Token::Ptr(new Token((*it)->terminal_symbol_id));
+		new_token->type_ = (*it)->terminal_symbol_id;
+		new_token->abs_pos_ = (*it)->start;
+		new_token->length_ = (*it)->finish - (*it)->start + 1;
+		tokens_to_return.push_back(new_token);
+	}
+	return tokens_to_return;
 }

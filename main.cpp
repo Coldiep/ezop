@@ -1,10 +1,14 @@
-#define PRINT_ADDING
 
+#define PRINT_ADDING
 
 #include "public_grammar.h"
 #include "grammar.h"
+#include "lexer.h"
 #include "earley_parser.h"
 #include "allocator.h"
+
+#include "open_lexer.h"
+
 using namespace parser;
 
 #include <exception>
@@ -12,9 +16,10 @@ using namespace parser;
 
 #include <time.h>
 
+
 int main() {
   try {
-    
+
     PublicGrammar pg("test");
     pg.AddTerminal(1, "N");
     pg.AddTerminal(2, "+", "\\+");
@@ -44,24 +49,21 @@ int main() {
     pg.AddRhsSymbol(4, 1);
 
     pg.SetStartSymbolId(4);
-  
 
     pg.Print(std::cout);
     std::cout << "\n\n";
 
     Grammar gr(&pg);
+	
+	lexer ll(&pg);
+	ll.set_stream("N+N");
+	//ll.analyze();
 
-    lexer l(&pg);  
-    l.set_stream("N+N");
-  
 
-    EarleyParser parser(&gr, &l);
+    EarleyParser parser(&gr, &ll);
 
-    int time1 = time(0);
     if (parser.Parse()) {
         std::cout << "parse successful\n";
-    int time2 = time(0);
-    std::cout << "Time is " << (time2-time1) << "\n";
     } else {
       std::cout << "there is an error during parsing.\n";
     }
