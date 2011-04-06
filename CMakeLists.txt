@@ -42,8 +42,9 @@ endif()
 
 add_subdirectory(parser)
 add_subdirectory(terms)
+add_subdirectory(lexers/re-lexer)
 
-include_directories(${PROJECT_SOURCE_DIR}/parser ${PROJECT_SOURCE_DIR}/terms)
+include_directories(${PROJECT_SOURCE_DIR}/parser ${PROJECT_SOURCE_DIR}/terms ${PROJECT_SOURCE_DIR}/lexers/re-lexer)
 
 set(NAME ezop)
 
@@ -54,4 +55,5 @@ add_executable(${NAME}
 target_link_libraries (${NAME}
           parser
           terms
+          re-lexer
 )
