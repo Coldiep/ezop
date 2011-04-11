@@ -8,11 +8,22 @@ long n_id=0;
 std::string symbols;
 std::set <tree_point*> t_leaves;
 
+/*!
+* \brief Конструктор по умолчанию.
+*
+*/
 tree_point::tree_point()
   : left(0)
   , right(0)
   , parent(0)
 {}
+
+/*!
+* \brief Конструктор, инициализирующийся одним символом.
+*
+* \param[in] c  Символ, который должен соответствовать вершине.
+*
+*/
 tree_point::tree_point(char c)
   : left(0)
   , right(0)
@@ -22,6 +33,14 @@ tree_point::tree_point(char c)
   , nullable(false)
 {
 }
+
+/*!
+* \brief Конструктор, инициализирующийся диапазоном символов.
+*
+* \param[in] c1  Первый символ из диапазона.
+* \param[in] c2  Последний символ из диапазона.
+*
+*/
 tree_point::tree_point(unsigned int c1,unsigned int c2)
   {
     type=symbol;
@@ -43,6 +62,13 @@ tree_point::tree_point(unsigned int c1,unsigned int c2)
     nullable=false;
     type=prev->type;
   }
+
+/*!
+* \brief Конструктор копирования.
+*
+* \param[in] tp  Вершина для копирования.
+*
+*/
 tree_point::tree_point(tree_point*tp)
   {
     left=tp->left;
@@ -53,6 +79,11 @@ tree_point::tree_point(tree_point*tp)
     nullable=tp->nullable;
     firstpos=tp->firstpos;
   }
+
+/*!
+* \brief Деструктор.
+*
+*/
 tree_point::~tree_point()
 {
 
@@ -77,6 +108,10 @@ tree_point::~tree_point()
   }
 }
 
+/*!
+* \brief Вычисление множеств firstpos, lastpos и followpos для вершины.
+*
+*/
 void tree_point::calc()
 {
   id=n_id++;
@@ -135,6 +170,11 @@ void tree_point::calc()
   }
     
 }
+
+/*!
+* \brief Вывод параметров вершины на печать.
+*
+*/
 void tree_point::print(int n)
 {
   for(int i=0;i<n;i++)
@@ -164,11 +204,22 @@ void tree_point::print(int n)
     left->print(n+1);
 }
 //****************************************************************
+
+/*!
+* \brief Конструктор по умолчанию.
+*
+*/
 exp_tree::exp_tree()
   {
     root=NULL;
   }
 
+/*!
+* \brief Конструктор копирования.
+*
+* \param[in] t  Дерево для копирования.
+*
+*/
 exp_tree::exp_tree(exp_tree* t)
 {
   root = t->root;
@@ -176,6 +227,12 @@ exp_tree::exp_tree(exp_tree* t)
   this->leaves = t->leaves;
 }
 
+/*!
+* \brief Конструктор, инициализирующийся вершиной.
+*
+* \param[in] tp  Вершина, которая должна стать корнем дерева.
+*
+*/
 exp_tree::exp_tree(tree_point pnt)
   {
     root=new tree_point();
@@ -191,14 +248,36 @@ exp_tree::exp_tree(tree_point pnt)
     root->lastpos=pnt.lastpos;
 
   }
+
+/*!
+* \brief Конструктор, инициализирующийся диапазоном символов.
+*
+* \param[in] c1  Первый символ из диапазона.
+* \param[in] c2  Последний символ из диапазона.
+*
+*/
 exp_tree::exp_tree(unsigned int c1,unsigned int c2)
   {
     root=new tree_point(c1,c2);
   }
+
+/*!
+* \brief Конструктор, инициализирующийся одним символом.
+*
+* \param[in] c  Символ, который должен соответствовать корню дерева.
+*
+*/
 exp_tree::exp_tree(char c)
   {
     root=new tree_point(c);
   }
+
+/*!
+* \brief Конструктор, инициализирующийся типом вершины.
+*
+* \param[in] t  Тип, который должен иметь корень дерева.
+*
+*/
 exp_tree::exp_tree(point_type t)
   {
     root = new tree_point();
@@ -206,10 +285,23 @@ exp_tree::exp_tree(point_type t)
     root->nullable = (t==empty || t==opIter) ? true : false;
 
   }
+
+/*!
+* \brief Проверка того, является ли дерево пустым.
+*
+*/
 bool exp_tree::is_empty()
   {
     return root==NULL;
   }
+
+
+/*!
+* \brief Построение нового дерева с корнем заданного типа.
+*
+* \param[in] t  Тип, который должен иметь корень дерева.
+*
+*/
 exp_tree* exp_tree::make_new_root(point_type t)
   {
     tree_point* pnt = new tree_point();
@@ -222,6 +314,15 @@ exp_tree* exp_tree::make_new_root(point_type t)
     out->root=root;
     return out;
   }
+
+/*!
+* \brief Слияние двух деревьев в одно.
+*
+* \param[in] l  Левое поддерево.
+* \param[in] r  Правое поддерево.
+* \param[in] t  Тип, который должен иметь корень дерева.
+*
+*/
 exp_tree* exp_tree::merge_trees(exp_tree* l,exp_tree* r,point_type t)
   {
     exp_tree* res = new exp_tree(t);
@@ -231,6 +332,11 @@ exp_tree* exp_tree::merge_trees(exp_tree* l,exp_tree* r,point_type t)
     res->root->nullable = t==opIter ? true : (t==opConcat ? (res->root->right->nullable && res->root->left->nullable) : (res->root->right->nullable || res->root->left->nullable));
     return res;
   }
+
+/*!
+* \brief Вычисление множества followpos.
+*
+*/
 void exp_tree::calc_followpos()
 {
   symbols="";
@@ -242,6 +348,10 @@ void exp_tree::calc_followpos()
   leaves=t_leaves;
 }
 
+/*!
+* \brief Деструктор.
+*
+*/
 exp_tree::~exp_tree()
 {
   delete root;

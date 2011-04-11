@@ -2,7 +2,12 @@
 #include "error_thrower.h"
 #include "scanner.h"
 
-
+/*!
+* \brief ќбработка части регул€рного выражени€, заключенной в скобки.
+*
+* \param[in] p  ѕозици€ во входной строке, с которой следует начать обработку.
+* \return    ƒерево разбора части регул€рного выражени€.
+*/
 exp_tree* scanner::do_brackets(Position& p)
   {
     exp_tree* t = new exp_tree();
@@ -37,6 +42,12 @@ exp_tree* scanner::do_brackets(Position& p)
     return t;
   }
 
+/*!
+* \brief ќбработка регул€рного выражени€.
+*
+* \param[in] str  —трока, содержаща€ регул€рное выражение.
+* \return      ƒерево разбора регул€рного выражени€.
+*/
 exp_tree* scanner::process(std::string str)
   {
     //printf("Processing regexp '%s' of length %i.\n",str.c_str(),str.length());

@@ -91,11 +91,11 @@ void lexer::set_stream_file(std::string filename, std::string tail)
 /*!
 * \brief Добавление лексического типа.
 *
-* \param[in] name		Название типа.
-* \param[in] regexp		Регулярное выражение.
-* \param[in] priority	Приоритет типа.
-* \param[in] ret		Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
-* \param[in] id			Идентификатор типа.
+* \param[in] name    Название типа.
+* \param[in] regexp    Регулярное выражение.
+* \param[in] priority  Приоритет типа.
+* \param[in] ret    Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
+* \param[in] id      Идентификатор типа.
 */
 void lexer::add_type(std::string name, std::string regexp,int priority, int id_, bool ret)
 {
@@ -123,10 +123,10 @@ void lexer::add_type(std::string name, std::string regexp,int priority, int id_,
 /*!
 * \brief Добавление лексического типа.
 *
-* \param[in] id			Идентификатор типа.
-* \param[in] regexp		Регулярное выражение.
-* \param[in] priority	Приоритет типа.
-* \param[in] ret		Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
+* \param[in] id      Идентификатор типа.
+* \param[in] regexp    Регулярное выражение.
+* \param[in] priority  Приоритет типа.
+* \param[in] ret    Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
 */
 void lexer::add_type(int id_, std::string regexp, int priority, bool ret)
 {
@@ -263,17 +263,17 @@ bool lexer::IsEnd()
 */
 parser::Lexer::TokenList parser::lexer::GetTokens(Token::Ptr t)
 {
-	int abs_pos_ = t->abs_pos_;
-	int length_ = t->length_;
-	std::set <token*> next_tokens = get_tokens(abs_pos_ + length_ - 1);
-	TokenList tokens_to_return;
-	for (std::set <token*>::iterator it = next_tokens.begin(); it!=next_tokens.end(); ++it)
-	{
-		Token::Ptr new_token = Token::Ptr(new Token((*it)->terminal_symbol_id));
-		new_token->type_ = (*it)->terminal_symbol_id;
-		new_token->abs_pos_ = (*it)->start;
-		new_token->length_ = (*it)->finish - (*it)->start + 1;
-		tokens_to_return.push_back(new_token);
-	}
-	return tokens_to_return;
+  int abs_pos_ = t->abs_pos_;
+  int length_ = t->length_;
+  std::set <token*> next_tokens = get_tokens(abs_pos_ + length_ - 1);
+  TokenList tokens_to_return;
+  for (std::set <token*>::iterator it = next_tokens.begin(); it!=next_tokens.end(); ++it)
+  {
+    Token::Ptr new_token = Token::Ptr(new Token((*it)->terminal_symbol_id));
+    new_token->type_ = (*it)->terminal_symbol_id;
+    new_token->abs_pos_ = (*it)->start;
+    new_token->length_ = (*it)->finish - (*it)->start + 1;
+    tokens_to_return.push_back(new_token);
+  }
+  return tokens_to_return;
 }

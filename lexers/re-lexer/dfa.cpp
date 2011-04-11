@@ -4,10 +4,22 @@
 #include "error_thrower.h"
 
 int s_id=0;
+
+/*!
+* \brief Конструктор по умолчанию.
+*
+*/
 state::state()
 {
   marked=false;
 }
+
+/*!
+* \brief Получение списка возможных переходов из данного состояния по определенному символу.
+*
+* \param[in] c  Символ, по которому должен осуществляться переход.
+*
+*/
 unsigned int state::get_transition(char c)
 {
   std::map<char, unsigned int>::iterator it = transitions.find(c);
@@ -16,13 +28,33 @@ unsigned int state::get_transition(char c)
   return 0;
 
 }
+
+/*!
+* \brief Добавление перехода.
+*
+* \param[in] c    Символ, по которому осуществляется переход.
+* \param[in] state  Идентификатор состояния, в которое осуществляется переход.
+*
+*/
 void state::add_transition(char c,unsigned int state)
 {
   transitions[c] = state;
 }
 
 //******************************************************************************************
+/*!
+* \brief Конструктор по умолчанию.
+*
+*/
 dfa::dfa(){}
+
+
+/*!
+* \brief Добавление состояния.
+*
+* \param[in] state  Состояние, которое следует добавить.
+*
+*/
 void dfa::add_state(state* s)
 {
   if (!(states.empty()))
@@ -31,6 +63,14 @@ void dfa::add_state(state* s)
         return;
   states.insert(s);
 }
+
+/*!
+* \brief Добавление состояния.
+*
+* \param[in] id    Идентификатор состояния, которое следует добавить.
+* \param[in] type  Тип состояния, которое следует добавить.
+*
+*/
 void dfa::add_state(int id,state_type type)
 {
   if (!(states.empty()))
@@ -42,6 +82,15 @@ void dfa::add_state(int id,state_type type)
   s->type=type;
   states.insert(s);
 }
+
+
+/*!
+* \brief Создние нового состояния.
+*
+* \param[in] leaves_set    Множество вершин дерева регулярного выражения, которым будет соответствовать состояние.
+* \param[in] type      Тип состояния.
+* \return          Новое состояние.
+*/
 state* dfa::make_state(std::set<tree_point*> leaves_set,state_type type)
 {
   state* s = new state();
@@ -85,12 +134,28 @@ state* dfa::make_state(std::set<tree_point*> leaves_set,state_type type)
   return s;
   
 }
+
+/*!
+* \brief Добавление перехода.
+*
+* \param[in] beg_state  Состояние, из которого будет осуществляться переход.
+* \param[in] c      Символ, по которому будет осуществляться переход.
+* \param[in] beg_state  Состояние, в которое будет осуществляться переход
+* 
+*/
 void dfa::add_transition(int beg_state,char c,int end_state)
 {
   state* bs = get_state(beg_state);
   state* es = get_state(end_state);
   bs->add_transition(c,es->id);
 }
+
+/*!
+* \brief Получение состояния по идентификатору.
+*
+* \param[in] ii    Идентификатор состояния.
+* \return      Состояние ДКА с указанным идентификатором.
+*/
 state* dfa::get_state(int ii)
 {
   for (std::set <state*>::iterator it = states.begin(); it != states.end(); ++it)
@@ -101,6 +166,12 @@ state* dfa::get_state(int ii)
   }
   throw_error("No state with id ",ii);
 }
+
+/*!
+* \brief Получение начального состояния ДКА.
+*
+* \return  Начальное состояние ДКА.
+*/
 state* dfa::get_start_state()
 {
   for (std::set <state*>::iterator it = states.begin(); it != states.end(); ++it)
@@ -111,6 +182,13 @@ state* dfa::get_start_state()
   }
   throw_error("No start state found!");
 }
+
+/*!
+* \brief Запуск алгоритма проверки соответствия входной строки регулярному выражению, на основе которого построен ДКА.
+*
+* \param[in] str  Регулярное выражение.
+* \return      1, если входная строка соответствует регулярному выражению, на основе которого построен ДКА, 0 - если не соответствует.
+*/
 int dfa::process(std::string str)
 {
   //printf("Processing string '%s' of length %i: ",str.c_str(),str.length());
@@ -130,6 +208,8 @@ int dfa::process(std::string str)
   else 
     return 0;
 }
+
+//! Структура для хранения информации о состоянии ДКА.
 struct tri
 {
   tri(int idid, char aa, std::set <tree_point*> ss)
@@ -143,6 +223,12 @@ struct tri
   int id;
 };
 
+/*!
+* \brief Построение ДКА по дереву регулярного выражения.
+*
+* \param[in]  tr  Дерево регулярного выражения.
+*
+*/
 void dfa::build(exp_tree* tr)
 {
   s_id=0;
@@ -196,6 +282,12 @@ void dfa::build(exp_tree* tr)
   curr_state = get_start_state();
 }
 
+/*!
+* \brief Переход ДКА из текущего состояния по символу.
+*
+* \param[in] c  Символ, по которому должен осуществляться переход.
+* \return    1, если переход возможен, 0 - если невозможен.
+*/
 int dfa::move(char c)
 {
   unsigned int ind = curr_state->get_transition(c);
@@ -208,55 +300,13 @@ int dfa::move(char c)
     return 0;
 
 }
+
+/*!
+* \brief Деструктор.
+*
+*/
 dfa::~dfa()
 {
   for (std::set <state*>::iterator it = states.begin(); it != states.end(); ++it)
   delete (*it);
-}
-void dfa::build1(exp_tree* tr)
-{
-  s_id=0;
-  bool flag=true;
-  std::string input = tr->alphabet;
-  std::set <tree_point*> leaves = tr->leaves;
-
-  state* firststate = make_state(tr->root->firstpos,start);
-  add_state(firststate);
-  while(flag)
-  {
-    for (std::set <state*>::iterator it = states.begin(); it != states.end(); ++it)
-    {
-      state* t = (*it);
-      if(t->marked)
-        continue;
-      t->marked=true;
-      for(unsigned int i=0;i<input.length();i++)
-      {
-        char a = input[i];
-        std::set <tree_point*> S;
-    for (std::set <tree_point*>::iterator leaves_it = leaves.begin(); leaves_it != leaves.end(); ++leaves_it)
-    {
-      tree_point* leaf = (*leaves_it);
-      for (std::set <int>::iterator ids_it = t->ids.begin(); ids_it != t->ids.end(); ++ids_it)  
-            if((*ids_it)==leaf->id && leaf->contents==a)
-            {
-              S.insert(leaf->followpos.begin(),leaf->followpos.end());
-            }
-    }
-        if(!(S.empty()) )
-        {
-          state* newstate  = make_state(S);
-          add_state(newstate);
-          add_transition(t->id,a,newstate->id);
-        }
-      }
-    }
-    flag=false;
-    for (std::set <state*>::iterator it = states.begin(); it != states.end(); ++it)
-      if((*it)->marked==false)
-      {
-        flag=true;
-        break;
-      }
-  }
 }

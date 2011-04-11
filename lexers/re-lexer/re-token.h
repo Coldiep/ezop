@@ -3,30 +3,43 @@
 #include <vector>
 #include <string>
 
+//! Определение класса токена.
 class token
 {
 public:
+  //! Конструктор по умолчанию.
   token() {start = -1; finish = -1;};
+  //! Конструктор, заполняющий все поля экземпляра класса.
   token(int t, int s, int f, std::string st, bool ret, int term_sym_id = 0);
+  //! Конструктор копирования.
   token(token* t);
+  //! Тип токена.
   int type;
+  //! Позиция начала токена.
   int start;
+  //! Позиция конца токена.
   int finish;
+  //! Флаг для указания того, нужно ли включать данный токен в выходное дерево токенов.
   bool is_returned;
+  //! Идентификатор терминального символа грамматики, которому соответствует данный токен.
   int terminal_symbol_id;
+  //! Идентификатор токена, использующийся для построения дерева.
   std::string id;
+  //! Фрагмент входной цепочки, которому соотвествует данный токен.
   std::string str;
+  //! Множество дочерних узлов данного токена в выходном дереве токенов.
   std::set<token*> children;
-  std::string print(int level, std::map <unsigned int, std::string> types);
-  std::string print_gv(std::map <unsigned int, std::string> types, std::string par = "");
-  std::string print_xml(std::map <unsigned int, std::string> types);
 
 };
 
+//! Определение класса дерева токенов.
 class token_tree
 {
 public:
+  //! Корень дерева.
   token* root;
+  //! Конструктор по умолчанию.
   token_tree();
+  //! Добавление вершины к дереву.
   void add_node(token* node);
 };
