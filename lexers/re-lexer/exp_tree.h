@@ -79,7 +79,7 @@ public:
   exp_tree* make_new_root(point_type t);
 
   //! Слияние двух деревьев в одно.
-  static exp_tree* merge_trees(exp_tree* l,exp_tree* r,point_type t)
+  static exp_tree* merge_trees(exp_tree* l,exp_tree* r,point_type t);
 
   //! Вычисление множества followpos.
   void calc_followpos();
