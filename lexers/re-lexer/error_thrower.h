@@ -1,7 +1,7 @@
 #include <sstream>
 #include <stdio.h>
 
-//! Остановка программы и вывод сообщения об ошибке.
+//! РћСЃС‚Р°РЅРѕРІРєР° РїСЂРѕРіСЂР°РјРјС‹ Рё РІС‹РІРѕРґ СЃРѕРѕР±С‰РµРЅРёСЏ РѕР± РѕС€РёР±РєРµ.
 inline void throw_error (const std::string& message, int num=-1)
 {
     std::string err = "Error occurred!";
@@ -12,7 +12,7 @@ inline void throw_error (const std::string& message, int num=-1)
     //ExitThread(0);
 }
 
-//! Преобразование целого числа в строку.
+//! РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С†РµР»РѕРіРѕ С‡РёСЃР»Р° РІ СЃС‚СЂРѕРєСѓ.
 inline char* itoa(int value, char* result, int base) {
   // check that the base if valid
   if (base < 2 || base > 36) { *result = '\0'; return result; }

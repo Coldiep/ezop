@@ -9,7 +9,7 @@ std::string symbols;
 std::set <tree_point*> t_leaves;
 
 /*!
-* \brief Конструктор по умолчанию.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.
 *
 */
 tree_point::tree_point()
@@ -19,9 +19,9 @@ tree_point::tree_point()
 {}
 
 /*!
-* \brief Конструктор, инициализирующийся одним символом.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РѕРґРЅРёРј СЃРёРјРІРѕР»РѕРј.
 *
-* \param[in] c  Символ, который должен соответствовать вершине.
+* \param[in] c  РЎРёРјРІРѕР», РєРѕС‚РѕСЂС‹Р№ РґРѕР»Р¶РµРЅ СЃРѕРѕС‚РІРµС‚СЃС‚РІРѕРІР°С‚СЊ РІРµСЂС€РёРЅРµ.
 *
 */
 tree_point::tree_point(char c)
@@ -31,67 +31,60 @@ tree_point::tree_point(char c)
   , contents(c)
   , type(symbol)
   , nullable(false)
-{
+{}
+
+/*!
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РґРёР°РїР°Р·РѕРЅРѕРј СЃРёРјРІРѕР»РѕРІ.
+*
+* \param[in] c1  РџРµСЂРІС‹Р№ СЃРёРјРІРѕР» РёР· РґРёР°РїР°Р·РѕРЅР°.
+* \param[in] c2  РџРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР» РёР· РґРёР°РїР°Р·РѕРЅР°.
+*
+*/
+tree_point::tree_point(unsigned int c1,unsigned int c2) {
+  type = symbol;
+  tree_point* prev = new tree_point(c1);
+  for (unsigned i = c1 + 1; i <= c2; ++i) {
+    tree_point* l = prev;
+    tree_point* r = new tree_point(i);
+    prev = new tree_point();
+    prev->left = l;
+    prev->right = r;
+    prev->type = opUnion;
+    l->parent = r->parent=prev;
+  }
+
+  contents = prev->contents;
+  left = prev->left;
+  right = prev->right;
+  parent = prev->parent;
+  nullable = false;
+  type = prev->type;
 }
 
 /*!
-* \brief Конструктор, инициализирующийся диапазоном символов.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєРѕРїРёСЂРѕРІР°РЅРёСЏ.
 *
-* \param[in] c1  Первый символ из диапазона.
-* \param[in] c2  Последний символ из диапазона.
+* \param[in] tp  Р’РµСЂС€РёРЅР° РґР»СЏ РєРѕРїРёСЂРѕРІР°РЅРёСЏ.
 *
 */
-tree_point::tree_point(unsigned int c1,unsigned int c2)
-  {
-    type=symbol;
-    tree_point* prev = new tree_point(c1);
-    for (unsigned int i=c1+1;i<=c2;i++)
-    {
-      tree_point* l = prev;
-      tree_point* r = new tree_point(i);
-      prev = new tree_point();
-      prev->left=l;
-      prev->right=r;
-      prev->type=opUnion;
-      l->parent=r->parent=prev;      
-    }
-    contents=prev->contents;
-    left=prev->left;
-    right=prev->right;
-    parent=prev->parent;
-    nullable=false;
-    type=prev->type;
-  }
+tree_point::tree_point(tree_point* tp) {
+  left = tp->left;
+  right = tp->right;
+  parent = tp->parent;
+  type = tp->type;
+  contents = tp->contents;
+  nullable = tp->nullable;
+  firstpos = tp->firstpos;
+}
 
 /*!
-* \brief Конструктор копирования.
-*
-* \param[in] tp  Вершина для копирования.
+* \brief Р”РµСЃС‚СЂСѓРєС‚РѕСЂ.
 *
 */
-tree_point::tree_point(tree_point*tp)
-  {
-    left=tp->left;
-    right=tp->right;
-    parent=tp->parent;
-    type=tp->type;
-    contents=tp->contents;
-    nullable=tp->nullable;
-    firstpos=tp->firstpos;
-  }
-
-/*!
-* \brief Деструктор.
-*
-*/
-tree_point::~tree_point()
-{
-
+tree_point::~tree_point() {
   delete left;
-  if (0)
-  {
-    if (right && left)
-    {
+  if (0) {
+    if (right && left) {
       if (this->id == 25)
         id = id;
     }
@@ -104,12 +97,11 @@ tree_point::~tree_point()
     followpos.clear();
     lastpos.clear();
     memset(this,NULL,sizeof(this));
-
   }
 }
 
 /*!
-* \brief Вычисление множеств firstpos, lastpos и followpos для вершины.
+* \brief Р’С‹С‡РёСЃР»РµРЅРёРµ РјРЅРѕР¶РµСЃС‚РІ firstpos, lastpos Рё followpos РґР»СЏ РІРµСЂС€РёРЅС‹.
 *
 */
 void tree_point::calc()
@@ -172,7 +164,7 @@ void tree_point::calc()
 }
 
 /*!
-* \brief Вывод параметров вершины на печать.
+* \brief Р’С‹РІРѕРґ РїР°СЂР°РјРµС‚СЂРѕРІ РІРµСЂС€РёРЅС‹ РЅР° РїРµС‡Р°С‚СЊ.
 *
 */
 void tree_point::print(int n)
@@ -206,7 +198,7 @@ void tree_point::print(int n)
 //****************************************************************
 
 /*!
-* \brief Конструктор по умолчанию.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.
 *
 */
 exp_tree::exp_tree()
@@ -215,9 +207,9 @@ exp_tree::exp_tree()
   }
 
 /*!
-* \brief Конструктор копирования.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєРѕРїРёСЂРѕРІР°РЅРёСЏ.
 *
-* \param[in] t  Дерево для копирования.
+* \param[in] t  Р”РµСЂРµРІРѕ РґР»СЏ РєРѕРїРёСЂРѕРІР°РЅРёСЏ.
 *
 */
 exp_tree::exp_tree(exp_tree* t)
@@ -228,9 +220,9 @@ exp_tree::exp_tree(exp_tree* t)
 }
 
 /*!
-* \brief Конструктор, инициализирующийся вершиной.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РІРµСЂС€РёРЅРѕР№.
 *
-* \param[in] tp  Вершина, которая должна стать корнем дерева.
+* \param[in] tp  Р’РµСЂС€РёРЅР°, РєРѕС‚РѕСЂР°СЏ РґРѕР»Р¶РЅР° СЃС‚Р°С‚СЊ РєРѕСЂРЅРµРј РґРµСЂРµРІР°.
 *
 */
 exp_tree::exp_tree(tree_point pnt)
@@ -250,10 +242,10 @@ exp_tree::exp_tree(tree_point pnt)
   }
 
 /*!
-* \brief Конструктор, инициализирующийся диапазоном символов.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РґРёР°РїР°Р·РѕРЅРѕРј СЃРёРјРІРѕР»РѕРІ.
 *
-* \param[in] c1  Первый символ из диапазона.
-* \param[in] c2  Последний символ из диапазона.
+* \param[in] c1  РџРµСЂРІС‹Р№ СЃРёРјРІРѕР» РёР· РґРёР°РїР°Р·РѕРЅР°.
+* \param[in] c2  РџРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР» РёР· РґРёР°РїР°Р·РѕРЅР°.
 *
 */
 exp_tree::exp_tree(unsigned int c1,unsigned int c2)
@@ -262,9 +254,9 @@ exp_tree::exp_tree(unsigned int c1,unsigned int c2)
   }
 
 /*!
-* \brief Конструктор, инициализирующийся одним символом.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РѕРґРЅРёРј СЃРёРјРІРѕР»РѕРј.
 *
-* \param[in] c  Символ, который должен соответствовать корню дерева.
+* \param[in] c  РЎРёРјРІРѕР», РєРѕС‚РѕСЂС‹Р№ РґРѕР»Р¶РµРЅ СЃРѕРѕС‚РІРµС‚СЃС‚РІРѕРІР°С‚СЊ РєРѕСЂРЅСЋ РґРµСЂРµРІР°.
 *
 */
 exp_tree::exp_tree(char c)
@@ -273,9 +265,9 @@ exp_tree::exp_tree(char c)
   }
 
 /*!
-* \brief Конструктор, инициализирующийся типом вершины.
+* \brief РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ С‚РёРїРѕРј РІРµСЂС€РёРЅС‹.
 *
-* \param[in] t  Тип, который должен иметь корень дерева.
+* \param[in] t  РўРёРї, РєРѕС‚РѕСЂС‹Р№ РґРѕР»Р¶РµРЅ РёРјРµС‚СЊ РєРѕСЂРµРЅСЊ РґРµСЂРµРІР°.
 *
 */
 exp_tree::exp_tree(point_type t)
@@ -287,7 +279,7 @@ exp_tree::exp_tree(point_type t)
   }
 
 /*!
-* \brief Проверка того, является ли дерево пустым.
+* \brief РџСЂРѕРІРµСЂРєР° С‚РѕРіРѕ, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РґРµСЂРµРІРѕ РїСѓСЃС‚С‹Рј.
 *
 */
 bool exp_tree::is_empty()
@@ -297,9 +289,9 @@ bool exp_tree::is_empty()
 
 
 /*!
-* \brief Построение нового дерева с корнем заданного типа.
+* \brief РџРѕСЃС‚СЂРѕРµРЅРёРµ РЅРѕРІРѕРіРѕ РґРµСЂРµРІР° СЃ РєРѕСЂРЅРµРј Р·Р°РґР°РЅРЅРѕРіРѕ С‚РёРїР°.
 *
-* \param[in] t  Тип, который должен иметь корень дерева.
+* \param[in] t  РўРёРї, РєРѕС‚РѕСЂС‹Р№ РґРѕР»Р¶РµРЅ РёРјРµС‚СЊ РєРѕСЂРµРЅСЊ РґРµСЂРµРІР°.
 *
 */
 exp_tree* exp_tree::make_new_root(point_type t)
@@ -316,11 +308,11 @@ exp_tree* exp_tree::make_new_root(point_type t)
   }
 
 /*!
-* \brief Слияние двух деревьев в одно.
+* \brief РЎР»РёСЏРЅРёРµ РґРІСѓС… РґРµСЂРµРІСЊРµРІ РІ РѕРґРЅРѕ.
 *
-* \param[in] l  Левое поддерево.
-* \param[in] r  Правое поддерево.
-* \param[in] t  Тип, который должен иметь корень дерева.
+* \param[in] l  Р›РµРІРѕРµ РїРѕРґРґРµСЂРµРІРѕ.
+* \param[in] r  РџСЂР°РІРѕРµ РїРѕРґРґРµСЂРµРІРѕ.
+* \param[in] t  РўРёРї, РєРѕС‚РѕСЂС‹Р№ РґРѕР»Р¶РµРЅ РёРјРµС‚СЊ РєРѕСЂРµРЅСЊ РґРµСЂРµРІР°.
 *
 */
 exp_tree* exp_tree::merge_trees(exp_tree* l,exp_tree* r,point_type t)
@@ -334,7 +326,7 @@ exp_tree* exp_tree::merge_trees(exp_tree* l,exp_tree* r,point_type t)
   }
 
 /*!
-* \brief Вычисление множества followpos.
+* \brief Р’С‹С‡РёСЃР»РµРЅРёРµ РјРЅРѕР¶РµСЃС‚РІР° followpos.
 *
 */
 void exp_tree::calc_followpos()
@@ -349,7 +341,7 @@ void exp_tree::calc_followpos()
 }
 
 /*!
-* \brief Деструктор.
+* \brief Р”РµСЃС‚СЂСѓРєС‚РѕСЂ.
 *
 */
 exp_tree::~exp_tree()

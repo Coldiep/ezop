@@ -2,102 +2,131 @@
 #include <sstream>
 #include <set>
 
-//! Типы вершин дерева разбора.
+//! РўРёРїС‹ РІРµСЂС€РёРЅ РґРµСЂРµРІР° СЂР°Р·Р±РѕСЂР°.
 enum point_type {symbol=0,opUnion, opIter,opConcat,OpLeftBracket,OpRightBracket,empty};
 
-//! Определение класса вершины дерева регулярного выражения.
-class tree_point
-{
+//! РћРїСЂРµРґРµР»РµРЅРёРµ РєР»Р°СЃСЃР° РІРµСЂС€РёРЅС‹ РґРµСЂРµРІР° СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ.
+class tree_point {
 public:
-  //! Идентификатор вершины.
-  int id;
-  //! Левая дочерняя вершина.
-  tree_point* left;
-  //! Правая дочерняя вершина.
-  tree_point* right;
-  //! Родительская вершина.
-  tree_point* parent;
-  //! Тип вершины.
-  point_type type;
-  //! Символ, соответствующий вершине.
-  char contents;
-  //! Показатель того, выводима ли из вершины пустая строка.
-  bool nullable;
-  //! Множество firstpos.
-  std::set <tree_point*> firstpos;
-  //! Множество lastpos.
-  std::set <tree_point*> lastpos;
-  //! Множество followpos.
-  std::set <tree_point*> followpos;
-  
-  //! Конструктор по умолчанию.
+  tree_point* left;     //!< Р›РµРІР°СЏ РґРѕС‡РµСЂРЅСЏСЏ РІРµСЂС€РёРЅР°.
+  tree_point* right;    //!< РџСЂР°РІР°СЏ РґРѕС‡РµСЂРЅСЏСЏ РІРµСЂС€РёРЅР°.
+  tree_point* parent;   //!< Р РѕРґРёС‚РµР»СЊСЃРєР°СЏ РІРµСЂС€РёРЅР°.
+  point_type  type;     //!< РўРёРї РІРµСЂС€РёРЅС‹.
+  char        contents; //!< РЎРёРјРІРѕР», СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ РІРµСЂС€РёРЅРµ.
+  bool        nullable; //!< РџРѕРєР°Р·Р°С‚РµР»СЊ С‚РѕРіРѕ, РІС‹РІРѕРґРёРјР° Р»Рё РёР· РІРµСЂС€РёРЅС‹ РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°.
+  int         id;       //!< РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІРµСЂС€РёРЅС‹.
+
+  int end;  // Р­С‚Рѕ С‡С‚Рѕ С‚Р°РєРѕРµ?
+
+  //! РўРёРї РјРЅРѕР¶РµСЃС‚РІР° РІРµСЂС€РёРЅ РґРµСЂРµРІР°.
+  typedef std::set<tree_point*> TreePointSet;
+
+  TreePointSet firstpos;    //!< РњРЅРѕР¶РµСЃС‚РІРѕ firstpos.
+  TreePointSet lastpos;     //!< РњРЅРѕР¶РµСЃС‚РІРѕ lastpos.
+  TreePointSet followpos;   //!< РњРЅРѕР¶РµСЃС‚РІРѕ followpos.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.
   tree_point();
-  //! Конструктор, инициализирующийся одним символом.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РѕРґРЅРёРј СЃРёРјРІРѕР»РѕРј.
   tree_point(char c);
-  //! Конструктор, инициализирующийся диапазоном символов.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РґРёР°РїР°Р·РѕРЅРѕРј СЃРёРјРІРѕР»РѕРІ.
   tree_point(unsigned int c1,unsigned int c2);
-  //! Конструктор копирования.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєРѕРїРёСЂРѕРІР°РЅРёСЏ.
   tree_point(tree_point*tp);
-  //! Вычисление множеств firstpos, lastpos и followpos для вершины.
+
+  //! Р’С‹С‡РёСЃР»РµРЅРёРµ РјРЅРѕР¶РµСЃС‚РІ firstpos, lastpos Рё followpos РґР»СЏ РІРµСЂС€РёРЅС‹.
   void calc();
-  //! Вывод параметров вершины на печать.
+
+  //! Р’С‹РІРѕРґ РїР°СЂР°РјРµС‚СЂРѕРІ РІРµСЂС€РёРЅС‹ РЅР° РїРµС‡Р°С‚СЊ.
   void print(int n);
-  int end;  
-  //! Деструктор.
+
+  //! Р”РµСЃС‚СЂСѓРєС‚РѕСЂ.
   ~tree_point();
 };
 
-//! Определение класса дерева регулярного выражения.
-class exp_tree
-{
+//! РћРїСЂРµРґРµР»РµРЅРёРµ РєР»Р°СЃСЃР° РґРµСЂРµРІР° СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ.
+class exp_tree {
 public:
-  //! Корень дерева.
-  tree_point* root;
-  //! Алфавит регулярного выражения.
-  std::string alphabet;
-  //! Множество листьев дерева.
-  std::set <tree_point*> leaves;
-  //! Конструктор по умолчанию.
+  tree_point*             root;     //! РљРѕСЂРµРЅСЊ РґРµСЂРµРІР°.
+  std::string             alphabet; //! РђР»С„Р°РІРёС‚ СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ.
+  std::set<tree_point*>   leaves;   //! РњРЅРѕР¶РµСЃС‚РІРѕ Р»РёСЃС‚СЊРµРІ РґРµСЂРµРІР°.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.
   exp_tree();
-  //! Конструктор копирования.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєРѕРїРёСЂРѕРІР°РЅРёСЏ.
   exp_tree(exp_tree* t);
-  //! Конструктор, инициализирующийся вершиной.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РІРµСЂС€РёРЅРѕР№.
   exp_tree(tree_point pnt);
-  //! Конструктор, инициализирующийся диапазоном символов.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РґРёР°РїР°Р·РѕРЅРѕРј СЃРёРјРІРѕР»РѕРІ.
   exp_tree(unsigned int c1,unsigned int c2);
-  //! Конструктор, инициализирующийся одним символом.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ РѕРґРЅРёРј СЃРёРјРІРѕР»РѕРј.
   exp_tree(char c);
-  //! Конструктор, инициализирующийся типом вершины.
+
+  //! РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓСЋС‰РёР№СЃСЏ С‚РёРїРѕРј РІРµСЂС€РёРЅС‹.
   exp_tree(point_type t);
-  //! Проверка того, является ли дерево пустым.
+
+  //! РџСЂРѕРІРµСЂРєР° С‚РѕРіРѕ, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РґРµСЂРµРІРѕ РїСѓСЃС‚С‹Рј.
   bool is_empty();
-  //! Построение нового дерева с корнем заданного типа.
+
+  //! РџРѕСЃС‚СЂРѕРµРЅРёРµ РЅРѕРІРѕРіРѕ РґРµСЂРµРІР° СЃ РєРѕСЂРЅРµРј Р·Р°РґР°РЅРЅРѕРіРѕ С‚РёРїР°.
   exp_tree* make_new_root(point_type t);
-  //! Слияние двух деревьев в одно.
-  static exp_tree* merge_trees(exp_tree* l,exp_tree* r,point_type t);
-  //! Вычисление множества followpos.
+
+  //! РЎР»РёСЏРЅРёРµ РґРІСѓС… РґРµСЂРµРІСЊРµРІ РІ РѕРґРЅРѕ.
+  static exp_tree* merge_trees(exp_tree* l,exp_tree* r,point_type t)
+
+  //! Р’С‹С‡РёСЃР»РµРЅРёРµ РјРЅРѕР¶РµСЃС‚РІР° followpos.
   void calc_followpos();
-  //! Деструктор.
+
+  //! Р”РµСЃС‚СЂСѓРєС‚РѕСЂ.
   ~exp_tree();
-
-
 };
 
-//! Определение структуры позиции в строке регулярного выражения.
+//! РћРїСЂРµРґРµР»РµРЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ РїРѕР·РёС†РёРё РІ СЃС‚СЂРѕРєРµ СЂРµРіСѓР»СЏСЂРЅРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ.
 struct Position{
-    unsigned int PosNumber;
-    const char* PosPointer;
-    
-    Position (const char* posPointer)
-    : PosPointer (posPointer)
-    , PosNumber (1)
-    {}
-    
-    void Next () {if (! IsEnd ()){++ PosPointer; ++ PosNumber;}}
-    bool IsEnd () {return *PosPointer == 0;}
-    unsigned int GetPos () {return PosNumber;}
-    const char* LookForward (unsigned int dist) {return PosPointer+dist;}
-    char operator * () {return *PosPointer;}
-    Position& operator ++ () {Next (); return *this;}
-    const char* operator + (unsigned int dist) {return LookForward (dist);}
+  const char* PosPointer;
+  unsigned int PosNumber;
+
+  Position (const char* posPointer)
+    : PosPointer(posPointer)
+    , PosNumber(1) {
+  }
+
+  void Next() {
+    if (not IsEnd ()) {
+      ++ PosPointer;
+      ++ PosNumber;
+    }
+  }
+
+  bool IsEnd() {
+    return *PosPointer == 0;
+  }
+
+  unsigned GetPos() {
+    return PosNumber;
+  }
+
+  const char* LookForward(unsigned dist) {
+    return PosPointer + dist;
+  }
+
+  char operator*() {
+    return *PosPointer;
+  }
+
+  Position& operator++() {
+    Next();
+    return *this;
+  }
+
+  const char* operator+(unsigned dist) {
+    return LookForward(dist);
+  }
 };
