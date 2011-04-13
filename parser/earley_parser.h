@@ -3,7 +3,6 @@
   Earley's algorithm implementation declarations.
 **************************************************************************************************************/
 
-
 #ifndef EARLEY_PARSER_H__
 #define EARLEY_PARSER_H__
 
@@ -15,6 +14,8 @@
 #include "lexer.h"
 #include "allocator.h"
 #include "ast.h"
+
+#include <boost/shared_ptr.hpp>
 
 #include <vector>
 #include <deque>
@@ -34,11 +35,13 @@ class EarleyParser {
 public:
   //! Абстрактный интерфейс для взаимодействия с интерпретатором.
   struct Context {
+    //! Тип умного указателя на контекст.
+    typedef boost::shared_ptr<Context> Ptr;
+
     //! Виртуальный деструктор т.к. класс -- абстрактный интерфейс.
     virtual ~Context() {}
   };
 
-private:
   /*!
    * \brief Тип, реализующий расширенную ситуацию Эрли.
    *
@@ -60,7 +63,7 @@ private:
       {}
 
       //! Инициализация всех полей.
-      Rptr( Context* context, Item* item )
+      Rptr(Context* context, Item* item)
         : context_(context)
         , item_(item)
       {}
@@ -89,11 +92,11 @@ private:
      * \param[in] grammar Указатель на объект грамматики, у которой берутся символьные имена элементов.
      * \param[in] out Поток для вывода.
      */
-    void Dump( Grammar* grammar, std::ostream& out );
+    void Dump(Grammar* grammar, std::ostream& out);
 #   endif // DUMP_CONTENT
 
     //! Оператор сравнения.
-    bool operator==( const Item& rhs ) {
+    bool operator==(const Item& rhs) {
         return  rule_id_ == rhs.rule_id_
                 and rhs_pos_ == rhs.rhs_pos_ 
                 and origin_ == rhs.origin_ 
@@ -135,7 +138,7 @@ private:
      * \param[in] origin    Номер состояния, в которое данная ситуация была первоначально добавлена.
      * \param[in] lptr      Указатель на ситуацию с меткой на символ левее.
      */
-    inline Item* GetItem( Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr ) {
+    inline Item* GetItem(Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr) {
       Item* item = NULL;
 
       // Проверяем свободную память.
@@ -166,7 +169,7 @@ private:
      *
      * \param[in] item Указатель на ситуацию.
      */
-    void FreeItem( Item* item ) {
+    void FreeItem(Item* item) {
       free_list_.push_front(item);
     }
   };
@@ -195,7 +198,7 @@ private:
       }
 
       //! Аналог деструктора, используется т.к. память реально не освобождается.
-      void Uninit( ItemDispatcher* disp ) {
+      void Uninit(ItemDispatcher* disp) {
         while (not elems_.empty()) {
           disp->FreeItem(elems_.pop_back());
         }
@@ -284,11 +287,11 @@ private:
      * \param[in] rptr      Указатель на ситуацию, послужившую причиной сдвига нетерминала слева от метки.
      * \param[in] context   Указатель на контекст интерпретатора.
      */
-    inline Item* AddItem( EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context );
+    inline Item* AddItem(EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context);
 
 #   ifdef DUMP_CONTENT
     //! Печать содержимого состояния.
-    void Dump( std::ostream& out ) {
+    void Dump(std::ostream& out) {
       out << "\n****** State number = " << id_ << " *** Number of items = " << num_of_items_ << " ******\n";
       for (Item* item = state_items_.get_first(); item; item = state_items_.get_next()) {
         item->Dump(grammar_, out);
@@ -363,14 +366,56 @@ private:
     }
   };
 
+  //! Интерфейс для взаимодействия с интерпретатором.
+  struct Interpretator {
+    //! Виртуальный деструктор для абстрактного типа.
+    virtual ~Interpretator() {
+    }
+
+    /*!
+     * \brief Начало работы алгоритма.
+     *
+     * \param[in] parser Указатель на объект парсера для получения информации о состояниях.
+     */
+    virtual void Start(EarleyParser* parser) = 0;
+
+    /*!
+     * \brief Успешное завершение работы алгоритма.
+     *
+     * \param[in] item Ситуация с начальным символом в левой части.
+     */
+    virtual void End(const Item* item) = 0;
+
+    /*!
+     * \brief Обработка добавления терминального символа.
+     *
+     * \param[in]   token   Токен терминала.
+     * \param[in]   item    Ситуация, в которой производится сдвиг терминального символа.
+     *
+     * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
+     */
+    virtual Context::Ptr HandleTerminal(Token::Ptr token, const Item* item) = 0;
+
+    /*!
+     * \brief Обработка добавления нетерминального символа.
+     *
+     * \param[in]   rule_item   Ситуация, соответствующая правилу, в левой части которого стоит данный нетерминал.
+     * \param[in]   left_item   Ситуация, в которой производится сдвиг нетерминального символа.
+     *
+     * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
+     */
+    virtual Context::Ptr HandleNonTerminal(const Item* rule_item, const Item* left_item) = 0;
+  };
+
   typedef queue<Item*> ItemQueue;
   typedef parser::list<size_t> StateList;
 
-  Grammar*          grammar_;          //!< Указатель на объект грамматики.
-  Lexer*            lexer_;            //!< Указатель на объект лексического анализатора.
-  StateDispatcher   state_disp_;       //!< Диспетчер состояний.
-  ItemDispatcher    item_disp_;        //!< Диспетчер ситуаций.
-  ItemQueue         nonhandled_items_; //!< Очередь необработанных ситуаций.
+  Grammar*          grammar_;           //!< Указатель на объект грамматики.
+  Lexer*            lexer_;             //!< Указатель на объект лексического анализатора.
+  Interpretator*    interpretator_;     //!< Указатель на объект интерпретатора.
+  StateDispatcher   state_disp_;        //!< Диспетчер состояний.
+  ItemDispatcher    item_disp_;         //!< Диспетчер ситуаций.
+  ItemQueue         nonhandled_items_;  //!< Очередь необработанных ситуаций.
 
   /*!
    * \brief Реализация операции Completer.
@@ -440,16 +485,17 @@ private:
     return false;
   }
 
-public:
   /*!
    * \brief Конструктор класса.
    *
-   * \param grammar Указатель на объект грамматики.
-   * \param lexer   Указатель на объект лексического анализатора.
+   * \param grammar       Указатель на объект грамматики.
+   * \param lexer         Указатель на объект лексического анализатора.
+   * \param interpretator Указатель на объект интерпретатора.
    */
-  EarleyParser(Grammar* grammar, Lexer* lexer)
+  EarleyParser(Grammar* grammar, Lexer* lexer, Interpretator* interpretator)
     : grammar_(grammar)
     , lexer_(lexer)
+    , interpretator_(interpretator)
     , state_disp_(&item_disp_, grammar_)
     , item_disp_(1024*1024) {
   }

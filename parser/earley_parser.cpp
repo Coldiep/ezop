@@ -101,8 +101,11 @@ inline void EarleyParser::Completer(size_t state_id, Item* item) {
     // Список ситуаций с точкой перед символом в левой части правила переданной ситуации.
     State::SymbolItemList& or_item_list = origin_state->items_[grammar_->GetLhsOfRule(item->rule_id_)];
     for (Item* cur = or_item_list.elems_.get_first(); cur; cur = or_item_list.elems_.get_next()) {
+      // Спрашиваем у интерпретатора, нужно ли добавлять новое состояние.
+      Context::Ptr context = interpretator_->HandleNonTerminal(item, cur);
+
       // В случае неоднозначности одна и та же ситуация может обрабатываться несколько раз, проверяем это.
-      if (not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1)], cur, item)) {
+      if (context.get() and not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1)], cur, item)) {
         // Сдвигаем символ после точки в обрабатываемой ситуации и добавляем ее в текущее состояние.
         Item* new_item = cur_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item, NULL);
         PutItemToNonhandledList(new_item, true);
@@ -146,18 +149,22 @@ inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new
   if (State* cur_state = state_disp_.GetState(state_id)) {
     // Получаем список ситуаций, у которых точка стоит перед данным символом.
     State::SymbolItemList& term_item_list = cur_state->items_[cur_symbol_id];
-    if (term_item_list.elems_.size() > 0) {
+    if (term_item_list.elems_.size()) {
       // Создаем новое состояние для данного символа.
       new_state_id = state_disp_.AddState(token);
       if (State* next_state = state_disp_.GetState(new_state_id)) {
         for (Item* cur = term_item_list.elems_.get_first(); cur; cur = term_item_list.elems_.get_next()) {
-          // Добавляем новую ситуацию со сдвинутой точкой в новое состояние.
-          Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
-          PutItemToNonhandledList(new_item, false);
+          // Спрашиваем у интерпретатора, нужно ли добавлять новое состояние.
+          Context::Ptr context = interpretator_->HandleTerminal(token, cur);
+          if (context.get()) {
+            // Добавляем новую ситуацию со сдвинутой точкой в новое состояние.
+            Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
+            PutItemToNonhandledList(new_item, false);
 
-#       ifdef DUMP_CONTENT
-          new_item->Dump(grammar_, std::cout);
-#       endif
+#           ifdef DUMP_CONTENT
+            new_item->Dump(grammar_, std::cout);
+#           endif
+          }
         }
         return true;
       }
@@ -206,6 +213,9 @@ inline bool EarleyParser::InitFirstState(size_t& state_id) {
 }
 
 bool EarleyParser::Parse() {
+  // Сообщаем интерпретатору о начале работы.
+  interpretator_->Start(this);
+
   // Инициализируем начальное состояние.
   size_t first_state_id = 0;
   if (not InitFirstState(first_state_id)) {
@@ -249,6 +259,7 @@ bool EarleyParser::Parse() {
   for (size_t state_id = cur_gen_states.get_first(); not cur_gen_states.is_end(); state_id = cur_gen_states.get_next()) {
     State* state = state_disp_.GetState(state_id);
     if (state->is_completed_) {
+      interpretator_->End(NULL);
       parse_well = true;
     }
   }

@@ -3,21 +3,27 @@
 #ifndef SEMANTICS_H__
 #define SEMANTICS_H__
 
-#include "earley_parser.h"
-#include "ast.h"
-#include "tree.h"
-#include "token.h"
+#include <parser/earley_parser.h>
+#include <parser/token.h>
 
-namespace parser{
+namespace parser {
 
-typedef tree_node< ast_data >    ast_node_t;
-typedef parser::list< int >      error_cost_list_t;
+//! Базовый класс для всех семантических контекстов.
+struct SemanticContext {
+  //! Виртуальный деструктор.
+  virtual inline ~SemanticContext() = 0;
+};
 
-struct semantics{
+virtual inline SemanticContext::~SemanticContext() {
+}
 
-  virtual error_cost_list_t*    handle_error( private_::item_list_t*, token ) = 0;
-  
-  virtual void          handle_terminal( int ) = 0;
+struct Semantics {
+  /*!
+   * \brief Обработка терминального символа.
+   *
+   * \return true если терминал необходимо обрабатывать и false в противном случае.
+   */
+  virtual bool HandleTerminal() = 0;
   virtual ast_node_t*        handle_before_nonterminal( private_::item*, ast_node_t*, bool ) = 0;
   virtual ast_node_t*        handle_after_nonterminal( private_::item*, ast_node_t* ) = 0;
 

@@ -16,6 +16,56 @@ using namespace parser;
 
 #include <time.h>
 
+//! Интерфейс для взаимодействия с интерпретатором.
+struct TestSemantic : public EarleyParser::Interpretator {
+  EarleyParser* parser_;
+
+  struct MyContext : public EarleyParser::Context {
+  };
+
+  /*!
+   * \brief Начало работы алгоритма.
+   *
+   * \param[in] parser Указатель на объект парсера для получения информации о состояниях.
+   */
+  void Start(EarleyParser* parser) {
+    std::cout << "Start working...\n";
+    parser_ = parser;
+  }
+
+  /*!
+   * \brief Успешное завершение работы алгоритма.
+   *
+   * \param[in] item Ситуация с начальным символом в левой части.
+   */
+  void End(const EarleyParser::Item* item) {
+    std::cout << "End working...\n";
+  }
+
+  /*!
+   * \brief Обработка добавления терминального символа.
+   *
+   * \param[in]   token   Токен терминала.
+   * \param[in]   item    Ситуация, в которой производится сдвиг терминального символа.
+   *
+   * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
+   */
+  EarleyParser::Context::Ptr HandleTerminal(Token::Ptr token, const EarleyParser::Item* item) {
+    return EarleyParser::Context::Ptr(new MyContext());
+  }
+
+  /*!
+   * \brief Обработка добавления нетерминального символа.
+   *
+   * \param[in]   rule_item   Ситуация, соответствующая правилу, в левой части которого стоит данный нетерминал.
+   * \param[in]   left_item   Ситуация, в которой производится сдвиг нетерминального символа.
+   *
+   * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
+   */
+  EarleyParser::Context::Ptr HandleNonTerminal(const EarleyParser::Item* rule_item, const EarleyParser::Item* left_item) {
+    return EarleyParser::Context::Ptr(new MyContext());
+  }
+};
 
 int main() {
   try {
@@ -53,15 +103,16 @@ int main() {
     std::cout << "\n\n";
 
     Grammar gr(&pg);
-	
-	lexer ll;
-	ll.add_type(1, "N");
-	ll.add_type(2, "\\+");
-	ll.add_type(3, "x");
-	ll.set_stream("N+N");
-	ll.analyze();
 
-    EarleyParser parser(&gr, &ll);
+    lexer ll;
+    ll.add_type(1, "N");
+    ll.add_type(2, "\\+");
+    ll.add_type(3, "x");
+    ll.set_stream("N+N");
+    ll.analyze();
+
+    TestSemantic interpretator;
+    EarleyParser parser(&gr, &ll, &interpretator);
 
     if (parser.Parse()) {
         std::cout << "parse successful\n";
