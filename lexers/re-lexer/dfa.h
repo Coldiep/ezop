@@ -2,26 +2,28 @@
 #include <map>
 #include <set>
 
+namespace relexer {
+
 //! Типы состояний ДКА.
-enum state_type {start, mid, finish, start_finish};
+enum state_type {start,mid,finish,start_finish};
 
 //! Определение класса состояния ДКА.
-class state
+class State
 {
 public:
   //! Идентификатор состояния.
-  int id;
+  int id_;
   //! Флаг для определения того, является ли состояние помеченным.
-  bool marked;
+  bool marked_;
   //! Возможные переходы из данного состояния.
-  std::map<char, unsigned int> transitions;
-  //! Множество идентификаторов вершин дерева разбора, входящих в данное состояние.
-  std::set <int> ids;
+  std::map<char,unsigned int> transitions_;
+  //! Множество идентификаторов вершин дерева разбора,входящих в данное состояние.
+  std::set <int> ids_;
   //! Тип состояния.
-  state_type type;
+  state_type type_;
 
   //! Конструктор по умолчанию.
-  state();
+  State();
   //! Получение списка возможных переходов из данного состояния по определенному символу.
   unsigned int get_transition(char c);
   //! Добавление перехода.
@@ -29,34 +31,36 @@ public:
 };
 
 //! Определение класса ДКА.
-class dfa
+class DFA
 {
 public:
   //! Множество состояний ДКА.
-  std::set <state*> states;
+  std::set <State*> states_;
   //! Текущее состояние ДКА.
-  state* curr_state;
+  State* curr_state_;
 
   //! Конструктор по умолчанию.
-  dfa();
+  DFA();
   //! Деструктор.
-  ~dfa();
+  ~DFA();
   //! Добавление состояния.
-  void add_state(state* s);
+  void add_state(State* s);
   //! Добавление состояния.
   void add_state(int id,state_type type=mid);
   //! Создние нового состояния.
-  state* make_state(std::set<tree_point*> leaves_set,state_type type=mid);
+  State* make_state(std::set<TreePoint*> leaves_set,state_type type=mid);
   //! Добавление перехода.
   void add_transition(int beg_state,char c,int end_state);
   //! Получение состояния по идентификатору.
-  state* get_state(int ii);
+  State* get_state(int ii);
   //! Получение начального состояния ДКА.
-  state* get_start_state();
-  //! Запуск алгоритма проверки соответствия входной строки регулярному выражению, на основе которого построен ДКА.
+  State* get_start_state();
+  //! Запуск алгоритма проверки соответствия входной строки регулярному выражению,на основе которого построен ДКА.
   int process(std::string str);
   //! Построение ДКА по дереву регулярного выражения.
-  void build(exp_tree* t);
+  void build(ExpTree* t);
   //! Переход ДКА из текущего состояния по символу.
   int move(char c);
 };
+
+}

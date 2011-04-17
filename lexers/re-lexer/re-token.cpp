@@ -1,77 +1,78 @@
 #include "error_thrower.h"
 #include "re-token.h"
+
+
+using relexer::ReToken;
+using relexer::TokenTree;
+
 /*!
-* \brief Конструктор, заполняющий все поля экземпляра класса.
+* \brief Конструктор,заполняющий все поля экземпляра класса.
 *
 * \param[in] t        Тип токена.
 * \param[in] s        Позиция начала токена.
 * \param[in] f        Позиция конца токена.
-* \param[in] st        Фрагмент входной цепочки, которому соотвествует данный токен.
+* \param[in] st        Фрагмент входной цепочки,которому соотвествует данный токен.
 * \param[in] ret      Флаг для указания того, нужно ли включать данный токен в выходное дерево токенов.
-* \param[in] term_sym_id  Идентификатор терминального символа грамматики, которому соответствует данный токен.
-*/  
-token::token(int t, int s, int f, std::string st, bool ret, int term_sym_id)
-{
-  type = t;
-  start = s;
-  finish = f;
-  str = st;
-  is_returned = ret;
-  terminal_symbol_id = term_sym_id;
+* \param[in] term_sym_id  Идентификатор терминального символа грамматики,которому соответствует данный токен.
+*/
+ReToken::ReToken(int t,int s,int f,std::string st,bool ret,int term_sym_id) {
+    type_ = t;
+    start_ = s;
+    finish_ = f;
+    str_ = st;
+    is_returned_ = ret;
+    terminal_symbol_id_ = term_sym_id;
 }
 
 /*!
 * \brief Конструктор по умолчанию.
 *
 */
-token::token(token* t)
-{
-  type = t->type;
-  start = t->start;
-  finish = t->finish;
-  str = t->str;
-  is_returned = t->is_returned;
-  this->children = t->children;
-  this->id = t->id;
+ReToken::ReToken(ReToken* t) {
+    type_ = t->type_;
+    start_ = t->start_;
+    finish_ = t->finish_;
+    str_ = t->str_;
+    is_returned_ = t->is_returned_;
+    this->children_ = t->children_;
+    this->id_ = t->id_;
 }
 
 /*!
 * \brief Конструктор по умолчанию.
 *
 */
-token_tree::token_tree()
-{
-  this->root = new token(0,-1,-1,"",true);
+TokenTree::TokenTree() {
+    this->root_ = new ReToken(0,-1,-1,"",true);
 }
 
 /*!
 * \brief Добавление вершины к дереву.
 *
-* \param[in] token  Токен, который следует добавить к дереву.
-*/  
-void token_tree::add_node(token* node)
-{
-  std::vector <token*> nodes2see;
-  nodes2see.push_back(root);
-  int len = 1;
-  int uses = 0;
-  for (int i = 0; i<len; i++)
-  {
-    if(nodes2see[i]->finish == node->start - 1)
-    {
-      for (int j = 0; j < node->id.length(); j++)
-        if (node->id[j] == '.')
-          node->id.erase(j,std::string::npos);
-      char integer[10] = "";
-      itoa(++uses,integer,10);
-      node->id.append(".").append(integer);
+* \param[in] ReToken  Токен,который следует добавить к дереву.
+*/
+void TokenTree::add_node(ReToken* node) {
+    std::vector<ReToken*> nodes2see;
+    nodes2see.push_back(root_);
+    int len = 1;
+    int uses = 0;
 
-      nodes2see[i]->children.insert(new token(node));
+    for ( int i = 0; i < len; i++ ) {
+        if (nodes2see[i]->finish_ == node->start_ - 1) {
+            for ( int j = 0; j < node->id_.length(); j++ )
+                if (node->id_[j] == '.')
+                    node->id_.erase(j,std::string::npos);
+            char integer[10] = "";
+            itoa(++uses,integer,10);
+            node->id_.append(".").append(integer);
+
+            nodes2see[i]->children_.insert(new ReToken(node));
+        }
+
+        for ( std::set<ReToken*>::iterator it = nodes2see[i]->children_.begin(); it != nodes2see[i]->children_.end(); ++it )
+            {
+            nodes2see.push_back(*it);
+            len++;
+        }
     }
-  for (std::set<token*>::iterator it = nodes2see[i]->children.begin(); it!=nodes2see[i]->children.end(); ++it)
-  {
-      nodes2see.push_back(*it);
-      len++;
-    }
-  }
 }

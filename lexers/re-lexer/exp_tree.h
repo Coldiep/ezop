@@ -2,90 +2,91 @@
 #include <sstream>
 #include <set>
 
+namespace relexer {
+
 //! Типы вершин дерева разбора.
-enum point_type {symbol=0,opUnion, opIter,opConcat,OpLeftBracket,OpRightBracket,empty};
+enum point_type {symbol=0,opUnion,opIter,opConcat,OpLeftBracket,OpRightBracket,empty};
 
 //! Определение класса вершины дерева регулярного выражения.
-class tree_point {
+class TreePoint {
 public:
-  tree_point* left;     //!< Левая дочерняя вершина.
-  tree_point* right;    //!< Правая дочерняя вершина.
-  tree_point* parent;   //!< Родительская вершина.
-  point_type  type;     //!< Тип вершины.
-  char        contents; //!< Символ, соответствующий вершине.
-  bool        nullable; //!< Показатель того, выводима ли из вершины пустая строка.
-  int         id;       //!< Идентификатор вершины.
-
-  int end;  // Это что такое?
+  TreePoint*  left_;     //!< Левая дочерняя вершина.
+  TreePoint*  right_;    //!< Правая дочерняя вершина.
+  TreePoint*  parent_;   //!< Родительская вершина.
+  point_type  type_;     //!< Тип вершины.
+  char        contents_; //!< Символ,соответствующий вершине.
+  bool        nullable_; //!< Показатель того,выводима ли из вершины пустая строка.
+  int         id_;       //!< Идентификатор вершины.
+  int         end_;      //!< Показатель того,что вершина соответствует маркеру конца регулярного выражения.
 
   //! Тип множества вершин дерева.
-  typedef std::set<tree_point*> TreePointSet;
+  typedef std::set<TreePoint*> TreePointSet;
 
-  TreePointSet firstpos;    //!< Множество firstpos.
-  TreePointSet lastpos;     //!< Множество lastpos.
-  TreePointSet followpos;   //!< Множество followpos.
+  TreePointSet firstpos_;    //!< Множество firstpos.
+  TreePointSet lastpos_;     //!< Множество lastpos.
+  TreePointSet followpos_;   //!< Множество followpos.
 
   //! Конструктор по умолчанию.
-  tree_point();
+  TreePoint();
 
-  //! Конструктор, инициализирующийся одним символом.
-  tree_point(char c);
+  //! Конструктор,инициализирующийся одним символом.
+  TreePoint(char c);
 
-  //! Конструктор, инициализирующийся диапазоном символов.
-  tree_point(unsigned int c1,unsigned int c2);
+  //! Конструктор,инициализирующийся диапазоном символов.
+  TreePoint(unsigned int c1,unsigned int c2);
 
   //! Конструктор копирования.
-  tree_point(tree_point*tp);
+  TreePoint(TreePoint* tp);
 
-  //! Вычисление множеств firstpos, lastpos и followpos для вершины.
+  //! Вычисление множеств firstpos,lastpos и followpos для вершины.
   void calc();
 
   //! Вывод параметров вершины на печать.
   void print(int n);
 
   //! Деструктор.
-  ~tree_point();
+  ~TreePoint();
 };
 
 //! Определение класса дерева регулярного выражения.
-class exp_tree {
+class ExpTree {
 public:
-  tree_point*             root;     //! Корень дерева.
-  std::string             alphabet; //! Алфавит регулярного выражения.
-  std::set<tree_point*>   leaves;   //! Множество листьев дерева.
+  TreePoint*             root_;     //! Корень дерева.
+  std::string             alphabet_; //! Алфавит регулярного выражения.
+  std::set<TreePoint*>   leaves_;   //! Множество листьев дерева.
 
   //! Конструктор по умолчанию.
-  exp_tree();
+  ExpTree();
 
   //! Конструктор копирования.
-  exp_tree(exp_tree* t);
+  ExpTree(ExpTree* t);
 
-  //! Конструктор, инициализирующийся вершиной.
-  exp_tree(tree_point pnt);
+  //! Конструктор,инициализирующийся вершиной.
+  ExpTree(TreePoint pnt);
 
-  //! Конструктор, инициализирующийся диапазоном символов.
-  exp_tree(unsigned int c1,unsigned int c2);
+  //! Конструктор,инициализирующийся диапазоном символов.
+  ExpTree(unsigned int c1,unsigned int c2);
 
-  //! Конструктор, инициализирующийся одним символом.
-  exp_tree(char c);
+  //! Конструктор,инициализирующийся одним символом.
+  ExpTree(char c);
 
-  //! Конструктор, инициализирующийся типом вершины.
-  exp_tree(point_type t);
+  //! Конструктор,инициализирующийся типом вершины.
+  ExpTree(point_type t);
 
   //! Проверка того, является ли дерево пустым.
   bool is_empty();
 
   //! Построение нового дерева с корнем заданного типа.
-  exp_tree* make_new_root(point_type t);
+  ExpTree* make_new_root(point_type t);
 
   //! Слияние двух деревьев в одно.
-  static exp_tree* merge_trees(exp_tree* l,exp_tree* r,point_type t);
+  static ExpTree* merge_trees(ExpTree* l,ExpTree* r,point_type t);
 
   //! Вычисление множества followpos.
   void calc_followpos();
 
   //! Деструктор.
-  ~exp_tree();
+  ~ExpTree();
 };
 
 //! Определение структуры позиции в строке регулярного выражения.
@@ -95,7 +96,7 @@ struct Position{
 
   Position (const char* posPointer)
     : PosPointer(posPointer)
-    , PosNumber(1) {
+    ,PosNumber(1) {
   }
 
   void Next() {
@@ -130,3 +131,5 @@ struct Position{
     return LookForward(dist);
   }
 };
+
+}

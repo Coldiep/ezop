@@ -6,23 +6,23 @@
 #include "../../parser/public_grammar.h"
 #include "../../parser/lexer.h"
 
-namespace parser {
+namespace relexer {
 
 /*!
  * \brief Определение лексического типа.
  *
- * Структура для хранения данных о лексическом типе, использующаяся в
+ * Структура для хранения данных о лексическом типе,использующаяся в
  * алгоритме лексического анализа.
  */
-  struct lex_type
+  struct LexType
   {
-    int id;        //!< Идентификатор типа.
-    std::string name;  //!< Название типа.
-    std::string regexp;  //!< Регулярное выражение, задающее тип.
-    dfa* d;        //!< ДКА, построенный по регулярному выражению.
-    bool valid;      //!< Флаг для определения того, может ли данный тип быть применен к текущему символу входного потока.
-    bool is_returned;  //!< Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
-    int priority;    //!< Приоритет лексического типа.
+    int id_;                //!< Идентификатор типа.
+    std::string name_;      //!< Название типа.
+    std::string regexp_;    //!< Регулярное выражение,задающее тип.
+    DFA* d_;                //!< ДКА, построенный по регулярному выражению.
+    bool valid_;            //!< Флаг для определения того, может ли данный тип быть применен к текущему символу входного потока.
+    bool is_returned_;      //!< Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
+    int priority_;          //!< Приоритет лексического типа.
   };
  
  /*!
@@ -30,45 +30,45 @@ namespace parser {
  *
  * Класс реализует алгоритм лексического анализа текста, модифицированный для
  * обработки лексических неоднозначностей. Реализована возможность добавления
- * лексических типов на основе регулярных выражений, задания входного потока в
+ * лексических типов на основе регулярных выражений,задания входного потока в
  * виде строки или файла и проведения лексического анализа, результатом которого
  * является дерево токенов.
  */
-  class lexer : public Lexer
+  class ReLexer : public parser::Lexer
   {
   public:
-  //! Получение списка токенов, следующих за данным.
-  Lexer::TokenList GetTokens(Token::Ptr t);
-  //! Проверка, достигнут ли конец потока.
+  //! Получение списка токенов,следующих за данным.
+  parser::Lexer::TokenList GetTokens(parser::Token::Ptr t);
+  //! Проверка,достигнут ли конец потока.
   bool IsEnd();
 
   //! Конструктор по умолчнию.
-    lexer();
+    ReLexer();
   //! Деструктор.
-    ~lexer();
+    ~ReLexer();
   //! Входной поток символов.
     std::string stream;
   //! Множество лексических типов.
-    std::set <lex_type*> lex_types;
+    std::set <LexType*> lex_types;
   //! Количество лексических типов.
     int types_no;
   //! Дерево токеов - результат лексического анализа.
-    token_tree* tree;
+    TokenTree* tree;
   //! Текущая позиция во входном потоке.
     int cur_pos;
 
   //! Добавление лексического типа.
-    void add_type(std::string name, std::string regexp,int priority, int id = -1, bool ret = true);
+    void add_type(std::string name,std::string regexp,int priority,int id = -1,bool ret = true);
   //! Добавление лексического типа.
-  void add_type(int id, std::string regexp, int priority = 0, bool ret = true);
+  void add_type(int id,std::string regexp,int priority = 0,bool ret = true);
   //! Задание входного потока строкой.
     void set_stream(std::string s);
   //! Задание входного потока файлом.
-    void set_stream_file(std::string f, std::string tail);
+    void set_stream_file(std::string f,std::string tail);
   //! Проведение лексического анализа.
     void analyze();
-  //! Получение списка токенов, начинающихся с заданной позиции.
-    std::set <token*> get_tokens(int pos);
+  //! Получение списка токенов,начинающихся с заданной позиции.
+    std::set <ReToken*> get_tokens(int pos);
   //! Сброс параметров всех лексических типов в начальные.
     void reset();
   //! Обработка входной строки для удаления лишних символов.

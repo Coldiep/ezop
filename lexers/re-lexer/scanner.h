@@ -2,12 +2,16 @@
 #include <stack>
 #include "exp_tree.h"
 
+namespace relexer {
+
 //! Определение класса сканера.
-class scanner
+class Scanner
 {
 public:
-  //! Обработка части регулярного выражения, заключенной в скобки.
-  exp_tree* do_brackets(Position& p);
+  //! Обработка части регулярного выражения,заключенной в скобки.
+  ExpTree* do_brackets(Position& p);
   //! Обработка регулярного выражения.
-  exp_tree* process(std::string str);
+  ExpTree* process(std::string str);
 };
+
+}
