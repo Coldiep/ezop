@@ -10,10 +10,6 @@ using relexer::point_type;
 using relexer::Position;
 
 
-long n_id = 0;
-std::string symbols;
-std::set<TreePoint*> t_leaves;
-
 /*!
 * \brief Конструктор по умолчанию.
 *
@@ -106,15 +102,19 @@ TreePoint::~TreePoint() {
 /*!
 * \brief Вычисление множеств firstpos_,lastpos_ и followpos_ для вершины.
 *
+* \param[in] n_id    Идентификатор, который следует присвоить вершине.
+* \param[in] leaves  Все найденные до сих пор листья дерева.
+* \param[in] symbols Все найденные до сих пор символы регулярного выражения.
+*
 */
-void TreePoint::calc() {
+void TreePoint::Calc(int& n_id, std::set<TreePoint*>& leaves, std::string& symbols) {
     id_ = n_id++;
 
     if (right_ and left_) {
-        right_->calc();
+        right_->Calc(n_id, leaves, symbols);
 
         if (type_ != opIter)
-            left_->calc();
+            left_->Calc(n_id, leaves, symbols);
 
         switch (type_) {
             case opUnion: {
@@ -158,7 +158,7 @@ void TreePoint::calc() {
     else if (type_ == symbol) {
         firstpos_.insert(this);
         lastpos_.insert(this);
-        t_leaves.insert(this);
+        leaves.insert(this);
 
         if (not(contents_ == '#' and end_ == 1) and symbols.find(contents_) == std::string::npos)
             symbols.push_back(contents_);
@@ -169,7 +169,7 @@ void TreePoint::calc() {
 * \brief Вывод параметров вершины на печать.
 *
 */
-void TreePoint::print(int n) {
+void TreePoint::Print(int n) {
     for ( int i = 0; i < n; i++ )
         printf("%s","   ");
 
@@ -196,10 +196,10 @@ void TreePoint::print(int n) {
     }
 
     if (right_)
-        right_->print(n + 1);
+        right_->Print(n + 1);
 
     if (left_)
-        left_->print(n + 1);
+        left_->Print(n + 1);
 }
 
 //****************************************************************
@@ -292,7 +292,7 @@ bool ExpTree::is_empty() {
 * \param[in] t  Тип,который должен иметь корень дерева.
 *
 */
-ExpTree* ExpTree::make_new_root(point_type t) {
+ExpTree* ExpTree::MakeNewRoot(point_type t) {
     TreePoint* pnt = new TreePoint();
     pnt->type_ = t;
     pnt->right_ = pnt->left_ = root_;
@@ -312,7 +312,7 @@ ExpTree* ExpTree::make_new_root(point_type t) {
 * \param[in] t  Тип,который должен иметь корень дерева.
 *
 */
-ExpTree* ExpTree::merge_trees(ExpTree* l,ExpTree* r,point_type t) {
+ExpTree* ExpTree::MergeTrees(ExpTree* l,ExpTree* r,point_type t) {
     ExpTree* res = new ExpTree(t);
     l->root_->parent_ = r->root_->parent_ = res->root_;
     res->root_->left_ = l->root_;
@@ -327,12 +327,12 @@ ExpTree* ExpTree::merge_trees(ExpTree* l,ExpTree* r,point_type t) {
 * \brief Вычисление множества followpos_.
 *
 */
-void ExpTree::calc_followpos() {
-    symbols = "";
+void ExpTree::CalcFollowpos() {
+	std::string symbols = "";
+	std::set<TreePoint*> t_leaves;
     t_leaves.clear();
-    n_id = 0;
-    root_->id_ = 0;
-    root_->calc();
+    int n_id = 0;
+    root_->Calc(n_id, t_leaves, symbols);
     alphabet_ = symbols;
     leaves_ = t_leaves;
 }

@@ -18,7 +18,7 @@ namespace relexer {
   {
     int id_;                //!< Идентификатор типа.
     std::string name_;      //!< Название типа.
-    std::string regexp_;    //!< Регулярное выражение,задающее тип.
+    std::string regexp_;    //!< Регулярное выражение, задающее тип.
     DFA* d_;                //!< ДКА, построенный по регулярному выражению.
     bool valid_;            //!< Флаг для определения того, может ли данный тип быть применен к текущему символу входного потока.
     bool is_returned_;      //!< Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
@@ -30,7 +30,7 @@ namespace relexer {
  *
  * Класс реализует алгоритм лексического анализа текста, модифицированный для
  * обработки лексических неоднозначностей. Реализована возможность добавления
- * лексических типов на основе регулярных выражений,задания входного потока в
+ * лексических типов на основе регулярных выражений, задания входного потока в
  * виде строки или файла и проведения лексического анализа, результатом которого
  * является дерево токенов.
  */
@@ -58,21 +58,21 @@ namespace relexer {
     int cur_pos;
 
   //! Добавление лексического типа.
-    void add_type(std::string name,std::string regexp,int priority,int id = -1,bool ret = true);
+  void AddType(std::string name,std::string regexp,int priority,int id = -1,bool ret = true);
   //! Добавление лексического типа.
-  void add_type(int id,std::string regexp,int priority = 0,bool ret = true);
+  void AddType(int id,std::string regexp,int priority = 0,bool ret = true);
   //! Задание входного потока строкой.
-    void set_stream(std::string s);
+  void SetStream(std::string s);
   //! Задание входного потока файлом.
-    void set_stream_file(std::string f,std::string tail);
+  void SetStreamFile(std::string f,std::string tail);
   //! Проведение лексического анализа.
-    void analyze();
+  void Analyze();
   //! Получение списка токенов,начинающихся с заданной позиции.
-    std::set <ReToken*> get_tokens(int pos);
+  std::set <ReToken*> GetTokensInternal(int pos);
   //! Сброс параметров всех лексических типов в начальные.
-    void reset();
+  void Reset();
   //! Обработка входной строки для удаления лишних символов.
-    std::string strip(std::string str);
+  std::string Strip(std::string str);
     
   };
 

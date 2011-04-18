@@ -43,7 +43,7 @@ public:
   //! Конструктор по умолчанию.
   TokenTree();
   //! Добавление вершины к дереву.
-  void add_node(ReToken* node);
+  void AddNode(ReToken* node);
 };
 
 }

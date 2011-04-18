@@ -9,9 +9,9 @@ class Scanner
 {
 public:
   //! Обработка части регулярного выражения,заключенной в скобки.
-  ExpTree* do_brackets(Position& p);
+  ExpTree* DoBrackets(Position& p);
   //! Обработка регулярного выражения.
-  ExpTree* process(std::string str);
+  ExpTree* Process(std::string str);
 };
 
 }

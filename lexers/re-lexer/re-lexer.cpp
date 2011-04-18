@@ -41,7 +41,7 @@ ReLexer::~ReLexer() {
 *
 * \param[in] str Строка для обработки.
 */
-std::string ReLexer::strip(std::string str) {
+std::string ReLexer::Strip(std::string str) {
     /*
   
     std::string tmp = str.c_str();
@@ -61,15 +61,15 @@ std::string ReLexer::strip(std::string str) {
 *
 * \param[in] str Строка для обработки.
 */
-void ReLexer::set_stream(std::string s) {
-    stream = strip(s);
+void ReLexer::SetStream(std::string s) {
+    stream = Strip(s);
 }
 /*!
 * \brief Обработка входной строки для удаления лишних символов
 *
 * \param[in] str Строка для обработки.
 */
-void ReLexer::set_stream_file(std::string filename,std::string tail) {
+void ReLexer::SetStreamFile(std::string filename,std::string tail) {
     FILE* f = fopen(filename.c_str(),"r");
 
     if (f == NULL)
@@ -83,7 +83,7 @@ void ReLexer::set_stream_file(std::string filename,std::string tail) {
         stream.append(s);
     }
     stream.append(tail);
-    stream = strip(stream);
+    stream = Strip(stream);
 }
 /*!
 * \brief Добавление лексического типа.
@@ -94,7 +94,7 @@ void ReLexer::set_stream_file(std::string filename,std::string tail) {
 * \param[in] ret    Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
 * \param[in] id      Идентификатор типа.
 */
-void ReLexer::add_type(std::string name,std::string regexp,int priority,int id_,bool ret) {
+void ReLexer::AddType(std::string name,std::string regexp,int priority,int id_,bool ret) {
     LexType* lt = new LexType();
 
     if (id_ < 0)
@@ -107,9 +107,9 @@ void ReLexer::add_type(std::string name,std::string regexp,int priority,int id_,
     lt->regexp_ = regexp;
     lt->is_returned_ = ret;
     Scanner S;
-    ExpTree* t = S.process(regexp);
+    ExpTree* t = S.Process(regexp);
     DFA* d = new DFA();
-    d->build(t);
+    d->Build(t);
     lt->d_ = d;
     lt->valid_ = true;
     lt->priority_ = priority;
@@ -124,7 +124,7 @@ void ReLexer::add_type(std::string name,std::string regexp,int priority,int id_,
 * \param[in] priority  Приоритет типа.
 * \param[in] ret    Флаг для указания того, нужно ли включать данный тип в выходное дерево токенов.
 */
-void ReLexer::add_type(int id_,std::string regexp,int priority,bool ret) {
+void ReLexer::AddType(int id_,std::string regexp,int priority,bool ret) {
     LexType* lt = new LexType();
     types_no++;
     lt->id_ = id_;
@@ -132,9 +132,9 @@ void ReLexer::add_type(int id_,std::string regexp,int priority,bool ret) {
     lt->regexp_ = regexp;
     lt->is_returned_ = ret;
     Scanner S;
-    ExpTree* t = S.process(regexp);
+    ExpTree* t = S.Process(regexp);
     DFA* d = new DFA();
-    d->build(t);
+    d->Build(t);
     lt->d_ = d;
     lt->valid_ = true;
     lt->priority_ = priority;
@@ -145,21 +145,21 @@ void ReLexer::add_type(int id_,std::string regexp,int priority,bool ret) {
 * \brief Проведение лексического анализа.
 *
 */
-void ReLexer::analyze() {
+void ReLexer::Analyze() {
     int id = 0;
     std::set<int> token_ends;
     token_ends.insert(-1);
 
     for ( std::set<int>::iterator it = token_ends.begin(); it != token_ends.end(); ++it ) {
         int start_pos = (*it);
-        std::set<ReToken*> next_tokens = get_tokens(start_pos);
+        std::set<ReToken*> next_tokens = GetTokensInternal(start_pos);
 
         for ( std::set<ReToken*>::iterator iter = next_tokens.begin(); iter != next_tokens.end(); ++iter ) {
             ReToken* tok = (*iter);
             char integer[10] = "";
             itoa(++id,integer,10);
             tok->id_ = integer;
-            tree->add_node(tok);
+            tree->AddNode(tok);
             token_ends.insert(tok->finish_);
         }
     }
@@ -168,7 +168,7 @@ void ReLexer::analyze() {
 * \brief Сброс параметров всех лексических типов в начальные.
 *
 */
-void ReLexer::reset() {
+void ReLexer::Reset() {
     for ( std::set<LexType*>::iterator it = lex_types.begin(); it != lex_types.end(); ++it ) {
         LexType* lt = (*it);
 
@@ -176,7 +176,7 @@ void ReLexer::reset() {
             continue;
 
         lt->valid_ = true;
-        lt->d_->curr_state_ = lt->d_->get_start_state();
+        lt->d_->curr_state_ = lt->d_->GetStartState();
     }
 }
 /*!
@@ -184,7 +184,7 @@ void ReLexer::reset() {
 *
 * \param[in] pos Позиция во входном потоке.
 */
-std::set<ReToken*> ReLexer::get_tokens(int pos) {
+std::set<ReToken*> ReLexer::GetTokensInternal(int pos) {
     std::map<unsigned int,bool> types_returned;
     std::map<unsigned int,int> types_priority;
 
@@ -207,7 +207,7 @@ std::set<ReToken*> ReLexer::get_tokens(int pos) {
             if (not((*it)->valid_))
                 continue;
 
-            if ((*it)->d_->move(stream[i])) {
+            if ((*it)->d_->Move(stream[i])) {
                 if ((*it)->d_->curr_state_->type_ == finish or (*it)->d_->curr_state_->type_ == start_finish)
                     accepted_types[(*it)->id_] = i;
             }
@@ -241,7 +241,7 @@ std::set<ReToken*> ReLexer::get_tokens(int pos) {
     if (accepted_types.empty() and i < stream.length())
         result.insert(new ReToken(0,pos,(int)stream.length() - 1,stream.substr(pos,(int)stream.length() - pos),
             true));
-    reset();
+    Reset();
     return result;
 }
 /*!
@@ -259,7 +259,7 @@ bool ReLexer::IsEnd() {
 parser::Lexer::TokenList relexer::ReLexer::GetTokens(parser::Token::Ptr t) {
     int abs_pos_ = t->abs_pos_;
     int length_ = t->length_;
-    std::set<ReToken*> next_tokens = get_tokens(abs_pos_ + length_ - 1);
+    std::set<ReToken*> next_tokens = GetTokensInternal(abs_pos_ + length_ - 1);
     TokenList tokens_to_return;
 
     for ( std::set<ReToken*>::iterator it = next_tokens.begin(); it != next_tokens.end(); ++it ) {

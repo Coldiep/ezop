@@ -18,7 +18,9 @@ public:
   bool        nullable_; //!< Показатель того,выводима ли из вершины пустая строка.
   int         id_;       //!< Идентификатор вершины.
   int         end_;      //!< Показатель того,что вершина соответствует маркеру конца регулярного выражения.
+  
 
+public:
   //! Тип множества вершин дерева.
   typedef std::set<TreePoint*> TreePointSet;
 
@@ -39,10 +41,10 @@ public:
   TreePoint(TreePoint* tp);
 
   //! Вычисление множеств firstpos,lastpos и followpos для вершины.
-  void calc();
+  void Calc(int& n_id, std::set<TreePoint*>& leaves, std::string& symbols);
 
   //! Вывод параметров вершины на печать.
-  void print(int n);
+  void Print(int n);
 
   //! Деструктор.
   ~TreePoint();
@@ -52,7 +54,7 @@ public:
 class ExpTree {
 public:
   TreePoint*             root_;     //! Корень дерева.
-  std::string             alphabet_; //! Алфавит регулярного выражения.
+  std::string            alphabet_; //! Алфавит регулярного выражения.
   std::set<TreePoint*>   leaves_;   //! Множество листьев дерева.
 
   //! Конструктор по умолчанию.
@@ -77,13 +79,13 @@ public:
   bool is_empty();
 
   //! Построение нового дерева с корнем заданного типа.
-  ExpTree* make_new_root(point_type t);
+  ExpTree* MakeNewRoot(point_type t);
 
   //! Слияние двух деревьев в одно.
-  static ExpTree* merge_trees(ExpTree* l,ExpTree* r,point_type t);
+  static ExpTree* MergeTrees(ExpTree* l,ExpTree* r,point_type t);
 
   //! Вычисление множества followpos.
-  void calc_followpos();
+  void CalcFollowpos();
 
   //! Деструктор.
   ~ExpTree();

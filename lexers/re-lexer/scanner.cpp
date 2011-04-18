@@ -13,7 +13,7 @@ using relexer::Position;
 * \return    Дерево разбора части регулярного выражения.
 */
 
-ExpTree* Scanner::do_brackets(Position& p) {
+ExpTree* Scanner::DoBrackets(Position& p) {
     ExpTree* t = new ExpTree();
     ++p;
 
@@ -35,18 +35,18 @@ ExpTree* Scanner::do_brackets(Position& p) {
                 throw_error("Nonpair [ is at the end of the input");
 
             if (*p == ']') {
-                t = t->is_empty() ? new ExpTree(c1,0xff) : ExpTree::merge_trees(t,new ExpTree(c1,0xff),opUnion);
+                t = t->is_empty() ? new ExpTree(c1,0xff) : ExpTree::MergeTrees(t,new ExpTree(c1,0xff),opUnion);
                 break;
             }
             else {
                 if (t->is_empty())
                     t = new ExpTree(c1,*p);
                 else
-                    t = ExpTree::merge_trees(t,new ExpTree(c1,*p),opUnion);
+                    t = ExpTree::MergeTrees(t,new ExpTree(c1,*p),opUnion);
             }
         }
         else
-            t = t->is_empty() ? new ExpTree(*p) : ExpTree::merge_trees(t,new ExpTree(*p),opUnion);
+            t = t->is_empty() ? new ExpTree(*p) : ExpTree::MergeTrees(t,new ExpTree(*p),opUnion);
     }
     return t;
 }
@@ -57,7 +57,7 @@ ExpTree* Scanner::do_brackets(Position& p) {
 * \param[in] str  Строка,содержащая регулярное выражение.
 * \return      Дерево разбора регулярного выражения.
 */
-ExpTree* Scanner::process(std::string str) {
+ExpTree* Scanner::Process(std::string str) {
     //printf("Processing regexp '%s' of length %i.\n",str.c_str(),str.length());
     //std::string input = str.append("#");//"(a|b)*abb#";//"N.*";//"a*b[c-de](a)f|n|(((b)*)c|d)";
     std::stack<point_type> mag;
@@ -79,7 +79,7 @@ ExpTree* Scanner::process(std::string str) {
                 trees_mag.pop();
                 ExpTree* left = trees_mag.top();
                 trees_mag.pop();
-                ExpTree* t = ExpTree::merge_trees(left,right,mag.top());
+                ExpTree* t = ExpTree::MergeTrees(left,right,mag.top());
                 trees_mag.push(t);
                 mag.pop();
 
@@ -96,20 +96,20 @@ ExpTree* Scanner::process(std::string str) {
         else if (*p == '*') {
             if (trees_mag.empty())
                 throw_error("Missing left operand of *");
-            ExpTree* t = trees_mag.top()->make_new_root(opIter);
+            ExpTree* t = trees_mag.top()->MakeNewRoot(opIter);
         }
         else if (*p == '+') {
             if (trees_mag.empty())
                 throw_error("Missing left operand of +");
             ExpTree* t =
-                ExpTree::merge_trees(new ExpTree(trees_mag.top()),trees_mag.top()->make_new_root(opIter),opConcat);
+                ExpTree::MergeTrees(new ExpTree(trees_mag.top()),trees_mag.top()->MakeNewRoot(opIter),opConcat);
             trees_mag.pop();
             trees_mag.push(t);
         }
         else if (*p == '?') {
             if (trees_mag.empty())
                 throw_error("Missing left operand of ?");
-            ExpTree* t = ExpTree::merge_trees(trees_mag.top(),new ExpTree(empty),opUnion);
+            ExpTree* t = ExpTree::MergeTrees(trees_mag.top(),new ExpTree(empty),opUnion);
             trees_mag.pop();
             trees_mag.push(t);
         }
@@ -121,7 +121,7 @@ ExpTree* Scanner::process(std::string str) {
             trees_mag.push(new ExpTree(*p));
         }
         else if (*p == '[') {
-            ExpTree* t = do_brackets(p);
+            ExpTree* t = DoBrackets(p);
             trees_mag.push(t);
         }
         else {
@@ -129,7 +129,7 @@ ExpTree* Scanner::process(std::string str) {
                 trees_mag.push(new ExpTree(ch));
             }
             else {
-                ExpTree* t = trees_mag.top()->make_new_root(opConcat);
+                ExpTree* t = trees_mag.top()->MakeNewRoot(opConcat);
                 t->root_->right_ = new TreePoint(ch);
                 trees_mag.pop();
                 trees_mag.push(t);
@@ -143,7 +143,7 @@ ExpTree* Scanner::process(std::string str) {
             trees_mag.pop();
             ExpTree* l = trees_mag.top();
             trees_mag.pop();
-            trees_mag.push(ExpTree::merge_trees(l,r,mag.top()));
+            trees_mag.push(ExpTree::MergeTrees(l,r,mag.top()));
             mag.pop();
         }
 
@@ -159,16 +159,16 @@ ExpTree* Scanner::process(std::string str) {
         while (not(mag.empty())) {
             ExpTree* r = trees_mag.top();
             trees_mag.pop();
-            e = trees_mag.top()->make_new_root(mag.top());
+            e = trees_mag.top()->MakeNewRoot(mag.top());
             e->root_->right_ = r->root_;
             mag.pop();
         }
     trees_mag.pop();
-    e->make_new_root(opConcat);
+    e->MakeNewRoot(opConcat);
     TreePoint* end = new TreePoint('#');
     end->end_ = 1;
     e->root_->right_ = end;
-    e->calc_followpos();
+    e->CalcFollowpos();
 
     return e;
 }

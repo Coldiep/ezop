@@ -5,8 +5,6 @@
 
 using namespace relexer;
 
-int s_id = 0;
-
 /*!
 * \brief Конструктор по умолчанию.
 *
@@ -21,7 +19,7 @@ State::State() {
 * \param[in] c  Символ, по которому должен осуществляться переход.
 *
 */
-unsigned int State::get_transition(char c) {
+unsigned int State::GetTransition(char c) {
     std::map<char,unsigned int>::iterator it = transitions_.find(c);
 
     if (it != transitions_.end())
@@ -37,7 +35,7 @@ unsigned int State::get_transition(char c) {
 * \param[in] State  Идентификатор состояния,в которое осуществляется переход.
 *
 */
-void State::add_transition(char c,unsigned int State) {
+void State::AddTransition(char c,unsigned int State) {
     transitions_[c] = State;
 }
 
@@ -55,7 +53,7 @@ DFA::DFA() { }
 * \param[in] State  Состояние,которое следует добавить.
 *
 */
-void DFA::add_state(State* s) {
+void DFA::AddState(State* s) {
     if (not(states_.empty()))
         for ( std::set<State*>::iterator it = states_.begin(); it != states_.end(); ++it )
             if ((*it)->id_ == s->id_)
@@ -70,7 +68,7 @@ void DFA::add_state(State* s) {
 * \param[in] type  Тип состояния,которое следует добавить.
 *
 */
-void DFA::add_state(int id,state_type type) {
+void DFA::AddState(int id,state_type type) {
     if (not(states_.empty()))
         for ( std::set<State*>::iterator it = states_.begin(); it != states_.end(); ++it )
             if ((*it)->id_ == id)
@@ -86,10 +84,11 @@ void DFA::add_state(int id,state_type type) {
 * \brief Создние нового состояния.
 *
 * \param[in] leaves_set    Множество вершин дерева регулярного выражения,которым будет соответствовать состояние.
-* \param[in] type      Тип состояния.
-* \return          Новое состояние.
+* \param[in] s_id          Идентификатор, который следует присвоить состоянию.
+* \param[in] type          Тип состояния.
+* \return                  Новое состояние.
 */
-State* DFA::make_state(std::set<TreePoint*> leaves_set,state_type type) {
+State* DFA::MakeState(std::set<TreePoint*> leaves_set, int& s_id, state_type type) {
     State* s = new State();
     s->type_ = type;
 
@@ -138,10 +137,10 @@ State* DFA::make_state(std::set<TreePoint*> leaves_set,state_type type) {
 * \param[in] beg_state  Состояние,в которое будет осуществляться переход
 * 
 */
-void DFA::add_transition(int beg_state,char c,int end_state) {
-    State* bs = get_state(beg_state);
-    State* es = get_state(end_state);
-    bs->add_transition(c,es->id_);
+void DFA::AddTransition(int beg_state,char c,int end_state) {
+    State* bs = GetState(beg_state);
+    State* es = GetState(end_state);
+    bs->AddTransition(c,es->id_);
 }
 
 /*!
@@ -150,7 +149,7 @@ void DFA::add_transition(int beg_state,char c,int end_state) {
 * \param[in] ii    Идентификатор состояния.
 * \return      Состояние ДКА с указанным идентификатором.
 */
-State* DFA::get_state(int ii) {
+State* DFA::GetState(int ii) {
     for ( std::set<State*>::iterator it = states_.begin(); it != states_.end(); ++it ) {
         State* s = (*it);
 
@@ -166,7 +165,7 @@ State* DFA::get_state(int ii) {
 *
 * \return  Начальное состояние ДКА.
 */
-State* DFA::get_start_state() {
+State* DFA::GetStartState() {
     for ( std::set<State*>::iterator it = states_.begin(); it != states_.end(); ++it ) {
         State* s = (*it);
 
@@ -183,18 +182,18 @@ State* DFA::get_start_state() {
 * \param[in] str  Регулярное выражение.
 * \return      1,если входная строка соответствует регулярному выражению,на основе которого построен ДКА,0 - если не соответствует.
 */
-int DFA::process(std::string str) {
+int DFA::Process(std::string str) {
     //printf("Processing string '%s' of length %i: ",str.c_str(),str.length());
-    State* s = get_start_state();
+    State* s = GetStartState();
 
     for ( unsigned int i = 0; i < str.length(); i++ ) {
-        unsigned int ind = s->get_transition(str[i]);
+        unsigned int ind = s->GetTransition(str[i]);
 
         if (ind == 0) {
             s->type_ = mid;
             break;
         }
-        s = get_state(ind);
+        s = GetState(ind);
     }
 
     if (s->type_ == finish or s->type_ == start_finish)
@@ -221,14 +220,14 @@ struct tri {
 * \param[in]  tr  Дерево регулярного выражения.
 *
 */
-void DFA::build(ExpTree* tr) {
-    s_id = 0;
+void DFA::Build(ExpTree* tr) {
+    int s_id = 0;
     bool flag = true;
     std::string input = tr->alphabet_;
     std::set<TreePoint*> leaves = tr->leaves_;
 
-    State* firststate = make_state(tr->root_->firstpos_,start);
-    add_state(firststate);
+    State* firststate = MakeState(tr->root_->firstpos_,s_id,start);
+    AddState(firststate);
 
     while (flag) {
         flag = false;
@@ -262,13 +261,13 @@ void DFA::build(ExpTree* tr) {
         }
 
         for ( std::set<tri*>::iterator it = toadd.begin(); it != toadd.end(); ++it ) {
-            State* newstate = make_state((*it)->s);
-            add_state(newstate);
-            add_transition((*it)->id,(*it)->a,newstate->id_);
+            State* newstate = MakeState((*it)->s,s_id);
+            AddState(newstate);
+            AddTransition((*it)->id,(*it)->a,newstate->id_);
         }
         toadd.clear();
     }
-    curr_state_ = get_start_state();
+    curr_state_ = GetStartState();
 }
 
 /*!
@@ -277,11 +276,11 @@ void DFA::build(ExpTree* tr) {
 * \param[in] c  Символ, по которому должен осуществляться переход.
 * \return    1,если переход возможен,0 - если невозможен.
 */
-int DFA::move(char c) {
-    unsigned int ind = curr_state_->get_transition(c);
+int DFA::Move(char c) {
+    unsigned int ind = curr_state_->GetTransition(c);
 
     if (ind != 0) {
-        curr_state_ = get_state(ind);
+        curr_state_ = GetState(ind);
         return 1;
     }
     else

@@ -25,9 +25,9 @@ public:
   //! Конструктор по умолчанию.
   State();
   //! Получение списка возможных переходов из данного состояния по определенному символу.
-  unsigned int get_transition(char c);
+  unsigned int GetTransition(char c);
   //! Добавление перехода.
-  void add_transition(char c,unsigned int s);
+  void AddTransition(char c,unsigned int s);
 };
 
 //! Определение класса ДКА.
@@ -44,23 +44,23 @@ public:
   //! Деструктор.
   ~DFA();
   //! Добавление состояния.
-  void add_state(State* s);
+  void AddState(State* s);
   //! Добавление состояния.
-  void add_state(int id,state_type type=mid);
+  void AddState(int id,state_type type=mid);
   //! Создние нового состояния.
-  State* make_state(std::set<TreePoint*> leaves_set,state_type type=mid);
+  State* MakeState(std::set<TreePoint*> leaves_set, int& s_id, state_type type=mid);
   //! Добавление перехода.
-  void add_transition(int beg_state,char c,int end_state);
+  void AddTransition(int beg_state,char c,int end_state);
   //! Получение состояния по идентификатору.
-  State* get_state(int ii);
+  State* GetState(int ii);
   //! Получение начального состояния ДКА.
-  State* get_start_state();
+  State* GetStartState();
   //! Запуск алгоритма проверки соответствия входной строки регулярному выражению,на основе которого построен ДКА.
-  int process(std::string str);
+  int Process(std::string str);
   //! Построение ДКА по дереву регулярного выражения.
-  void build(ExpTree* t);
+  void Build(ExpTree* t);
   //! Переход ДКА из текущего состояния по символу.
-  int move(char c);
+  int Move(char c);
 };
 
 }

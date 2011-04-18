@@ -25,7 +25,7 @@ ReToken::ReToken(int t,int s,int f,std::string st,bool ret,int term_sym_id) {
 }
 
 /*!
-* \brief Конструктор по умолчанию.
+* \brief Конструктор копирования.
 *
 */
 ReToken::ReToken(ReToken* t) {
@@ -51,7 +51,7 @@ TokenTree::TokenTree() {
 *
 * \param[in] ReToken  Токен,который следует добавить к дереву.
 */
-void TokenTree::add_node(ReToken* node) {
+void TokenTree::AddNode(ReToken* node) {
     std::vector<ReToken*> nodes2see;
     nodes2see.push_back(root_);
     int len = 1;

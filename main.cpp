@@ -55,11 +55,11 @@ int main() {
     Grammar gr(&pg);
   
     relexer::ReLexer ll;
-    ll.add_type(1,"N");
-    ll.add_type(2,"\\+");
-    ll.add_type(3,"x");
-    ll.set_stream("N+N");
-    ll.analyze();
+    ll.AddType(1,"N");
+    ll.AddType(2,"\\+");
+    ll.AddType(3,"x");
+    ll.SetStream("N+N");
+    ll.Analyze();
 
     EarleyParser parser(&gr,&ll);
 
