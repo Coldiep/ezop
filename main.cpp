@@ -1,4 +1,3 @@
-
 #define PRINT_ADDING
 
 #include "public_grammar.h"
@@ -68,34 +67,35 @@ struct TestSemantic : public EarleyParser::Interpretator {
 };
 
 int main() {
+
   try {
     PublicGrammar pg("test");
-    pg.AddTerminal(1, "N");
-    pg.AddTerminal(2, "+");
-    pg.AddTerminal(3, "x");
+    pg.AddTerminal(1,"N");
+    pg.AddTerminal(2,"+");
+    pg.AddTerminal(3,"x");
 
-    pg.AddNonterminal(4, "A");
-    pg.AddNonterminal(5, "M");
+    pg.AddNonterminal(4,"A");
+    pg.AddNonterminal(5,"M");
 
-    pg.AddRule(1, "A --> M + A");
-    pg.AddLhsSymbol(1, 4);
-    pg.AddRhsSymbol(1, 5);
-    pg.AddRhsSymbol(1, 2);
-    pg.AddRhsSymbol(1, 4);
+    pg.AddRule(1,"A --> M + A");
+    pg.AddLhsSymbol(1,4);
+    pg.AddRhsSymbol(1,5);
+    pg.AddRhsSymbol(1,2);
+    pg.AddRhsSymbol(1,4);
 
-    pg.AddRule(2, "A --> M");
-    pg.AddLhsSymbol(2, 4);
-    pg.AddRhsSymbol(2, 5);
+    pg.AddRule(2,"A --> M");
+    pg.AddLhsSymbol(2,4);
+    pg.AddRhsSymbol(2,5);
 
-    pg.AddRule(3, "M --> N x M");
-    pg.AddLhsSymbol(3, 5);
-    pg.AddRhsSymbol(3, 1);
-    pg.AddRhsSymbol(3, 3);
-    pg.AddRhsSymbol(3, 5);
+    pg.AddRule(3,"M --> N x M");
+    pg.AddLhsSymbol(3,5);
+    pg.AddRhsSymbol(3,1);
+    pg.AddRhsSymbol(3,3);
+    pg.AddRhsSymbol(3,5);
 
-    pg.AddRule(4, "M --> N");
-    pg.AddLhsSymbol(4, 5);
-    pg.AddRhsSymbol(4, 1);
+    pg.AddRule(4,"M --> N");
+    pg.AddLhsSymbol(4,5);
+    pg.AddRhsSymbol(4,1);
 
     pg.SetStartSymbolId(4);
 
@@ -103,13 +103,13 @@ int main() {
     std::cout << "\n\n";
 
     Grammar gr(&pg);
-
-    lexer ll;
-    ll.add_type(1, "N");
-    ll.add_type(2, "\\+");
-    ll.add_type(3, "x");
-    ll.set_stream("N+N");
-    ll.analyze();
+  
+    relexer::ReLexer ll;
+    ll.AddType(1,"N");
+    ll.AddType(2,"\\+");
+    ll.AddType(3,"x");
+    ll.SetStream("N+N");
+    ll.Analyze();
 
     TestSemantic interpretator;
     EarleyParser parser(&gr, &ll, &interpretator);

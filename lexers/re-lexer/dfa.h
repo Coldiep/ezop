@@ -2,38 +2,65 @@
 #include <map>
 #include <set>
 
-enum state_type {start, mid, finish, start_finish};
-class state
+namespace relexer {
+
+//! Типы состояний ДКА.
+enum state_type {start,mid,finish,start_finish};
+
+//! Определение класса состояния ДКА.
+class State
 {
 public:
-  int id;
-  bool marked;
-  std::map<char, unsigned int> transitions;
-  std::set <int> ids;
-  state_type type;
+  //! Идентификатор состояния.
+  int id_;
+  //! Флаг для определения того, является ли состояние помеченным.
+  bool marked_;
+  //! Возможные переходы из данного состояния.
+  std::map<char,unsigned int> transitions_;
+  //! Множество идентификаторов вершин дерева разбора,входящих в данное состояние.
+  std::set <int> ids_;
+  //! Тип состояния.
+  state_type type_;
 
-  state();
-  unsigned int get_transition(char c);
-  void add_transition(char c,unsigned int s);
+  //! Конструктор по умолчанию.
+  State();
+  //! Получение списка возможных переходов из данного состояния по определенному символу.
+  unsigned int GetTransition(char c);
+  //! Добавление перехода.
+  void AddTransition(char c,unsigned int s);
 };
 
-
-class dfa
+//! Определение класса ДКА.
+class DFA
 {
 public:
-  std::set <state*> states;
-  state* curr_state;
+  //! Множество состояний ДКА.
+  std::set <State*> states_;
+  //! Текущее состояние ДКА.
+  State* curr_state_;
 
-  dfa();
-  ~dfa();
-  void add_state(state* s);
-  void add_state(int id,state_type type=mid);
-  state* make_state(std::set<tree_point*> leaves_set,state_type type=mid);
-  void add_transition(int beg_state,char c,int end_state);
-  state* get_state(int ii);
-  state* get_start_state();
-  int process(std::string str);
-  void build(exp_tree* t);
-  void build1(exp_tree* t);
-  int move(char c);
+  //! Конструктор по умолчанию.
+  DFA();
+  //! Деструктор.
+  ~DFA();
+  //! Добавление состояния.
+  void AddState(State* s);
+  //! Добавление состояния.
+  void AddState(int id,state_type type=mid);
+  //! Создние нового состояния.
+  State* MakeState(std::set<TreePoint*> leaves_set, int& s_id, state_type type=mid);
+  //! Добавление перехода.
+  void AddTransition(int beg_state,char c,int end_state);
+  //! Получение состояния по идентификатору.
+  State* GetState(int ii);
+  //! Получение начального состояния ДКА.
+  State* GetStartState();
+  //! Запуск алгоритма проверки соответствия входной строки регулярному выражению,на основе которого построен ДКА.
+  int Process(std::string str);
+  //! Построение ДКА по дереву регулярного выражения.
+  void Build(ExpTree* t);
+  //! Переход ДКА из текущего состояния по символу.
+  int Move(char c);
 };
+
+}

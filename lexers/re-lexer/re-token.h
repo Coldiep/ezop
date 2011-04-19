@@ -3,30 +3,47 @@
 #include <vector>
 #include <string>
 
-class token
+namespace relexer {
+
+//! Определение класса токена.
+class ReToken
 {
 public:
-  token() {start = -1; finish = -1;};
-  token(int t, int s, int f, std::string st, bool ret, int term_sym_id = 0);
-  token(token* t);
-  int type;
-  int start;
-  int finish;
-  bool is_returned;
-  int terminal_symbol_id;
-  std::string id;
-  std::string str;
-  std::set<token*> children;
-  std::string print(int level, std::map <unsigned int, std::string> types);
-  std::string print_gv(std::map <unsigned int, std::string> types, std::string par = "");
-  std::string print_xml(std::map <unsigned int, std::string> types);
+  //! Конструктор по умолчанию.
+  ReToken() {start_ = -1; finish_ = -1;};
+  //! Конструктор,заполняющий все поля экземпляра класса.
+  ReToken(int t,int s,int f,std::string st,bool ret,int term_sym_id = 0);
+  //! Конструктор копирования.
+  ReToken(ReToken* t);
+  //! Тип токена.
+  int type_;
+  //! Позиция начала токена.
+  int start_;
+  //! Позиция конца токена.
+  int finish_;
+  //! Флаг для указания того, нужно ли включать данный токен в выходное дерево токенов.
+  bool is_returned_;
+  //! Идентификатор терминального символа грамматики,которому соответствует данный токен.
+  int terminal_symbol_id_;
+  //! Идентификатор токена,использующийся для построения дерева.
+  std::string id_;
+  //! Фрагмент входной цепочки,которому соотвествует данный токен.
+  std::string str_;
+  //! Множество дочерних узлов данного токена в выходном дереве токенов.
+  std::set<ReToken*> children_;
 
 };
 
-class token_tree
+//! Определение класса дерева токенов.
+class TokenTree
 {
 public:
-  token* root;
-  token_tree();
-  void add_node(token* node);
+  //! Корень дерева.
+  ReToken* root_;
+  //! Конструктор по умолчанию.
+  TokenTree();
+  //! Добавление вершины к дереву.
+  void AddNode(ReToken* node);
 };
+
+}
