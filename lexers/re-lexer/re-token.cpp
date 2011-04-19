@@ -59,7 +59,7 @@ void TokenTree::AddNode(ReToken* node) {
 
     for ( int i = 0; i < len; i++ ) {
         if (nodes2see[i]->finish_ == node->start_ - 1) {
-            for ( int j = 0; j < node->id_.length(); j++ )
+            for (unsigned int j = 0; j < node->id_.length(); j++ )
                 if (node->id_[j] == '.')
                     node->id_.erase(j,std::string::npos);
             char integer[10] = "";

@@ -153,6 +153,7 @@ void TreePoint::Calc(int& n_id, std::set<TreePoint*>& leaves, std::string& symbo
                     (*it)->followpos_.insert(right_->firstpos_.begin(),right_->firstpos_.end());
                 break;
             }
+            default : { }
         }
     }
     else if (type_ == symbol) {

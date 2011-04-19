@@ -75,7 +75,6 @@ void ReLexer::SetStreamFile(std::string filename,std::string tail) {
     if (f == NULL)
         throw_error("Failed to open input stream file");
     char s[9999];
-    int lines = 0;
 
     while (fgets(s,9999,f) != NULL) { /*
                                          if (s[strlen(s)-1] == 10)
@@ -195,7 +194,7 @@ std::set<ReToken*> ReLexer::GetTokensInternal(int pos) {
         types_priority[lt->id_] = lt->priority_;
     }
 
-    int i = ++pos;
+    unsigned int i = ++pos;
     std::map<unsigned int,unsigned int> accepted_types;
     int invalid = 0;
 
@@ -249,7 +248,7 @@ std::set<ReToken*> ReLexer::GetTokensInternal(int pos) {
 *
 */
 bool ReLexer::IsEnd() {
-    return (cur_pos++ >= stream.length());
+    return ((unsigned int)(cur_pos++) >= stream.length());
 }
 /*!
 * \brief Получение списка токенов,следующих за данным.
