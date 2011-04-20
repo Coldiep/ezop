@@ -53,17 +53,16 @@ public:
   struct Item {
     //! Структура для хранения пар (контекст, указатель на ситуацию "ниже").
     struct Rptr {
-      Context*  context_; //!< Указатель на предоставляемый интерпретатором объект контекста.
-      Item*     item_;    //!< Указатель на объект класса ситуации Эрли.
+      Context::Ptr  context_; //!< Указатель на предоставляемый интерпретатором объект контекста.
+      Item*         item_;    //!< Указатель на объект класса ситуации Эрли.
 
       //! Инициализация по умолчанию.
       Rptr()
-        : context_(NULL)
-        , item_(NULL)
-      {}
+        : item_(NULL) {
+      }
 
       //! Инициализация всех полей.
-      Rptr(Context* context, Item* item)
+      Rptr(Context::Ptr context, Item* item)
         : context_(context)
         , item_(item)
       {}
@@ -85,7 +84,7 @@ public:
     size_t          order_number_;//!< Порядковый номер данной ситуации в состоянии.
     size_t          state_number_;//!< Номер состояния, котроому принадлежит ситуация.
 
-#   ifdef DUMP_CONTENT
+//#   ifdef DUMP_CONTENT
     /*!
      * \brief Печать содержимого ситуации.
      *
@@ -93,7 +92,7 @@ public:
      * \param[in] out Поток для вывода.
      */
     void Dump(Grammar* grammar, std::ostream& out);
-#   endif // DUMP_CONTENT
+//#   endif // DUMP_CONTENT
 
     //! Оператор сравнения.
     bool operator==(const Item& rhs) {
@@ -287,7 +286,7 @@ public:
      * \param[in] rptr      Указатель на ситуацию, послужившую причиной сдвига нетерминала слева от метки.
      * \param[in] context   Указатель на контекст интерпретатора.
      */
-    inline Item* AddItem(EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context);
+    inline Item* AddItem(EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context::Ptr context);
 
 #   ifdef DUMP_CONTENT
     //! Печать содержимого состояния.
@@ -478,7 +477,7 @@ public:
 
     for (Item* cur = item_list.elems_.get_first(); cur; cur = item_list.elems_.get_next()) {
       if (tmp_item == *cur) {
-        cur->rptrs_.push_back(Item::Rptr(NULL, rptr));
+        cur->rptrs_.push_back(Item::Rptr(Context::Ptr(), rptr));
         return true;
       }
     }

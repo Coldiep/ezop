@@ -5,7 +5,7 @@
 #include "earley_parser.h"
 using parser::EarleyParser;
 
-#ifdef DUMP_CONTENT
+//#ifdef DUMP_CONTENT
 void EarleyParser::Item::Dump(Grammar* grammar, std::ostream& out) {
   bool dot_printed = false;
   out << state_number_ << "." << order_number_ << " ";
@@ -26,32 +26,39 @@ void EarleyParser::Item::Dump(Grammar* grammar, std::ostream& out) {
   else out << "null";
 
   out << ", ";
-#if 0
+
   if (not rptrs_.empty()) {
     out << "<";
-    for (Rptr cur = rptrs_.get_first(); cur;) {
-      out << cur->item_->state_number_ << "." << cur->item_->order_number_;
-      if (cur = rptrs_.get_next()) out << ",";
+    bool first = true;
+    for (Rptr cur = rptrs_.get_first(); not rptrs_.is_end(); cur = rptrs_.get_next()) {
+      if (cur.item_) {
+        if (first) {
+          first = false;
+        } else {
+          out << ", ";
+        }
+        out << "(" << cur.item_->state_number_ << "." << cur.item_->order_number_ << ")";
+      } else {
+        out << "(T)";
+      }
     }
     out << ">";
   } else {
-    out << "<null>";
+    out << "<>";
   }
-#endif
-  out << "<null>";
 
   out << " ]\n";
 }
-#endif // DUMP_CONTENT
+//#endif // DUMP_CONTENT
 
-inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context* context) {
+inline EarleyParser::Item* EarleyParser::State::AddItem(EarleyParser* parser, Grammar::RuleId rule_id, unsigned dot, size_t origin, Item* lptr, Item* rptr, Context::Ptr context) {
   // Получаем идентификатор символа в правой части правила. Если метка стоит в конце правила, то
   // будет возвращен 0, который используется как индекс для меток в конце правила.
   Grammar::SymbolId symbol_id = grammar_->GetRhsOfRule(rule_id, dot);
 
   // Инициализируем ситуацию.
   Item* item = disp_->GetItem(rule_id, dot, origin, lptr);
-  if (rptr) item->rptrs_.push_back(Item::Rptr(context, rptr));
+  if (context.get()) item->rptrs_.push_back(Item::Rptr(context, rptr));
   item->order_number_ = num_of_items_;
   item->state_number_ = id_;
 
@@ -107,7 +114,7 @@ inline void EarleyParser::Completer(size_t state_id, Item* item) {
       // В случае неоднозначности одна и та же ситуация может обрабатываться несколько раз, проверяем это.
       if (context.get() and not IsItemInList(cur_state->items_[grammar_->GetRhsOfRule(cur->rule_id_, cur->rhs_pos_ + 1)], cur, item)) {
         // Сдвигаем символ после точки в обрабатываемой ситуации и добавляем ее в текущее состояние.
-        Item* new_item = cur_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item, NULL);
+        Item* new_item = cur_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, item, context);
         PutItemToNonhandledList(new_item, true);
 #       ifdef DUMP_CONTENT
         new_item->Dump(grammar_, std::cout);
@@ -130,7 +137,7 @@ inline void EarleyParser::Predictor(size_t state_id, Item* item) {
     Grammar::RuleIdList& rules_list = grammar_->GetSymRules(sym_after_dot - grammar_->GetNumOfTerminals());
     for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
       // Добавляем ситуацию на основе этого правила.
-      Item* new_item = cur_state->AddItem(this, cur, 0, cur_state->id_, NULL, NULL, NULL);
+      Item* new_item = cur_state->AddItem(this, cur, 0, cur_state->id_, NULL, NULL, Context::Ptr());
       PutItemToNonhandledList(new_item, false);
 
 #     ifdef DUMP_CONTENT
@@ -158,7 +165,7 @@ inline bool EarleyParser::Scanner(size_t state_id, Token::Ptr token, size_t& new
           Context::Ptr context = interpretator_->HandleTerminal(token, cur);
           if (context.get()) {
             // Добавляем новую ситуацию со сдвинутой точкой в новое состояние.
-            Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, NULL);
+            Item* new_item = next_state->AddItem(this, cur->rule_id_, cur->rhs_pos_ + 1, cur->origin_, cur, NULL, context);
             PutItemToNonhandledList(new_item, false);
 
 #           ifdef DUMP_CONTENT
@@ -199,7 +206,7 @@ inline bool EarleyParser::InitFirstState(size_t& state_id) {
   }
 
   for (unsigned cur = rules_list.get_first(); not rules_list.is_end(); cur = rules_list.get_next()) {
-    Item* new_item = next_state->AddItem(this, cur, 0, state_id, NULL, NULL, NULL);
+    Item* new_item = next_state->AddItem(this, cur, 0, state_id, NULL, NULL, Context::Ptr());
     PutItemToNonhandledList(new_item, false);
 
 #   ifdef DUMP_CONTENT
@@ -258,9 +265,11 @@ bool EarleyParser::Parse() {
   bool parse_well = false;
   for (size_t state_id = cur_gen_states.get_first(); not cur_gen_states.is_end(); state_id = cur_gen_states.get_next()) {
     State* state = state_disp_.GetState(state_id);
-    if (state->is_completed_) {
-      interpretator_->End(NULL);
-      parse_well = true;
+    for (Item* item = state->state_items_.get_first(); not  state->state_items_.is_end(); item = state->state_items_.get_next()) {
+      if (grammar_->GetLhsOfRule(item->rule_id_) == grammar_->GetStartSymbol() and item->origin_ == 0) {
+        parse_well = true;
+        interpretator_->End(item);
+      }
     }
   }
 

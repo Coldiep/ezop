@@ -19,8 +19,22 @@ using namespace parser;
 struct TestSemantic : public EarleyParser::Interpretator {
   EarleyParser* parser_;
 
-  struct MyContext : public EarleyParser::Context {
+  struct TreeContext : public EarleyParser::Context {
+    typedef std::list<EarleyParser::Context::Ptr> ChildList;
+    TreeContext(const std::string& name)
+      : name_(name) {
+    }
+    ChildList   children_;
+    std::string name_;
   };
+
+  void PrintContext(EarleyParser::Context::Ptr context, const std::string& indent) {
+    TreeContext* tree_context = static_cast<TreeContext*>(context.get());
+    std::cout << indent << tree_context->name_ << "\n";
+    for (TreeContext::ChildList::iterator it = tree_context->children_.begin(); it != tree_context->children_.end(); ++it) {
+      PrintContext(*it, indent + "  ");
+    }
+  }
 
   /*!
    * \brief Начало работы алгоритма.
@@ -28,7 +42,6 @@ struct TestSemantic : public EarleyParser::Interpretator {
    * \param[in] parser Указатель на объект парсера для получения информации о состояниях.
    */
   void Start(EarleyParser* parser) {
-    std::cout << "Start working...\n";
     parser_ = parser;
   }
 
@@ -38,7 +51,15 @@ struct TestSemantic : public EarleyParser::Interpretator {
    * \param[in] item Ситуация с начальным символом в левой части.
    */
   void End(const EarleyParser::Item* item) {
-    std::cout << "End working...\n";
+    if (item and not item->rptrs_.empty()) {
+      TreeContext* context = new TreeContext(parser_->grammar_->GetSymbolName(parser_->grammar_->GetLhsOfRule(item->rule_id_)));
+      for (const EarleyParser::Item* cur = item; cur; cur = cur->lptr_) {
+        if (not cur->rptrs_.empty()) {
+          context->children_.push_back(cur->rptrs_.front().context_);
+        }
+      }
+      PrintContext(EarleyParser::Context::Ptr(context), "");
+    }
   }
 
   /*!
@@ -50,7 +71,7 @@ struct TestSemantic : public EarleyParser::Interpretator {
    * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
    */
   EarleyParser::Context::Ptr HandleTerminal(Token::Ptr token, const EarleyParser::Item* item) {
-    return EarleyParser::Context::Ptr(new MyContext());
+    return EarleyParser::Context::Ptr(new TreeContext(parser_->grammar_->GetSymbolName(token->type_)));
   }
 
   /*!
@@ -62,7 +83,13 @@ struct TestSemantic : public EarleyParser::Interpretator {
    * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
    */
   EarleyParser::Context::Ptr HandleNonTerminal(const EarleyParser::Item* rule_item, const EarleyParser::Item* left_item) {
-    return EarleyParser::Context::Ptr(new MyContext());
+    TreeContext* context = new TreeContext(parser_->grammar_->GetSymbolName(parser_->grammar_->GetLhsOfRule(rule_item->rule_id_)));
+    for (const EarleyParser::Item* item = rule_item; item; item = item->lptr_) {
+      if (not item->rptrs_.empty()) {
+        context->children_.push_back(item->rptrs_.front().context_);
+      }
+    }
+    return EarleyParser::Context::Ptr(context);
   }
 };
 
@@ -105,10 +132,10 @@ int main() {
     Grammar gr(&pg);
   
     relexer::ReLexer ll;
-    ll.AddType(1,"N");
+    ll.AddType(1,"[1-9][0-9]*");
     ll.AddType(2,"\\+");
     ll.AddType(3,"x");
-    ll.SetStream("N+N");
+    ll.SetStream("12 + 34");
     ll.Analyze();
 
     TestSemantic interpretator;

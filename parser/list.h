@@ -118,17 +118,17 @@ public:
   }
 
 
-  Element& front()
+  Element& front() const
   {
     return head_->elem_;
   }
 
-  Element& back()
+  Element& back() const
   {
     return last_->elem_;
   }
   
-  bool empty()
+  bool empty() const
   {
     return head_ == 0;
   }
