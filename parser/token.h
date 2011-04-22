@@ -4,7 +4,7 @@
 #define TOKEN_H__
 
 #include <boost/shared_ptr.hpp>
-#include "grammar.h"
+#include <parser/grammar.h>
 
 namespace parser {
 
@@ -48,6 +48,16 @@ struct Token {
     , col_pos_(0)
     , abs_pos_(0)
     , length_(0) {
+  }
+
+  //! Инициализация лексическим типом.
+  explicit Token(const Grammar::SymbolId& type, const unsigned& pos, const std::string& text)
+    : type_(type)
+    , line_pos_(0)
+    , col_pos_(0)
+    , abs_pos_(pos)
+    , length_(text.length())
+    , text_(text) {
   }
 };
 

@@ -4,7 +4,7 @@
 #define LEXER_H__
 
 #include <vector>
-#include "token.h"
+#include <parser/token.h>
 
 namespace parser {
 
