@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <set>
+#include <iostream>
 
 namespace rexp {
 
@@ -36,16 +37,17 @@ private:
     }
 
     //! Реализация перехода.
-    unsigned Move(char symbol) {
+    unsigned Move(char symbol) const {
       return row_[symbol];
     }
 
     // Печать таблицы переходов.
-    void Print() {
-        for (unsigned i = 1; i < row_.size(); ++i) {
-          if (row_[i]) {
-            std::cout << i << "-" << row_[ cnt ] << " ";
+    void Print() const {
+      for (unsigned i = 1; i < row_.size(); ++i) {
+        if (row_[i]) {
+          std::cout << i << "-" << row_[i] << " ";
         }
+      }
     }
   };
 

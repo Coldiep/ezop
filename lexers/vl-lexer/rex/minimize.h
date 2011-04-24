@@ -78,7 +78,7 @@ class Minimization {
 
 public:
   //! Конструктор берет на вход ДКА.
-  explicit Minimization(Dfa& dfa);
+  explicit Minimization(Dfa& dfa)
     : dfa_(dfa) {
   }
 

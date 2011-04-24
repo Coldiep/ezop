@@ -3,6 +3,7 @@
 
 #include <rex/nfa.h>
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 
 namespace rexp {
@@ -20,7 +21,7 @@ protected:
   //! абстрактный базовый класс для всех классов выражений
   struct AbstractExpr {
     //! Тип умного указателя на класс.
-    Typedef boost::shared_ptr<AbstractExpr> Ptr;
+    typedef boost::shared_ptr<AbstractExpr> Ptr;
 
     //! типы выражений
     enum ExprType {
@@ -169,7 +170,7 @@ protected:
   public:
     // конструктор берет множество символов
     SymbolSetExpr(std::string symbols)
-      : buf_(symbols_) {
+      : buf_(symbols) {
     }
 
     // клонирование
@@ -192,8 +193,8 @@ protected:
 
     // генерирует НКА в соответствии с данным выражением
     void GenerateNfa(Nfa& nfa) {
-      nfa.add_state(1);
-      nfa.add_state(2);
+      nfa.AddState(1);
+      nfa.AddState(2);
 
       if (buf_.empty()) {
         nfa.AddTransition(1, 0, 2);
@@ -289,7 +290,7 @@ protected:
 
     // клонирование
     AbstractExpr::Ptr Clone() {
-      return new PredictionExpr(left_expr_, right_expr_);
+      return AbstractExpr::Ptr(new PredictionExpr(left_expr_, right_expr_));
     }
 
     // тип выражения

@@ -2,7 +2,7 @@
 #pragma once
 
 #include <rex/expressions_tree.h>
-#include <rex/Scanner.h>
+#include <rex/scanner.h>
 
 namespace rexp {
 
@@ -24,15 +24,22 @@ namespace rexp {
 class Parser : public ExpressionTree {
 public:
   // конструктор
-  Parser( stream st );
+  Parser(const char* begin, const char* end)
+    : scan_(begin, end) {
+    Parse();
+  }
 
   void Print() {
-    expr_->Print();
+    if (expr_.get()) {
+      expr_->Print();
+    }
   }
 
   // генерирует НКА
   void GetNfa(Nfa& nfa) {
-    expr_->GenerateNfa(nfa);
+    if (expr_.get()) {
+      expr_->GenerateNfa(nfa);
+    }
   }
 
 private:
@@ -43,7 +50,7 @@ private:
   Scanner scan_;
 
   // стек для скобок
-  std::stack<unsigned> parentheses_stack_;
+  std::stack<unsigned> par_stack_;
 
   // методы разбора...
 
@@ -60,5 +67,5 @@ private:
   AbstractExpr::Ptr Literal();
 };
 
-}
+}  // namespace rexp
 

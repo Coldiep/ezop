@@ -1,9 +1,11 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
 #include <set>
 #include <map>
 #include <stack>
+#include <vector>
 
 namespace rexp {
 
@@ -18,12 +20,13 @@ public:
 
 private:
   // недопустимое состояние
-  enum {
-    ZERO_STATE = 0
-  };
+  static const unsigned ZERO_STATE = 0;
 
   // элемент таблицы символов
   struct TableRow {
+    //! Умный указатель на объект класса.
+    typedef boost::shared_ptr<TableRow> Ptr;
+
     // конструктор с номер состояния
     TableRow(unsigned state)
       : state_(state) {
@@ -50,7 +53,7 @@ private:
   };
 
   //! Тип таблицы переходов.
-  typedef std::map<unsigned, TableRow> StateTable;
+  typedef std::map<unsigned, TableRow::Ptr> StateTable;
 
   //! Таблица переходов.
   StateTable transitions_;
@@ -63,13 +66,13 @@ private:
 
 public:
   // конструктор
-  Nfa();
+  Nfa()
     : start_state_(ZERO_STATE) {
   }
 
   //! Добавление нового состояния.
   void AddState(unsigned state) {
-    transitions_.insert(state);
+    transitions_[state] = TableRow::Ptr(new TableRow(state));
   }
 
   //! Добавление перехода.
@@ -82,7 +85,7 @@ public:
 
   //! Возвращает множество допустимых состояний.
   const StateSet& GetAcceptStates() const {
-    return acept_states_;
+    return accept_states_;
   }
 
   //! Устанавливает начальное состояние.
@@ -110,7 +113,7 @@ public:
   }
 
   //! Эпсилон замыкание множества состояний.
-  StateSet EpsilonClosure(const StateSet& states);
+  StateSet EpsilonClosure(const StateSet& states) const;
 
   //! Возвращает множество состояний имеющих переходы из state по символу symbol.
   StateSet Move(unsigned state, char symbol) const;

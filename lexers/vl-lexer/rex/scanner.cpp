@@ -1,92 +1,94 @@
 
-#include "Scanner.h"
-using namespace rexp_;
+#include <rex/scanner.h>
+using rexp::Scanner;
+
+#include <stdexcept>
+#include <sstream>
+#include <set>
 
 // возвращает лексему из потока ввода
-Scanner::Token Scanner::GetToken() {
-  // если мы держим токен в кеше, то берем его оттуда
-  if (tok_pos_ > 0 and tok_pos_ < token_buf_.size()) {
-    return token_buf_[tok_pos_++];
+Scanner::Token::Ptr Scanner::GetToken() {
+  if (tok_pos_ < tok_list_.size()) {
+    return tok_list_[tok_pos_++];
   }
 
-  // Запоминаем текущую позицию.
-  pos_ = stm_.get_pos();
+  if (IsEnd()) {
+    return Cached(new Token(END));
+  }
 
-  char cur = stm_.next();
-
+  char cur = Next();
   switch (cur) {
-    case ALTER:    return put2cache( Token( ALTER ) );
-    case STAR:    return put2cache( Token( STAR ) );
-    case FOR_SLASH:  return put2cache( Token( FOR_SLASH ) );
-    case QM:      return put2cache( Token( QM ) );
-    case PLUS:    return put2cache( Token( PLUS ) );
-    case LEFT_PAR:  return put2cache( Token( LEFT_PAR ) );
-    case RIGHT_PAR:  return put2cache( Token( RIGHT_PAR ) );
+    case ALTER:       return Cached(new Token(ALTER));
+    case STAR:        return Cached(new Token(STAR));
+    case FOR_SLASH:   return Cached(new Token(FOR_SLASH));
+    case QM:          return Cached(new Token(QM));
+    case PLUS:        return Cached(new Token(PLUS));
+    case LEFT_PAR:    return Cached(new Token(LEFT_PAR));
+    case RIGHT_PAR:   return Cached(new Token(RIGHT_PAR));
 
     // формируем выражение "точка" - любой символ за исключением '\n'
     case '.': return FormDotExpr();
 
-    // конец потока
-    case stream::eos_en: return put2cache( Token( END ) );
-
     // выражение в квадратных скобках
-    case '[':  return put2cache( ParseBracketsExpr() );
+    case '[':  return ParseBracketsExpr();
 
     // выражение в фигурных скобках
-    case '{':  return put2cache( ParseBracesExpr() );
+    case '{':  return ParseBracesExpr();
 
     // выражение в двойных кавычках
-    case '"':  return put2cache( ParseDblApostrExpr() );
+    case '"':  return ParseDblApostrExpr();
 
     // специальные символы
     case '\\':
-      cur_ = stm_.next();
-      if( cur_ == 's' || cur_ == 'S' || cur_ == 'w' || cur_ == 'W' || cur_ == 'd' || cur_ == 'D' )
-        return put2cache( FormEscapeExpr( cur_ ) );
+      if (IsEnd()) {
+        throw std::invalid_argument("Слэш не может быть в конце регулярного выражения");
+      }
+      cur = Next();
+      if (cur == 's' or cur == 'S' or cur == 'w' or cur == 'W' or cur == 'd' or cur == 'D') {
+        return FormEscapeExpr(cur);
+      }
       break;
 
     // эти символы не могут появляться в данном контексте
-    case '}':
-      {
-        std::stringstream st;
-        st << "Символ } не может быть в данном регулярном выражении на позиции " << stm_.get_pos();
-        throw std::logic_error( st.str() );
-      }
-    case ']':
-      {
-        std::stringstream st;
-        st << "Символ ] не может быть в данном регулярном выражении на позиции " << stm_.get_pos();
-        throw std::logic_error( st.str() );
-      }
+    case '}': {
+      std::stringstream st;
+      st << "Символ } не может быть в данном регулярном выражении на позиции " << pos_;
+      throw std::invalid_argument(st.str());
+    }
+    case ']': {
+      std::stringstream st;
+      st << "Символ ] не может быть в данном регулярном выражении на позиции " << pos_;
+      throw std::invalid_argument(st.str());
+    }
   }
 
   // любой символ не обработанный выше
-  std::string sym_;
-  sym_ += cur_;
-
-  return put2cache( Token( INC_SYMBOLS, sym_ ) );
+  return Cached(new Token(INC_SYMBOLS, std::string(&cur, 1)));
 }
 
 // обрабатывает выражение вида [ ... ]
-Scanner::Token Scanner::ParseBracketsExpr() {
-  // запоминаем позицию в потоке
-  stm_.remember_state();
-
+Scanner::Token::Ptr Scanner::ParseBracketsExpr() {
   // читаем символ из потока
-  char_type_t cur = stm_.next();
+  char cur = Next();
+  unsigned br_pos = pos_;
 
-  // конец потока- ошибка
-  if( cur == stream::eos_en ) {
+  if (IsEnd()) {
     std::stringstream st;
-    st << "Ошибка на позиции " << stm_.get_pos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
-    throw std::logic_error( st.str().c_str() );
+    st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+    throw std::invalid_argument(st.str().c_str());
   }
 
   // символы в выражении будут исключаться
   bool is_exclude = false;
   if (cur == '^') {
     is_exclude = true;
-    cur = stm_.next();
+    if (IsEnd()) {
+      std::stringstream st;
+      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+      throw std::invalid_argument(st.str().c_str());
+    }
+    cur = Next();
+    br_pos = pos_;
   }
 
   // если символ это двоеточие, то может быть одно их следующих сокращений
@@ -103,80 +105,64 @@ Scanner::Token Scanner::ParseBracketsExpr() {
   // [:xdigit:] -  {A-F} U {0-9}
   else if (cur == ':') {
     std::string keyword;
-    for (cur = stm_.next(); cur != ':'; cur = stm_.next()) {
-      // if it is end of stream...
-      if (cur == stream::eos_en) {
+    for (cur = Next(); cur != ':'; cur = Next()) {
+      // Конец потока.
+      if (IsEnd()) {
         std::stringstream st;
-        st << "Ошибка на позиции " << stm_.get_pos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
-        throw std::logic_error( st.str().c_str() );
+        st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+        throw std::invalid_argument(st.str().c_str());
       }
-
-      // if it is ']'...
-      if (cur == ']') goto MAIN_LOOP;
-
+      if (cur == ']') {
+        goto MAIN_LOOP;
+      }
       keyword += cur;
     }
 
     // читаем следующий символ. Он должен быть ']'
-    if ((cur = stm_.next()) != ']') {
+    if ((cur = Next()) != ']') {
       std::stringstream st;
-      st << "Ошибка на позиции " << stm_.get_pos() << ". Регулярное выражение вида [:" << keyword << ":] не содержит символа ']'";
-      throw std::logic_error( st.str() );
+      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение вида [:" << keyword << ":] не содержит символа ']'";
+      throw std::invalid_argument(st.str());
     }
 
-    // look up the given string
-    if (keyword == GetStr("alnum")) {
+    if (keyword == "alnum") {
       std::string res;
       for (unsigned tmp = '0'; tmp <= '9'; ++tmp) res += tmp;
       for (unsigned tmp = 'a'; tmp <= 'z'; ++tmp) res += tmp;
       for (unsigned tmp = 'A'; tmp <= 'Z'; ++tmp) res += tmp;
       res += '_';
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("alpha")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "alpha") {
       std::string res;
       for (unsigned tmp = 'a'; tmp <= 'z'; ++tmp) res += tmp;
       for (unsigned tmp = 'A'; tmp <= 'Z'; ++tmp) res += tmp;
       res += '_';
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("blank")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "blank") {
       std::string res;
       res += ' ';
       res += '\n';
       res += '\r';
       res += '\t';
       res += '\v';
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("cntrl")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "cntrl") {
       std::string res;
-      for (unsigned tmp = 1; tmp < 32; ++tmp) res += char(tmp);
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("digit")) {
+      for (unsigned tmp = 1; tmp < 32; ++tmp) res += tmp;
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "digit") {
       std::string res;
       for (unsigned tmp = '0'; tmp <= '9'; ++tmp) res += tmp;
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("lower")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "lower") {
       std::string res;
       for (unsigned tmp = 'a'; tmp <= 'z'; ++tmp) res += tmp;
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("print")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "print") {
       std::string res;
       for (unsigned tmp = 32; tmp < SYM_QUENT; ++tmp) res += char(tmp);
-
-      stm_.release_state();
-      return Token( INC_SYMBOLS, res );
-    } else if (keyword == GetStr("punct")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "punct") {
       std::string res;
       res += '.';
       res += ',';
@@ -184,92 +170,81 @@ Scanner::Token Scanner::ParseBracketsExpr() {
       res += ':';
       res += '!';
       res += '\?';
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("space")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "space") {
       std::string res;
       res += ' ';
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("upper")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword =="upper") {
       std::string res;
       for (unsigned tmp = 'A'; tmp <= 'Z'; ++tmp) res += tmp;
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
-    } else if (keyword == GetStr("xdigit")) {
+      return Cached(new Token(INC_SYMBOLS, res));
+    } else if (keyword == "xdigit") {
       std::string res;
       for (unsigned tmp = 'A'; tmp <= 'F'; ++tmp) res += tmp;
       for (unsigned tmp = 'a'; tmp <= 'f'; ++tmp) res += tmp;
       for (unsigned tmp = '0'; tmp <= '9'; ++tmp) res += tmp;
-
-      stm_.release_state();
-      return Token(INC_SYMBOLS, res);
+      return Cached(new Token(INC_SYMBOLS, res));
     }
   }
 
 MAIN_LOOP:
 
-  if (not is_exclude) {
-    // восстанавливаем позицию
-    stm_.restore_state();
-    cur = stm_.next();
-  } else {
-    stm_.release_state();
-  }
+  // Устанавливаем позицию на начало скобок.
+  pos_ = br_pos;
 
   // читаем содержимое квадратных скобок
   std::set<char> st;
-  for (; cur != ']'; cur = stm_.next()) {
+  for (; cur != ']'; cur = Next()) {
     // дошли до конца потока, это ошибка. Имеем: [... EOF
-    if (cur == stream::eos_en) {
+    if (IsEnd()) {
       std::stringstream st;
-      st << "Ошибка на позиции " << stm_.get_pos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
-      throw std::logic_error( st.str().c_str() );
+      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+      throw std::invalid_argument(st.str().c_str());
     }
 
     // символ '-' быть в этом контексте не может. Имеем [... --
     if (cur == '-') {
       std::stringstream st;
-      st << "Ошибка на позиции " << stm_.get_pos() << ". Символ '-' не может быть в данном регулярном выражении";
-      throw std::logic_error(st.str());
+      st << "Ошибка на позиции " << pos_ << ". Символ '-' не может быть в данном регулярном выражении";
+      throw std::invalid_argument(st.str());
     }
 
     // читаем следующий символ...
-    char next = stm_.next();
+    char next = Next();
 
     // в данном контексте символ '-' значит последовательность символов
     if (next == '-') {
       // читаем следующий символ. Он не должен быть ']' или '-'
-      next = stm_.next();
+      next = Next();
       if (next == ']' or next == '-') {
         std::stringstream st;
-        st << "В данном регулярном выражении на позиции " << stm_.get_pos() << " должен быть символ '-' или ']'";
-        throw std::logic_error(st.str());
+        st << "В данном регулярном выражении на позиции " << pos_ << " должен быть символ '-' или ']'";
+        throw std::invalid_argument(st.str());
       }
 
       // дошли до конца потока, это ошибка. Имеем: [... EOF
-      if (next == stream::eos_en) {
+      if (IsEnd()) {
         std::stringstream st;
-        st << "Ошибка на позиции " << stm_.get_pos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
-        throw std::logic_error(st.str().c_str());
+        st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+        throw std::invalid_argument(st.str().c_str());
       }
 
       // правый символ не может быть меньше левого в диапазоне
       if (next < cur) {
         std::stringstream st;
-        st << "Ошибка на позиции " << stm_.get_pos()
+        st << "Ошибка на позиции " << pos_
           << ". В регулярном выражении вида [left_symbol-rigth_symbol] left_symbol не может быть больше чем rigth_symbol";
-        throw std::logic_error(st.str().c_str());
+        throw std::invalid_argument(st.str().c_str());
       }
 
       // добавляем в str все символы между cur_ и next_
-      for (char tmp = cur; tmp <= next; ++tmp) st.insert( tmp );
+      for (char tmp = cur; tmp <= next; ++tmp) {
+        st.insert(tmp);
+      }
     } else {
       st.insert(cur);
-      stm_.back();
+      StreamBack();
     }
   }
 
@@ -286,101 +261,99 @@ MAIN_LOOP:
     }
   }
 
-  return Token(INC_SYMBOLS, res_str);
+  return Cached(new Token(INC_SYMBOLS, res_str));
 }
 
 // обрабатываем выражение двойные кавычки
-Scanner::Token Scanner::ParseDblApostrExpr()
-{
-  set< char_type_t > set_;
-  for( char_type_t cur_ = stm_.next(); cur_ != '"'; cur_ = stm_.next() )
-  {
-    if( cur_ == stream::eos_en )
-    {
+Scanner::Token::Ptr Scanner::ParseDblApostrExpr() {
+  std::set<char> char_set;
+  for (char cur = Next(); cur != '"'; cur = Next()) {
+    if (IsEnd()) {
       std::stringstream st;
-      st << "Ошибка на позиции " << stm_.get_pos() << ". Регулярное выражение содержит незавершенный двойной апостроф";
-      throw std::logic_error( st.str().c_str() );
+      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенный двойной апостроф";
+      throw std::invalid_argument(st.str().c_str());
     }
-
-    set_.insert( cur_ );
+    char_set.insert(cur);
   }
 
-  std::string res_str_;
-  for(  set< char_type_t >::const_iterator it_ = set_.begin(); it_ != set_.end(); ++ it_ )
-    res_str_ += *it_;
-
-  return Token( INC_SYMBOLS, res_str_ );
+  std::string res_str;
+  for (std::set<char>::const_iterator it = char_set.begin(); it != char_set.end(); ++it) {
+    res_str += *it;
+  }
+  return Cached(new Token(INC_SYMBOLS, res_str));
 }
 
 // обрабатываем выражение в фигурных скобках
-Scanner::Token Scanner::ParseBracesExpr()
-{
+Scanner::Token::Ptr Scanner::ParseBracesExpr() {
   // читаем первый символ
-  char_type_t cur_ = stm_.next();
+  char cur = Next();
 
   // это должна быть цифра
-  if( ! isdigit( cur_ ) )
-  {
+  if (not isdigit(cur)) {
     std::stringstream st;
-    st << "В данном регулярном выражении на позиции " << stm_.get_pos() << " должна быть цифра";
-    throw std::logic_error( st.str() );
+    st << "В данном регулярном выражении на позиции " << pos_ << " должна быть цифра";
+    throw std::invalid_argument(st.str());
   }
 
   // читаем последовательность цифр
-  unsigned int first_ = 0;
-  for( ; isdigit( cur_ ); cur_ = stm_.next() ) first_ = first_*10 + cur_ - '0';
+  unsigned first = 0;
+  for (; isdigit(cur); cur = Next()) {
+    first = first * 10 + cur - '0';
+  }
 
   // должно быть выражение вида {n,...} или {n}
-  if( cur_ != ',' && cur_ != '}' )
-  {
+  if (cur != ',' and cur != '}') {
     std::stringstream st;
-    st << "В данном регулярном выражении на позиции " << stm_.get_pos() << " должны быть символы ',' или '}'";
-    throw std::logic_error( st.str() );
+    st << "В данном регулярном выражении на позиции " << pos_ << " должны быть символы ',' или '}'";
+    throw std::invalid_argument(st.str());
   }
 
   // если следующий символ это фигурная скобка т.е. имеем {n}, выходим
-  if( cur_ == '}' ) return Token( first_ );
-
-  // читаем следующий символ, это может быть либо '}' либо цифра в случае {n,m}
-  cur_ = stm_.next();
-
-  // если следующий символ это '}' т.е. мы имеем {n,} выходим
-  if( cur_ == '}' ) return Token( first_, true );
-
-  // читаем последовательность цифр
-  unsigned int second_ = 0;
-  for( ; isdigit( cur_ ); cur_ = stm_.next() ) second_ = second_*10 + cur_ - '0';
-
-  // сейчас в любом случае должна быть '}'
-  if( cur_ != '}' )
-  {
-    std::stringstream st;
-    st << "В данном регулярном выражении на позиции " << stm_.get_pos() << " должен быть символ '}'";
-    throw std::logic_error( st.str() );
+  if (cur == '}') {
+    return Token::Ptr(new Token(first));
   }
 
-  return Token( first_, second_ );
+  // читаем следующий символ, это может быть либо '}' либо цифра в случае {n,m}
+  cur = Next();
+
+  // если следующий символ это '}' т.е. мы имеем {n,} выходим
+  if (cur == '}') {
+    return Cached(new Token(first, true));
+  }
+
+  // читаем последовательность цифр
+  unsigned second = 0;
+  for (; isdigit(cur); cur = Next()) {
+    second = second * 10 + cur - '0';
+  }
+
+  // сейчас в любом случае должна быть '}'
+  if (cur != '}') {
+    std::stringstream st;
+    st << "В данном регулярном выражении на позиции " << pos_ << " должен быть символ '}'";
+    throw std::invalid_argument(st.str());
+  }
+  return Cached(new Token(first, second));
 }
 
 // обработка специальных символов
-Scanner::Token Scanner::FormEscapeExpr( char_type_t cur )
-{
+Scanner::Token::Ptr Scanner::FormEscapeExpr(char cur) {
   std::string str;
-
-  switch( cur )
-  {
+  switch (cur) {
     case 's':
     str += ' ';
-    return Token( INC_SYMBOLS, str );
+    return Cached(new Token(INC_SYMBOLS, str));
 
     case 'S':
     str += ' ';
     {
       std::string ex_str;
-      for( unsigned int cnt = 1; cnt < SYM_QUENT; ++ cnt )
-        if( str.find( cnt ) == std::string::npos ) ex_str += char_type_t(cnt);
-
-      return Token( INC_SYMBOLS, ex_str );
+      for (unsigned cnt = 1; cnt < SYM_QUENT; ++cnt) {
+        if (str.find(cnt) == std::string::npos) {
+          ex_str += cnt;
+        }
+      }
+      return Cached(new Token(INC_SYMBOLS, ex_str));
     }
 
     case 'w':
@@ -388,7 +361,7 @@ Scanner::Token Scanner::FormEscapeExpr( char_type_t cur )
     str += '\r';
     str += '\t';
     str += '\v';
-    return Token( INC_SYMBOLS, str );
+    return Cached(new Token(INC_SYMBOLS, str));
 
     case 'W':
     str += '\n';
@@ -397,48 +370,46 @@ Scanner::Token Scanner::FormEscapeExpr( char_type_t cur )
     str += '\v';
     {
       std::string ex_str;
-      for( unsigned int cnt = 1; cnt < SYM_QUENT; ++ cnt )
-        if( str.find( cnt ) == std::string::npos ) ex_str += char_type_t(cnt);
-
-      return Token( INC_SYMBOLS, ex_str );
+      for (unsigned cnt = 1; cnt < SYM_QUENT; ++cnt) {
+        if (str.find(cnt) == std::string::npos) {
+          ex_str += cnt;
+        }
+      }
+      return Cached(new Token(INC_SYMBOLS, ex_str));
     }
 
     case 'd':
-    {
-      for( char_type_t cnt = '0'; cnt <= '9'; ++ cnt ) str += cnt;
-    }
-    return Token( INC_SYMBOLS, str );
+      for (char cnt = '0'; cnt <= '9'; ++cnt) {
+        str += cnt;
+      }
+      return Cached(new Token(INC_SYMBOLS, str));
 
     case 'D':
     {
-      for( char_type_t cnt = '0'; cnt <= '9'; ++ cnt ) str += cnt;
+      for (char cnt = '0'; cnt <= '9'; ++cnt) {
+        str += cnt;
+      }
       std::string ex_str;
-      for( unsigned int cnt1 = 1; cnt1 < SYM_QUENT; ++ cnt1 )
-        if( str.find( cnt1 ) == std::string::npos ) ex_str += char_type_t(cnt1);
-
-      return Token( INC_SYMBOLS, ex_str );
+      for (unsigned cnt1 = 1; cnt1 < SYM_QUENT; ++cnt1) {
+        if (str.find(cnt1) == std::string::npos) {
+          ex_str += char(cnt1);
+        }
+      }
+      return Cached(new Token(INC_SYMBOLS, ex_str));
     }
   }
 
-  return Token( INC_SYMBOLS, str );
+  return Cached(new Token(INC_SYMBOLS, str));
 }
 
 // выражение "точка" обозначает любой символ кроме символа конца строки
-Scanner::Token Scanner::FormDotExpr()
-{
+Scanner::Token::Ptr Scanner::FormDotExpr() {
   std::string sym;
-  for( unsigned int cnt = 1; cnt < SYM_QUENT; ++ cnt )
-    if( cnt != '\n' ) sym += char_type_t(cnt);
-
-  return Token( INC_SYMBOLS, sym );
+  for (unsigned cnt = 1; cnt < SYM_QUENT; ++cnt) {
+    if (cnt != '\n') {
+      sym += cnt;
+    }
+  }
+  return Cached(new Token(INC_SYMBOLS, sym));
 }
 
-// возвращает строку из char*
-std::string Scanner::GetStr( const char* str )
-{
-  std::string st;
-  const char* p = str;
-  while( *p ) st += *p ++;
-
-  return st;
-}

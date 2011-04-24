@@ -2,12 +2,12 @@
 #include <lex.h>
 using lexer::Lexer;
 
-size_t Lexer::GetTokens(size_t start_pos, parser::TokenList& tokens) {
+size_t Lexer::GetTokens(size_t start_pos, parser::Lexer::TokenList& tokens) {
   // Инициализируем множество автоматов, по которым будут производиться переходы.
   std::set<unsigned> lex_ids;
   for (LexTypeSet::iterator it = lex_types_.begin(), end = lex_types_.end(); it != end; ++it) {
-    lex_types_->second->Reset();
-    lex_ids.push_back(it->first);
+    it->second->Reset();
+    lex_ids.insert(it->first);
   }
 
   // Пары <id, position> используются для хранения последней позиции,
@@ -41,7 +41,7 @@ size_t Lexer::GetTokens(size_t start_pos, parser::TokenList& tokens) {
       std::string text(begin_ + start_pos, begin_ + it->second);
       tokens.push_back(parser::Token::Ptr(new parser::Token(lex_type->GetId(), start_pos, text)));
     } else {
-      ws_pos = it->second
+      ws_pos = it->second;
     }
   }
 
@@ -49,9 +49,9 @@ size_t Lexer::GetTokens(size_t start_pos, parser::TokenList& tokens) {
 
 }
 
-parser::TokenList Lexer::GetTokens(parser::Token::Ptr token) {
-  parser::TokenList tokens;
-  size_t pos = token->abs_pos + token->length_;
+parser::Lexer::TokenList Lexer::GetTokens(parser::Token::Ptr token) {
+  parser::Lexer::TokenList tokens;
+  size_t pos = token->abs_pos_ + token->length_;
   while (not IsEnd()) {
     pos = GetTokens(pos, tokens);
     if (not tokens.empty()) {

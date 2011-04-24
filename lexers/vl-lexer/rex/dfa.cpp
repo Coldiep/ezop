@@ -1,5 +1,5 @@
 
-#include <dfa.h>
+#include <rex/dfa.h>
 using rexp::Dfa;
 
 #include <iostream>
@@ -8,7 +8,7 @@ void Dfa::AddTransition(unsigned state_from, char symbol, unsigned state_to) {
   if (state_from > transitions_.size() - 1) {
     transitions_.resize(state_from + 1);
   }
-  transitions_[state].AddMove(symbol, state_to);
+  transitions_[state_from].AddMove(symbol, state_to);
 }
 
 void Dfa::Print() const {

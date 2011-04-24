@@ -1,12 +1,12 @@
 
 #include <rex/parser.h>
-#include <nfa2dfa_transformer.h>
-#include <minimize.h>
+#include <rex/nfa2dfa_transformer.h>
+#include <rex/minimize.h>
 
 #include <lex_type.h>
 using lexer::LexType;
 
-LexType::LexType(unsigned id, const std::string& re, const std::string& name, bool ret);
+LexType::LexType(unsigned id, const std::string& re, const std::string& name, bool ret)
   : id_(id)
   , re_(re)
   , name_(name)
@@ -15,7 +15,7 @@ LexType::LexType(unsigned id, const std::string& re, const std::string& name, bo
   GenerateDfa();
 }
 
-LexType::LexType(unsigned id, const std::string& word);
+LexType::LexType(unsigned id, const std::string& word)
   : id_(id)
   , name_(word)
   , cur_state_(0)
@@ -25,23 +25,24 @@ LexType::LexType(unsigned id, const std::string& word);
   unsigned i = 0;
   for (; i < word.length(); ++i) {
       dfa_.AddState(i + 2);
-      dfa_.AddArc(i + 1, word[i], i + 2);
+      dfa_.AddTransition(i + 1, word[i], i + 2);
   }
-  dfa_.AddToFinishSet(i + 1);
+  dfa_.AddToAcceptSet(i + 1);
   Reset();
 }
 
 void LexType::GenerateDfa() {
-  rexp::Parser parser(re_);
-  rexp::Nfa nfa = parser.GetNFA();
-  dfa_ = Nfa2DfaTransformer::Transform(nfa);
-  Minimization min(dfa_);
+  rexp::Parser parser(&re_[0], &re_[0] + re_.length());
+  rexp::Nfa nfa;
+  parser.GetNfa(nfa);
+  rexp::Nfa2DfaTransformer::Transform(nfa, dfa_);
+  rexp::Minimization min(dfa_);
   min.Minimize();
   Reset();
 }
 
-bool LexType::Move(char symbol) const {
+bool LexType::Move(char symbol) {
   cur_state_ = dfa_.Move(cur_state_, symbol);
-  return cur_state_ != Dfa::ZERO_STATE;
+  return cur_state_ != rexp::Dfa::ZERO_STATE;
 }
 

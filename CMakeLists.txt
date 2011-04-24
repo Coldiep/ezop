@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-project(EarleyParser CXX)
+project(Ezop CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING
@@ -40,11 +40,16 @@ else()
   message(FATAL_ERROR "Boost libraries not found. Please get a copy from http://www.boost.org")
 endif()
 
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/parser
+    ${PROJECT_SOURCE_DIR}/terms
+    ${PROJECT_SOURCE_DIR}/lexers/vl-lexer
+)
+
 add_subdirectory(parser)
 add_subdirectory(terms)
-add_subdirectory(lexers/re-lexer)
-
-include_directories(${PROJECT_SOURCE_DIR}/parser ${PROJECT_SOURCE_DIR}/terms ${PROJECT_SOURCE_DIR}/lexers/re-lexer)
+add_subdirectory(lexers/vl-lexer)
 
 set(NAME ezop)
 
@@ -55,5 +60,5 @@ add_executable(${NAME}
 target_link_libraries (${NAME}
           parser
           terms
-          re-lexer
+          vl-lexer
 )

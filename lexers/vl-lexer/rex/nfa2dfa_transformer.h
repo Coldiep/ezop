@@ -15,6 +15,9 @@ class Nfa2DfaTransformer {
 
   //! Состояние ДКА.
   struct DfaState {
+    //! Умный указатель на объект класса.
+    typedef boost::shared_ptr<DfaState> Ptr;
+
     //! номер состояния.
     unsigned state_number_;
 
@@ -37,12 +40,12 @@ class Nfa2DfaTransformer {
   };
 
   //! Тип таблицы состояний.
-  typedef std::map<unsigned, DfaState> DfaStateMap;
+  typedef std::map<unsigned, DfaState::Ptr> DfaStateMap;
 
   //! Проверка, есть ли хотя бы одно немаркированное состояние в таблице.
   static bool IsUnmarked(const DfaStateMap& dfa_states) {
     for (DfaStateMap::const_iterator it = dfa_states.begin(); it != dfa_states.end(); ++it) {
-      if (not it->second.is_marked_) {
+      if (not it->second->is_marked_) {
         return true;
       }
     }
@@ -52,7 +55,7 @@ class Nfa2DfaTransformer {
   //! Возвращает первое найденное немаркированное состояние.
   static DfaStateMap::iterator GetUnmarkedState(DfaStateMap& dfa_states) {
     for (DfaStateMap::iterator it = dfa_states.begin(); it != dfa_states.end(); ++it) {
-      if (not it->second.is_marked_) {
+      if (not it->second->is_marked_) {
         return it;
       }
     }
@@ -62,7 +65,7 @@ class Nfa2DfaTransformer {
   //! Находит состояние ДКА как множество состояний НКА.
   static DfaStateMap::const_iterator FindState(const DfaStateMap& dfa_states, const StateSet& ss) {
     for (DfaStateMap::const_iterator it = dfa_states.begin(); it != dfa_states.end(); ++it) {
-      if (ss == it->second.nfa_states_) {
+      if (ss == it->second->nfa_states_) {
         return it;
       }
     }

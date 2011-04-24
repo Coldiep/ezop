@@ -26,7 +26,7 @@ class Lexer : public parser::Lexer {
   const char* end_;
 
   //! Внутренняя реализация получения списка токенов.
-  size_t GetTokens(size_t pos, parser::TokenList& tokens);
+  size_t GetTokens(size_t pos, parser::Lexer::TokenList& tokens);
 
 public:
   //! Инициализация по умолчанию.
@@ -36,7 +36,7 @@ public:
   }
 
   //! Возврат списка токенов, следующих за переданным в качестве параметра.
-  parser::TokenList GetTokens(parser::Token::Ptr token);
+  parser::Lexer::TokenList GetTokens(parser::Token::Ptr token);
 
   //! Возвращает true, если достигнут конец потока.
   bool IsEnd() {

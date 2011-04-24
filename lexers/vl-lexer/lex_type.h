@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <dfa.h>
+#include <rex/dfa.h>
 
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -37,7 +37,7 @@ public:
   LexType(unsigned id, const std::string& word);
 
   //! Необходим для оптимального поиска по множеству лексем.
-  explicit LexType(unsigned id);
+  explicit LexType(unsigned id)
     : id_(id)
     , re_("")
     , name_("only for a set search")
@@ -79,7 +79,7 @@ public:
    * \param symbol  Символ для перехода.
    * \retuen        ложь, если новое состояние недопустимо.
    */
-  bool Move(char symbol) const;
+  bool Move(char symbol);
 
   //! Устанавливает текущее состояние на начальное.
   void Reset() {

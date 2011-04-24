@@ -1,8 +1,15 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+#include <string>
+#include <deque>
+
 namespace rexp {
 
+/*!
+ * \brief Класс-лексический анализатор для парсер регулярных выражений.
+ */
 struct Scanner {
   // возвращаемые типы лексем
   enum TokenType {
@@ -16,7 +23,7 @@ struct Scanner {
     BRACES_EXPR = 1, // { n, } n или больше символов
     BRACES1_EXPR,    // { n } ровно n символов
     BRACES2_EXPR,    // { n, m } от n до m символов
-    INC_SYMBOLS,  // некоторое множество символов
+    INC_SYMBOLS,     // некоторое множество символов
     END              // конец потока
   };
 
@@ -25,123 +32,150 @@ struct Scanner {
     SYM_QUENT = 1 << sizeof(char) * 8
   };
 
-  // данные, возвращаемые сканером
+  //! Данные, возвращаемые сканером.
   class Token {
-    // тип лексемы
+    //! Тип лексемы.
     TokenType type_;
 
-    // буфер, где лежит значение лексемы
+    //! Буфер для значения лексемы.
     std::string buf_;
 
-    // здесь хранится n если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR
+    //! Здесь хранится n если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR.
     unsigned first_num_;
 
-    // здесь хранится m если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR
+    //! Здесь хранится m если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR.
     unsigned second_num_;
 
   public:
-    // конструктор только с типом, без данных
+    //! Конструктор только с типом, без данных.
     Token(TokenType type)
       : type_(type) {
     }
 
-    // конструктор со строковыми данными
+    //! Конструктор со строковыми данными.
     Token(TokenType type, const std::string& str)
       : type_(type)
       , buf_(str) {
     }
 
-    // конструктор с типом BRACES1_EXPR type
+    //! конструктор с типом BRACES1_EXPR.
     Token(unsigned num)
       : type_(BRACES1_EXPR)
       , first_num_(num) {
     }
 
-    // конструктор с типом BRACES2_EXPR type
+    //! конструктор с типом BRACES2_EXPR.
     Token(unsigned fnum, unsigned snum)
       : type_(BRACES2_EXPR)
       , first_num_(fnum)
       , second_num_(snum) {
     }
 
-    // конструктор с типом BRACES_EXPR type
+    //! Конструктор с типом BRACES_EXPR.
     Token(unsigned num, bool, bool)
       : type_(BRACES_EXPR)
       , first_num_(num) {
     }
 
-    // возвращает тип лексемы
+    //! Возвращает тип лексемы.
     TokenType Type() const {
       return type_;
     }
 
-    // возвращает данные лексемы
+    //! Возвращает данные лексемы.
     std::string Data() const {
       return buf_;
     }
 
-    // возвращает n если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR
+    //! Возвращает n если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR.
     unsigned First() const {
       return first_num_;
     }
 
-    // возвращает m если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR
+    //! Возвращает m если тип лексемы есть BRACES_EXPR, BRACES1_EXPR или BRACES2_EXPR.
     unsigned Second() const {
       return second_num_;
     }
+
+    //! Умный указатель на токен.
+    typedef boost::shared_ptr<Token> Ptr;
   };
 
 private:
-  // поток для чтения
-  stream stm_;
+  //! Начало буфера.
+  const char* begin_;
 
-  // позиция в потоке
+  //! Конец буфера.
+  const char* end_;
+
+  //! Позиция в потоке.
   unsigned pos_;
 
-  // вектор возвращенных токенов
-  typedef std::vector<Token> TokenList;
-  TokenList token_buf_;
+  //! Список распознанных токенов.
+  typedef std::deque<Token::Ptr> TokenList;
+  TokenList tok_list_;
 
-  // позиция в векторе возвращенных токенов
+  //! Позиция в списке токенов.
   unsigned tok_pos_;
 
 public:
-  // конструктор берет объект потока в качестве параметра
-  Scanner(const stream& strm)
-    : stm_(strm)
-    , pos_(stm_.get_pos())
+  /*!
+   * \brief Получает указатель на конец и начало потока.
+   *
+   * \param begin Указатель на начало потока.
+   * \param end   Указателт на конец потока.
+   */
+  Scanner(const char* begin, const char* end)
+    : begin_(begin)
+    , end_(end)
+    , pos_(0)
     , tok_pos_(0) {
   }
 
-  // переход на позицию назад
+  //! Возвращает лексему из потока ввода.
+  Token::Ptr GetToken();
+
+  //! Возврат к предыдущему токену.
   void Back() {
-    if (tok_pos_ > 0) {
+    if (tok_pos_) {
       --tok_pos_;
     }
   }
 
-  // возвращает лексему из потока ввода
-  Token GetToken();
-
 private:
-  Token ParseBracketsExpr();
-  Token ParseDblApostrExpr();
-  Token ParseBracesExpr();
-  Token FormEscapeExpr( char_type_t  );
-  Token FormDotExpr();
+  Token::Ptr ParseBracketsExpr();
+  Token::Ptr ParseDblApostrExpr();
+  Token::Ptr ParseBracesExpr();
+  Token::Ptr FormEscapeExpr(char);
+  Token::Ptr FormDotExpr();
 
-  // утилиты...
-  std::string GetStr(const char* str);
+  //! Сохранение в кэше.
+  Token::Ptr Cached(Token* ptr) {
+    Token::Ptr tok_ptr(ptr);
+    tok_list_.push_back(tok_ptr);
+    return tok_ptr;
+  }
 
-  // кладем токен в кеш перед возвращением
-  Token put2cache( Token tok )
-  {
-    Token_buf_.push_back( tok );
-    tok_pos_ = Token_buf_.size();
-    return tok;
+  //! Возврат на позицию назад.
+  void StreamBack() {
+    if (pos_) {
+      --pos_;
+    }
+  }
+
+  //! Достигнут ли конец потока?
+  bool IsEnd() const {
+    return (begin_ + pos_) == end_;
+  }
+
+  //! Получение следующиего символа из потока.
+  char Next() {
+    if (not IsEnd()) {
+      return begin_[pos_++];
+    }
+    return '\0';
   }
 };
 
-}
+}  // namespace rexp
 
-#endif // Scanner_H__

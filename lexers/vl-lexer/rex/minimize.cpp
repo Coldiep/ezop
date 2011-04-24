@@ -55,7 +55,7 @@ void Minimization::Minimize() {
       }
 
       // делаем допускающим, если группа этого состояния содержит допускающее
-      Dfa::StatesSet::iterator fnd = dfa_.accept_states_.find(gr_st);
+      Dfa::StateSet::iterator fnd = dfa_.accept_states_.find(gr_st);
       if (fnd != dfa_.accept_states_.end()) {
         new_dfa.AddToAcceptSet(st_ind);
       }
@@ -164,7 +164,7 @@ bool Minimization::IsEqual(unsigned left, unsigned right, GroupList& old_sg) {
 void Minimization::PrimaryDivide(GroupList& sg) {
   StateGroup first, second;
   for (unsigned ind = 1; ind < dfa_.transitions_.size(); ++ind) {
-    Dfa::StatesSet::iterator it = dfa_.accept_states_.find(ind);
+    Dfa::StateSet::iterator it = dfa_.accept_states_.find(ind);
     if (it != dfa_.accept_states_.end()) {
       second.AddState(ind);
     } else {

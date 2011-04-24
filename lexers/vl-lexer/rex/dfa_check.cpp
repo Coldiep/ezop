@@ -2,6 +2,8 @@
 #include <rex/dfa_check.h>
 using rexp::DfaEqualCheck;
 
+#include <map>
+
 bool DfaEqualCheck::Check(const Dfa& left, const Dfa& right) {
   // Сначала сверяем размеры автоматов.
   if (left.transitions_.size() != right.transitions_.size()) {
@@ -59,7 +61,7 @@ bool DfaEqualCheck::Check(const Dfa& left, const Dfa& right) {
   }
 
   // Сравниваем допускающие состояния.
-  for (Dfa::StatesSet::const_iterator fit = left.accept_states_.begin(); fit != left.accept_states_.end(); ++fit) {
+  for (Dfa::StateSet::const_iterator fit = left.accept_states_.begin(); fit != left.accept_states_.end(); ++fit) {
     it = equals.find(*fit);
     if (right.accept_states_.find((*it).second) == right.accept_states_.end()) {
       return false;
