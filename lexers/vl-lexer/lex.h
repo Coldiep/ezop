@@ -16,6 +16,9 @@ class Lexer : public parser::Lexer {
   //! Тип множества лексических типов.
   typedef std::map<unsigned, lexer::LexType::Ptr> LexTypeSet;
 
+  //! Тип списка токенов, помеченных булевым флагом.
+  typedef std::vector<std::pair<parser::Token::Ptr, bool> >   TokenList;
+
   //! Множество лексических типов.
   LexTypeSet  lex_types_;
 
@@ -26,7 +29,7 @@ class Lexer : public parser::Lexer {
   const char* end_;
 
   //! Внутренняя реализация получения списка токенов.
-  void GetTokens(size_t pos, parser::Lexer::TokenList& tokens);
+  void GetTokens(size_t pos, TokenList& tokens);
 
 public:
   //! Инициализация по умолчанию.
@@ -39,8 +42,8 @@ public:
   parser::Lexer::TokenList GetTokens(parser::Token::Ptr token);
 
   //! Возвращает true, если достигнут конец потока.
-  bool IsEnd() {
-    return begin_ == end_;
+  bool IsEnd(parser::Token::Ptr token) {
+    return (begin_ + token->abs_pos_ + token->length_) == end_;
   }
 
   /*!

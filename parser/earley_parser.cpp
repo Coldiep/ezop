@@ -231,14 +231,9 @@ bool EarleyParser::Parse() {
   Closure(first_state_id);
 
   // Проходим по цепочке (дереву при неоднозначности) терминалов, возвращаемой лексическим анализатором.
-  StateList cur_gen_states;
+  StateList cur_gen_states, res_states;
   cur_gen_states.push_back(first_state_id);
-  while (not lexer_->IsEnd()) {
-    // Если мы не дошли до конца потока, но список состояний пуст, то значит, цепочка не разобрана, возвращаем false.
-    if (cur_gen_states.empty()) {
-      return false;
-    }
-
+  while (not cur_gen_states.empty()) {
     // Обрабатываем все состояния из текущего множества.
     StateList next_gen_states;
     while (not cur_gen_states.empty()) {
@@ -253,17 +248,20 @@ bool EarleyParser::Parse() {
         if (Scanner(state_id, tokens[i], new_state_id)) {
           Closure(new_state_id);
           next_gen_states.push_back(new_state_id);
+          if (lexer_->IsEnd(tokens[i])) {
+            res_states.push_back(new_state_id);
+          }
         }
       }
     }
 
-    // Проделываем следующую иетрацию над следующем множеством состояний.
+    // Проделываем следующую итерацию над следующем множеством состояний.
     cur_gen_states = next_gen_states;
   }
 
-  // Проходим по списку состояний, построенных для последних симовлов в потоке.
+  // Проходим по списку состояний, построенных для последних символов в потоке.
   bool parse_well = false;
-  for (size_t state_id = cur_gen_states.get_first(); not cur_gen_states.is_end(); state_id = cur_gen_states.get_next()) {
+  for (size_t state_id = res_states.get_first(); not res_states.is_end(); state_id = res_states.get_next()) {
     State* state = state_disp_.GetState(state_id);
     for (Item* item = state->state_items_.get_first(); not  state->state_items_.is_end(); item = state->state_items_.get_next()) {
       if (grammar_->GetLhsOfRule(item->rule_id_) == grammar_->GetStartSymbol() and item->origin_ == 0) {

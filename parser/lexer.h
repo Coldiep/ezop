@@ -16,7 +16,7 @@ struct Lexer {
   virtual TokenList GetTokens(Token::Ptr token) = 0;
 
   //! Возвращает true, если достигнут конец потока.
-  virtual bool IsEnd() = 0;
+  virtual bool IsEnd(Token::Ptr token) = 0;
 
   //! Тип абстрактный.
   virtual ~Lexer() {

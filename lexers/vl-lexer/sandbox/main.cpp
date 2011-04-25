@@ -21,7 +21,7 @@ int main() {
     std::string str = "12+45 + 9";
     parser::Lexer::TokenList tok_list;
     tok_list.push_back(parser::Token::Ptr(new parser::Token()));
-    for (lexer.SetInputStream(&str[0], &str[0] + str.length()); not lexer.IsEnd();) {
+    for (lexer.SetInputStream(&str[0], &str[0] + str.length()); true;) {
       parser::Lexer::TokenList new_tok_list;
       for (parser::Lexer::TokenList::iterator it = tok_list.begin(); it != tok_list.end(); ++it) {
         parser::Lexer::TokenList tl = lexer.GetTokens(*it);

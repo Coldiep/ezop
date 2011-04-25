@@ -1,12 +1,8 @@
 #define PRINT_ADDING
 
-#include "public_grammar.h"
-#include "grammar.h"
-#include "lexer.h"
-#include "earley_parser.h"
-#include "allocator.h"
-
-#include "re-lexer.h"
+#include <parser/grammar.h>
+#include <parser/earley_parser.h>
+#include <lexers/vl-lexer/lex.h>
 
 using namespace parser;
 
@@ -131,15 +127,15 @@ int main() {
 
     Grammar gr(&pg);
   
-    relexer::ReLexer ll;
-    ll.AddType(1,"[1-9][0-9]*");
-    ll.AddType(2,"\\+");
-    ll.AddType(3,"x");
-    ll.SetStream("12 + 34");
-    ll.Analyze();
+    lexer::Lexer lexer;
+    lexer.AddLexType(1,"[1-9][0-9]*", "N", true);
+    lexer.AddLexType(2,"\\+", "add", true);
+    lexer.AddLexType(3, "x", "mul", true);
+    std::string st = "12+34x55";
+    lexer.SetInputStream(&st[0], &st[0] + st.length());
 
     TestSemantic interpretator;
-    EarleyParser parser(&gr, &ll, &interpretator);
+    EarleyParser parser(&gr, &lexer, &interpretator);
 
     if (parser.Parse()) {
         std::cout << "parse successful\n";

@@ -2,7 +2,7 @@
 #include <lex.h>
 using lexer::Lexer;
 
-void Lexer::GetTokens(size_t start_pos, parser::Lexer::TokenList& tokens) {
+void Lexer::GetTokens(size_t start_pos, TokenList& tokens) {
   // Инициализируем множество автоматов, по которым будут производиться переходы.
   std::set<unsigned> lex_ids;
   for (LexTypeSet::iterator it = lex_types_.begin(), end = lex_types_.end(); it != end; ++it) {
@@ -37,14 +37,27 @@ void Lexer::GetTokens(size_t start_pos, parser::Lexer::TokenList& tokens) {
   for (std::map<unsigned, size_t>::iterator it = accepted_types.begin(); it != accepted_types.end(); ++it) {
     lexer::LexType::Ptr lex_type = lex_types_[it->first];
     std::string text(begin_ + start_pos, begin_ + it->second + 1);
-    tokens.push_back(parser::Token::Ptr(new parser::Token(lex_type->GetId(), start_pos, text)));
+    tokens.push_back(std::make_pair(parser::Token::Ptr(new parser::Token(lex_type->GetId(), start_pos, text)), lex_type->IsSpace()));
   }
 }
 
 parser::Lexer::TokenList Lexer::GetTokens(parser::Token::Ptr token) {
   parser::Lexer::TokenList tokens;
   size_t pos = token->abs_pos_ + token->length_;
-  GetTokens(pos, tokens);
+  TokenList toks;
+  GetTokens(pos, toks);
+  for (TokenList::iterator it = toks.begin(); it != toks.end(); ++it) {
+    if (it->second) {
+      TokenList space_toks;
+      GetTokens(it->first->abs_pos_ + it->first->length_, space_toks);
+      for (TokenList::iterator it = space_toks.begin(); it != space_toks.end(); ++it) {
+        tokens.push_back(it->first);
+      }
+    } else {
+      tokens.push_back(it->first);
+    }
+
+  }
   return tokens;
 }
 
