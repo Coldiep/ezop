@@ -153,6 +153,7 @@ private:
   Token::Ptr Cached(Token* ptr) {
     Token::Ptr tok_ptr(ptr);
     tok_list_.push_back(tok_ptr);
+    ++tok_pos_;
     return tok_ptr;
   }
 

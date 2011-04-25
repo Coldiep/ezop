@@ -205,7 +205,7 @@ void ExpressionTree::SymbolSetExpr::Print() {
   for (unsigned tabs = 0; tabs < level; ++tabs ) {
     std::cout << "  ";
   }
-  std::cout << "L" << std::endl;
+  std::cout << "[" << buf_ << "]" << std::endl;
 }
 
 // вывод выражения на консоль

@@ -26,7 +26,7 @@ class Lexer : public parser::Lexer {
   const char* end_;
 
   //! Внутренняя реализация получения списка токенов.
-  size_t GetTokens(size_t pos, parser::Lexer::TokenList& tokens);
+  void GetTokens(size_t pos, parser::Lexer::TokenList& tokens);
 
 public:
   //! Инициализация по умолчанию.
