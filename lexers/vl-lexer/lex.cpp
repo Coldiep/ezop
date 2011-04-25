@@ -49,9 +49,10 @@ parser::Lexer::TokenList Lexer::GetTokens(parser::Token::Ptr token) {
   for (TokenList::iterator it = toks.begin(); it != toks.end(); ++it) {
     if (it->second) {
       TokenList space_toks;
-      GetTokens(it->first->abs_pos_ + it->first->length_, space_toks);
-      for (TokenList::iterator it = space_toks.begin(); it != space_toks.end(); ++it) {
-        tokens.push_back(it->first);
+      size_t pos = it->first->abs_pos_ + it->first->length_;
+      GetTokens(pos, space_toks);
+      for (TokenList::iterator sit = space_toks.begin(); sit != space_toks.end(); ++sit) {
+        tokens.push_back(sit->first);
       }
     } else {
       tokens.push_back(it->first);

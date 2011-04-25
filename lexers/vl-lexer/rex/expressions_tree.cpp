@@ -13,7 +13,7 @@ void ExpressionTree::AlternationExpr::GenerateNfa(Nfa& nfa) {
   // запоминаем допускающие состояния левого подвыражения
   unsigned left_accept_state = *left_nfa.GetAcceptStates().begin();
 
-  // запоминаем конечное состояние правого подвыражения
+  // запоминаем допускающее состояние правого подвыражения
   unsigned right_accept_state = *right_nfa.GetAcceptStates().begin();
 
   // запоминаем стартовое состояние правого подвыражения
@@ -38,7 +38,7 @@ void ExpressionTree::AlternationExpr::GenerateNfa(Nfa& nfa) {
   nfa.AddState(1);
   nfa.SetStartState(1);
 
-  // добавляем и устанавливаем новое конечное состояние
+  // добавляем и устанавливаем новое допускающее состояние
   nfa.AddState(max_state_number + 1);
   nfa.CleanAcceptStates();
   nfa.AddToAcceptSet(max_state_number + 1);
@@ -70,32 +70,29 @@ void ExpressionTree::RepetitionExpr::GenerateNfa(Nfa& nfa) {
   prev_nfa.CloneFromOffset(nfa, 1);
 
   // запоминает старое начальное состсояние
-  unsigned old_start_state = prev_nfa.GetStartState();
+  unsigned old_start_state = nfa.GetStartState();
 
   // добавляет новое начальное состояние
   nfa.AddState(1);
   nfa.SetStartState(1);
 
-  // добавляет переход
-  nfa.AddTransition(1, 0, old_start_state + 1);
+  // добавляет переход в старое начальное состояние.
+  nfa.AddTransition(1, '\0', old_start_state);
 
-  // запоминаем максимальное состояние
-  unsigned max_state_number = nfa.GetMaxStateNum();
+  // добавляем новое допускающее состояние.
+  unsigned new_accept_state = nfa.GetMaxStateNum() + 1;
+  nfa.AddState(new_accept_state);
+  nfa.AddTransition(1, '\0', new_accept_state);
 
-  // запоминаем старое конечное состояние
-  unsigned old_accept_state = *nfa.GetAcceptStates().begin();
+  // добавляем переходы из всех старых допускающих состояний к новому допускающему
+  const Nfa::StateSet& old_accept_states = nfa.GetAcceptStates();
+  for (Nfa::StateSet::const_iterator state = old_accept_states.begin(); state != old_accept_states.end(); ++state) {
+    // добавляем переходы из всех старых допускающих состояний к старому начальному
+    nfa.AddTransition(*state, '\0', old_start_state);
 
-  // удаляем старое конечное состояние
-  nfa.AddState(max_state_number + 1);
-  nfa.CleanAcceptStates();
-
-  // добавляем новое конечное состояние и переход
-  nfa.AddToAcceptSet(max_state_number + 1);
-  nfa.AddTransition(1, 0, max_state_number + 1);
-
-  // добавляем переходы из всех старых конечных состояний к новому конечному
-  nfa.AddTransition(old_accept_state, 0, max_state_number + 1);
-  nfa.AddTransition(old_accept_state, 0, old_accept_state);
+    // добавляем переходы из всех старых допускающих состояний к новому допускающему
+    nfa.AddTransition(*state, '\0', new_accept_state);
+  }
 }
 
 void ExpressionTree::FiniteRepExpr::CloneFromOffset(Nfa& nfa, Nfa nfa_tmp, size_t times) {
@@ -139,7 +136,7 @@ void ExpressionTree::FiniteRepExpr::GenerateNfa(Nfa& nfa) {
     nfa.SetStartState(1);
 
     for (std::vector<unsigned >::const_iterator it = accept_states.begin(); it != accept_states.end(); ++it) {
-      // добавляем новый эпсилон переход из нового конечного состояния в старое конечное
+      // добавляем новый эпсилон переход из нового допускающего состояния в старое допускающее
       nfa.AddTransition(*it, 0, max_state_number + 1);
     }
   } else {

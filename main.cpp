@@ -131,7 +131,8 @@ int main() {
     lexer.AddLexType(1,"[1-9][0-9]*", "N", true);
     lexer.AddLexType(2,"\\+", "add", true);
     lexer.AddLexType(3, "x", "mul", true);
-    std::string st = "12+34x55";
+    lexer.AddLexType(4, "[:space:]+", "space", false);
+    std::string st = "12345      + 34 x 55";
     lexer.SetInputStream(&st[0], &st[0] + st.length());
 
     TestSemantic interpretator;

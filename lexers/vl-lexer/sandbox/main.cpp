@@ -17,8 +17,9 @@ int main() {
     lexer.AddLexType(1, "[1-9][0-9]*", "Integer", true);
     lexer.AddLexType(2, "\\+", "Add", true);
     lexer.AddLexType(3, "[:space:]+", "space", false);
+    //lexer.AddLexType(1, "a*", "Integer", true);
 
-    std::string str = "12+45 + 9";
+    std::string str = "12     +    23";
     parser::Lexer::TokenList tok_list;
     tok_list.push_back(parser::Token::Ptr(new parser::Token()));
     for (lexer.SetInputStream(&str[0], &str[0] + str.length()); true;) {
@@ -33,7 +34,7 @@ int main() {
       }
 
       for (parser::Lexer::TokenList::iterator it = new_tok_list.begin(); it != new_tok_list.end(); ++it) {
-        std::cout << "(" << (*it)->abs_pos_ << ";" << (*it)->text_ << ")\n";
+        std::cout << "(" << (*it)->type_ << ";" << (*it)->abs_pos_ << ";" << (*it)->length_ << ";" << (*it)->text_ << ")\n";
       }
       tok_list.swap(new_tok_list);
     }

@@ -242,13 +242,13 @@ bool EarleyParser::Parse() {
 
       // Получаем список токенов, идущих за данным.
       Lexer::TokenList tokens = lexer_->GetTokens(state->token_);
-      for (size_t i = 0; i < tokens.size(); ++i) {
+      for (Lexer::TokenList::iterator it = tokens.begin(); it != tokens.end(); ++it) {
         // Для каждого токена осуществляем сдвиг и итеративно применяем операции Completer и Predictor.
         size_t new_state_id = 0;
-        if (Scanner(state_id, tokens[i], new_state_id)) {
+        if (Scanner(state_id, *it, new_state_id)) {
           Closure(new_state_id);
           next_gen_states.push_back(new_state_id);
-          if (lexer_->IsEnd(tokens[i])) {
+          if (lexer_->IsEnd(*it)) {
             res_states.push_back(new_state_id);
           }
         }
