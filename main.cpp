@@ -67,7 +67,7 @@ struct TestSemantic : public EarleyParser::Interpretator {
    * \return      Ненулевой указатель если данный символ необходимо обрабатывать.
    */
   EarleyParser::Context::Ptr HandleTerminal(Token::Ptr token, const EarleyParser::Item* item) {
-    return EarleyParser::Context::Ptr(new TreeContext(parser_->grammar_->GetSymbolName(token->type_)));
+    return EarleyParser::Context::Ptr(new TreeContext(parser_->grammar_->GetSymbolName(token->type_) + std::string(" (") + token->text_ + ")"));
   }
 
   /*!

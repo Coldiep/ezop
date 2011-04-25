@@ -10,17 +10,17 @@ void ExpressionTree::AlternationExpr::GenerateNfa(Nfa& nfa) {
   Nfa left_nfa; left_expr_->GenerateNfa(left_nfa);
   Nfa right_nfa; right_expr_->GenerateNfa(right_nfa);
 
-  // запоминаем допускающие состояния левого подвыражения
-  unsigned left_accept_state = *left_nfa.GetAcceptStates().begin();
-
   // запоминаем допускающее состояние правого подвыражения
-  unsigned right_accept_state = *right_nfa.GetAcceptStates().begin();
+  Nfa::StateSet right_accept_states = right_nfa.GetAcceptStates();
 
-  // запоминаем стартовое состояние правого подвыражения
+  // запоминаем начальное состояние правого автомата
+  unsigned right_start_state = right_nfa.GetStartState();
+
+  // запоминаем начальное состояние левого автомата
   unsigned left_start_state = left_nfa.GetStartState();
 
-  // запоминаем стартовое состояние правого подвыражения
-  unsigned right_start_state = right_nfa.GetStartState();
+  // запоминаем допускающие состояния левого автомат.
+  Nfa::StateSet left_accept_states = left_nfa.GetAcceptStates();
 
   // клонируем левый автомат
   left_nfa.CloneFromOffset(nfa, 1);
@@ -44,10 +44,16 @@ void ExpressionTree::AlternationExpr::GenerateNfa(Nfa& nfa) {
   nfa.AddToAcceptSet(max_state_number + 1);
 
   // добавляем переходы
-  nfa.AddTransition(1, 0, left_start_state + 1);
-  nfa.AddTransition(1, 0, right_start_state + offset_after_left);
-  nfa.AddTransition(left_accept_state + 1, 0, max_state_number + 1);
-  nfa.AddTransition(right_accept_state + offset_after_left, 0, max_state_number + 1);
+  nfa.AddTransition(1, '\0', left_start_state + 1);
+  nfa.AddTransition(1, '\0', right_start_state + offset_after_left);
+
+  for (Nfa::StateSet::iterator state = left_accept_states.begin(); state != left_accept_states.end(); ++state) {
+    nfa.AddTransition(*state + 1, '\0', max_state_number + 1);
+  }
+
+  for (Nfa::StateSet::iterator state = right_accept_states.begin(); state != right_accept_states.end(); ++state) {
+    nfa.AddTransition(*state + offset_after_left, '\0', max_state_number + 1);
+  }
 }
 
 void ExpressionTree::SequenceExpr::GenerateNfa(Nfa& nfa) {
@@ -55,14 +61,24 @@ void ExpressionTree::SequenceExpr::GenerateNfa(Nfa& nfa) {
   Nfa right_nfa; right_expr_->GenerateNfa(right_nfa);
   left_nfa.CloneFromOffset(nfa, 0);
 
-  // запоминаем старое состояние
-  unsigned old_start_state = nfa.GetStartState();
+  // запоминаем начальное состояние левого автомата
+  unsigned left_start_state = nfa.GetStartState();
 
-  unsigned max_state_number = nfa.GetMaxStateNum();
-  right_nfa.CloneFromOffset(nfa, max_state_number - 1);
+  // запоминаем допускающие состояния левого автомата.
+  Nfa::StateSet left_accept_states = nfa.GetAcceptStates();
+  nfa.CleanAcceptStates();
 
-  // добавляем новое
-  nfa.SetStartState(old_start_state);
+  unsigned right_start_state = nfa.GetMaxStateNum();
+  right_nfa.CloneFromOffset(nfa, right_start_state - 1);
+
+  // добавляем переходы из допускающих состояний левого автомата в начальное состояние правого.
+  for (Nfa::StateSet::iterator state = left_accept_states.begin(); state != left_accept_states.end(); ++state) {
+    // добавляем переходы из всех старых допускающих состояний к старому начальному
+    nfa.AddTransition(*state, '\0', right_start_state);
+  }
+
+  // добавляем новое начальное состояние.
+  nfa.SetStartState(left_start_state);
 }
 
 void ExpressionTree::RepetitionExpr::GenerateNfa(Nfa& nfa) {
@@ -93,6 +109,10 @@ void ExpressionTree::RepetitionExpr::GenerateNfa(Nfa& nfa) {
     // добавляем переходы из всех старых допускающих состояний к новому допускающему
     nfa.AddTransition(*state, '\0', new_accept_state);
   }
+
+  // Очищаем допускающие состояние и добавляем новое единственное допускающее состояние.
+  nfa.CleanAcceptStates();
+  nfa.AddToAcceptSet(new_accept_state);
 }
 
 void ExpressionTree::FiniteRepExpr::CloneFromOffset(Nfa& nfa, Nfa nfa_tmp, size_t times) {

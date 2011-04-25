@@ -17,9 +17,10 @@ int main() {
     lexer.AddLexType(1, "[1-9][0-9]*", "Integer", true);
     lexer.AddLexType(2, "\\+", "Add", true);
     lexer.AddLexType(3, "[:space:]+", "space", false);
-    //lexer.AddLexType(1, "a*", "Integer", true);
+    //lexer.AddLexType(1, "a+", "Integer", true);
 
-    std::string str = "12     +    23";
+    //std::string str = "a";
+    std::string str = "12345      + 34 x 55";
     parser::Lexer::TokenList tok_list;
     tok_list.push_back(parser::Token::Ptr(new parser::Token()));
     for (lexer.SetInputStream(&str[0], &str[0] + str.length()); true;) {
