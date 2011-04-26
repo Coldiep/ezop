@@ -2,6 +2,7 @@
 #pragma once
 
 #include <lex_type.h>
+#include <utf8_iterator.h>
 #include <parser/lexer.h>
 
 namespace lexer {
@@ -17,7 +18,10 @@ class Lexer : public parser::Lexer {
   typedef std::map<unsigned, lexer::LexType::Ptr> LexTypeSet;
 
   //! Тип списка токенов, помеченных булевым флагом.
-  typedef std::vector<std::pair<parser::Token::Ptr, bool> >   TokenList;
+  typedef std::vector<std::pair<parser::Token::Ptr, bool> > TokenList;
+
+  //! Тип итератора по UTF-8 тексту.
+  typedef Utf8Iterator<const char*> SymbolIterator;
 
   //! Множество лексических типов.
   LexTypeSet  lex_types_;

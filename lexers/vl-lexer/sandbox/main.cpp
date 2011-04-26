@@ -8,19 +8,20 @@
 int main() {
   try {
 #if 0
-    std::string re = "[1-9][0-9]*";
+    std::string re = "(true";
     rexp::Parser parser(&re[0], &re[0]+re.length());
     parser.Print();
 #endif
 
+//#if 0
     lexer::Lexer lexer;
-    lexer.AddLexType(1, "[1-9][0-9]*", "Integer", true);
-    lexer.AddLexType(2, "\\+", "Add", true);
+    lexer.AddLexType(1, "(true)|(false)", "bollean", true);
+    //lexer.AddLexType(2, "\\+", "Add", true);
     lexer.AddLexType(3, "[:space:]+", "space", false);
     //lexer.AddLexType(1, "a+", "Integer", true);
 
     //std::string str = "a";
-    std::string str = "12345      + 34 x 55";
+    std::string str = "true  falsetrue";
     parser::Lexer::TokenList tok_list;
     tok_list.push_back(parser::Token::Ptr(new parser::Token()));
     for (lexer.SetInputStream(&str[0], &str[0] + str.length()); true;) {
@@ -39,8 +40,9 @@ int main() {
       }
       tok_list.swap(new_tok_list);
     }
+//#endif
 #if 0
-    std::string re = "[1-9][0-9]*";
+    std::string re = "-?([1-9][0-9]*)|(0?)\\.[0-9]*(-?(e|E)-?[1-9][0-9]*)?[0-9]*";
     rexp::Scanner scanner(&re[0], &re[0]+re.length());
     for (;;) {
       rexp::Scanner::Token::Ptr token = scanner.GetToken();
