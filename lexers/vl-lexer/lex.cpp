@@ -13,9 +13,10 @@ void Lexer::GetTokens(size_t start_pos, TokenList& tokens) {
   // Пары <id, position> используются для хранения последней позиции,
   // в которой автомат с данным id допустил входную цепочку.
   std::map<unsigned, size_t> accepted_types;
-  for (size_t pos = start_pos; begin_ + pos < end_ and not lex_ids.empty(); ++pos) {
+  for (it_.SetPos(start_pos); it_ != SymbolIterator() and not lex_ids.empty(); ++it_) {
     // Читаем символ.
-    char sym = *(begin_ + pos);
+    char sym = it_->cp1251_;
+    std::cout << "sym: " << sym << "\n";
 
     // Производим переход по данному символу для каждого автомата.
     std::set<unsigned> lex_ids_tmp_;
@@ -23,7 +24,7 @@ void Lexer::GetTokens(size_t start_pos, TokenList& tokens) {
       lexer::LexType::Ptr lex_type = lex_types_[*it];
       if (lex_type->Move(sym)){
         if (lex_type->IsAccepted()) {
-          accepted_types[*it] = pos;
+          accepted_types[*it] = it_.GetPos();
         }
         lex_ids_tmp_.insert(*it);
       }
@@ -36,7 +37,7 @@ void Lexer::GetTokens(size_t start_pos, TokenList& tokens) {
   // Заполняем список токенов.
   for (std::map<unsigned, size_t>::iterator it = accepted_types.begin(); it != accepted_types.end(); ++it) {
     lexer::LexType::Ptr lex_type = lex_types_[it->first];
-    std::string text(begin_ + start_pos, begin_ + it->second + 1);
+    std::string text(it_.GetStartIter() + start_pos, it_.GetStartIter() + it->second);
     tokens.push_back(std::make_pair(parser::Token::Ptr(new parser::Token(lex_type->GetId(), start_pos, text)), lex_type->IsSpace()));
   }
 }
@@ -50,11 +51,13 @@ parser::Lexer::TokenList Lexer::GetTokens(parser::Token::Ptr token) {
     if (it->second) {
       TokenList space_toks;
       size_t pos = it->first->abs_pos_ + it->first->length_;
+      std::cout << "space token: \"" << it->first->text_ << "\" " << "abs pos: " << it->first->abs_pos_ << " len: " << it->first->length_ << " pos: " << pos << "\n";
       GetTokens(pos, space_toks);
       for (TokenList::iterator sit = space_toks.begin(); sit != space_toks.end(); ++sit) {
         tokens.push_back(sit->first);
       }
     } else {
+      std::cout << "token: " << it->first->text_ << "\n";
       tokens.push_back(it->first);
     }
 

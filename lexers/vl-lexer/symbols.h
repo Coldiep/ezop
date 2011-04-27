@@ -1,8 +1,10 @@
 
 #include <stdint.h>
+#include <string>
 
 namespace lexer {
 
+//! Преобразование из UTF-16 в CP 1251.
 inline char GetCp1251FromUtf16(uint16_t code) {
   if (code >= 0x0410 and code <= 0x042F) { // Прописные для кирилицы.
     return code - 0x0410 + 0xc0;
@@ -12,6 +14,22 @@ inline char GetCp1251FromUtf16(uint16_t code) {
     return '\xa8';
   } else if (code == 0x0451) { // Строчная ё.
     return '\xb8';
+  } else if (code < 0x80) { // ANSI символы.
+    return code;
+  }
+  return '\0';
+}
+
+//! Преобразование из CP-1251 в UTF-16.
+inline uint16_t GetCp1251FromUtf16(char code) {
+  if (code >= '\xc0' and code <= '\xdf') { // Прописные для кирилицы.
+    return code - 0xc0 + 0x0410;
+  } else if (code >= '\xe0' and code <= '\xff') { // Строчные для кирилицы.
+    return code - 0xe0 + 0x0430;
+  } else if (code == '\xa8') { // Прописная Ё.
+    return 0x0401;
+  } else if (code == '\xb8') { // Строчная ё.
+    return 0x0451;
   } else if (code < 0x80) { // ANSI символы.
     return code;
   }

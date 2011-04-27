@@ -15,12 +15,12 @@ int main() {
 
 //#if 0
     lexer::Lexer lexer;
-    lexer.AddLexType(1, "(true)|(false)", "bollean", true);
-    //lexer.AddLexType(2, "\\+", "Add", true);
+    lexer.AddLexType(1, "(true)|(false)", "bolean", true);
+    lexer.AddLexType(2, "\\+", "Add", true);
     lexer.AddLexType(3, "[:space:]+", "space", false);
     //lexer.AddLexType(1, "a+", "Integer", true);
 
-    //std::string str = "a";
+    //std::string str = "aaaaa";
     std::string str = "true  falsetrue";
     parser::Lexer::TokenList tok_list;
     tok_list.push_back(parser::Token::Ptr(new parser::Token()));

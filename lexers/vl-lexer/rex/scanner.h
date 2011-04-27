@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <utf8_iterator.h>
+
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <deque>
@@ -31,6 +33,9 @@ struct Scanner {
   enum {
     SYM_QUENT = 1 << sizeof(char) * 8
   };
+
+  //! Тип итератора по UTF-8 тексту.
+  typedef lexer::Utf8Iterator<const char*> SymbolIterator;
 
   //! Данные, возвращаемые сканером.
   class Token {
@@ -102,14 +107,11 @@ struct Scanner {
   };
 
 private:
-  //! Начало буфера.
-  const char* begin_;
+  //! Итератор по символам потока.
+  SymbolIterator it_;
 
-  //! Конец буфера.
-  const char* end_;
-
-  //! Позиция в потоке.
-  unsigned pos_;
+  //! Первый вызов Next.
+  bool           first_;
 
   //! Список распознанных токенов.
   typedef std::deque<Token::Ptr> TokenList;
@@ -126,9 +128,8 @@ public:
    * \param end   Указателт на конец потока.
    */
   Scanner(const char* begin, const char* end)
-    : begin_(begin)
-    , end_(end)
-    , pos_(0)
+    : it_(begin, end)
+    , first_(true)
     , tok_pos_(0) {
   }
 
@@ -159,20 +160,25 @@ private:
 
   //! Возврат на позицию назад.
   void StreamBack() {
-    if (pos_) {
-      --pos_;
+    if (size_t pos = it_.GetPos()) {
+      it_.SetPos(--pos);
     }
   }
 
   //! Достигнут ли конец потока?
   bool IsEnd() const {
-    return (begin_ + pos_) == end_;
+    return it_ == SymbolIterator();
   }
 
   //! Получение следующиего символа из потока.
   char Next() {
+    if (first_) {
+      first_ = false;
+    } else {
+      ++it_;
+    }
     if (not IsEnd()) {
-      return begin_[pos_++];
+      return it_->cp1251_;
     }
     return '\0';
   }

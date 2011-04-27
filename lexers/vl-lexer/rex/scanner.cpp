@@ -52,12 +52,12 @@ Scanner::Token::Ptr Scanner::GetToken() {
     // эти символы не могут появляться в данном контексте
     case '}': {
       std::stringstream st;
-      st << "Символ } не может быть в данном регулярном выражении на позиции " << pos_;
+      st << "Символ } не может быть в данном регулярном выражении на позиции " << it_.GetPos();
       throw std::invalid_argument(st.str());
     }
     case ']': {
       std::stringstream st;
-      st << "Символ ] не может быть в данном регулярном выражении на позиции " << pos_;
+      st << "Символ ] не может быть в данном регулярном выражении на позиции " << it_.GetPos();
       throw std::invalid_argument(st.str());
     }
   }
@@ -70,11 +70,11 @@ Scanner::Token::Ptr Scanner::GetToken() {
 Scanner::Token::Ptr Scanner::ParseBracketsExpr() {
   // читаем символ из потока
   char cur = Next();
-  unsigned br_pos = pos_;
+  unsigned br_pos = it_.GetPos();
 
   if (IsEnd()) {
     std::stringstream st;
-    st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+    st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
     throw std::invalid_argument(st.str().c_str());
   }
 
@@ -84,11 +84,11 @@ Scanner::Token::Ptr Scanner::ParseBracketsExpr() {
     is_exclude = true;
     if (IsEnd()) {
       std::stringstream st;
-      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+      st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
       throw std::invalid_argument(st.str().c_str());
     }
     cur = Next();
-    br_pos = pos_;
+    br_pos = it_.GetPos();
   }
 
   // если символ это двоеточие, то может быть одно их следующих сокращений
@@ -109,7 +109,7 @@ Scanner::Token::Ptr Scanner::ParseBracketsExpr() {
       // Конец потока.
       if (IsEnd()) {
         std::stringstream st;
-        st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+        st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
         throw std::invalid_argument(st.str().c_str());
       }
       if (cur == ']') {
@@ -121,7 +121,7 @@ Scanner::Token::Ptr Scanner::ParseBracketsExpr() {
     // читаем следующий символ. Он должен быть ']'
     if ((cur = Next()) != ']') {
       std::stringstream st;
-      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение вида [:" << keyword << ":] не содержит символа ']'";
+      st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение вида [:" << keyword << ":] не содержит символа ']'";
       throw std::invalid_argument(st.str());
     }
 
@@ -191,7 +191,7 @@ Scanner::Token::Ptr Scanner::ParseBracketsExpr() {
 MAIN_LOOP:
 
   // Устанавливаем позицию на начало скобок.
-  pos_ = br_pos;
+  it_.SetPos(br_pos);
 
   // читаем содержимое квадратных скобок
   std::set<char> st;
@@ -199,14 +199,14 @@ MAIN_LOOP:
     // дошли до конца потока, это ошибка. Имеем: [... EOF
     if (IsEnd()) {
       std::stringstream st;
-      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+      st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
       throw std::invalid_argument(st.str().c_str());
     }
 
     // символ '-' быть в этом контексте не может. Имеем [... --
     if (cur == '-') {
       std::stringstream st;
-      st << "Ошибка на позиции " << pos_ << ". Символ '-' не может быть в данном регулярном выражении";
+      st << "Ошибка на позиции " << it_.GetPos() << ". Символ '-' не может быть в данном регулярном выражении";
       throw std::invalid_argument(st.str());
     }
 
@@ -219,21 +219,21 @@ MAIN_LOOP:
       next = Next();
       if (next == ']' or next == '-') {
         std::stringstream st;
-        st << "В данном регулярном выражении на позиции " << pos_ << " должен быть символ '-' или ']'";
+        st << "В данном регулярном выражении на позиции " << it_.GetPos() << " должен быть символ '-' или ']'";
         throw std::invalid_argument(st.str());
       }
 
       // дошли до конца потока, это ошибка. Имеем: [... EOF
       if (IsEnd()) {
         std::stringstream st;
-        st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенную квадратную скобку";
+        st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение содержит незавершенную квадратную скобку";
         throw std::invalid_argument(st.str().c_str());
       }
 
       // правый символ не может быть меньше левого в диапазоне
       if (next < cur) {
         std::stringstream st;
-        st << "Ошибка на позиции " << pos_
+        st << "Ошибка на позиции " << it_.GetPos()
           << ". В регулярном выражении вида [left_symbol-rigth_symbol] left_symbol не может быть больше чем rigth_symbol";
         throw std::invalid_argument(st.str().c_str());
       }
@@ -270,7 +270,7 @@ Scanner::Token::Ptr Scanner::ParseDblApostrExpr() {
   for (char cur = Next(); cur != '"'; cur = Next()) {
     if (IsEnd()) {
       std::stringstream st;
-      st << "Ошибка на позиции " << pos_ << ". Регулярное выражение содержит незавершенный двойной апостроф";
+      st << "Ошибка на позиции " << it_.GetPos() << ". Регулярное выражение содержит незавершенный двойной апостроф";
       throw std::invalid_argument(st.str().c_str());
     }
     char_set.insert(cur);
@@ -291,7 +291,7 @@ Scanner::Token::Ptr Scanner::ParseBracesExpr() {
   // это должна быть цифра
   if (not isdigit(cur)) {
     std::stringstream st;
-    st << "В данном регулярном выражении на позиции " << pos_ << " должна быть цифра";
+    st << "В данном регулярном выражении на позиции " << it_.GetPos() << " должна быть цифра";
     throw std::invalid_argument(st.str());
   }
 
@@ -304,7 +304,7 @@ Scanner::Token::Ptr Scanner::ParseBracesExpr() {
   // должно быть выражение вида {n,...} или {n}
   if (cur != ',' and cur != '}') {
     std::stringstream st;
-    st << "В данном регулярном выражении на позиции " << pos_ << " должны быть символы ',' или '}'";
+    st << "В данном регулярном выражении на позиции " << it_.GetPos() << " должны быть символы ',' или '}'";
     throw std::invalid_argument(st.str());
   }
 
@@ -330,7 +330,7 @@ Scanner::Token::Ptr Scanner::ParseBracesExpr() {
   // сейчас в любом случае должна быть '}'
   if (cur != '}') {
     std::stringstream st;
-    st << "В данном регулярном выражении на позиции " << pos_ << " должен быть символ '}'";
+    st << "В данном регулярном выражении на позиции " << it_.GetPos() << " должен быть символ '}'";
     throw std::invalid_argument(st.str());
   }
   return Cached(new Token(first, second));

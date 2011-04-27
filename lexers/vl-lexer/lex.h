@@ -26,28 +26,19 @@ class Lexer : public parser::Lexer {
   //! Множество лексических типов.
   LexTypeSet  lex_types_;
 
-  //! Указатель на начало потока.
-  const char* begin_;
-
-  //! Указатель на конец потока.
-  const char* end_;
+  //! Итератор по сивольному потоку.
+  SymbolIterator it_;
 
   //! Внутренняя реализация получения списка токенов.
   void GetTokens(size_t pos, TokenList& tokens);
 
 public:
-  //! Инициализация по умолчанию.
-  Lexer()
-    : begin_(NULL)
-    , end_(NULL) {
-  }
-
   //! Возврат списка токенов, следующих за переданным в качестве параметра.
   parser::Lexer::TokenList GetTokens(parser::Token::Ptr token);
 
   //! Возвращает true, если достигнут конец потока.
   bool IsEnd(parser::Token::Ptr token) {
-    return (begin_ + token->abs_pos_ + token->length_) == end_;
+    return it_ == SymbolIterator();
   }
 
   /*!
@@ -90,8 +81,7 @@ public:
 
   //! Инициализирует лексический анализатор входным потоком.
   void SetInputStream(const char* begin, const char* end) {
-    begin_ = begin;
-    end_   = end;
+    it_ = SymbolIterator(begin, end);
   }
 };
 
