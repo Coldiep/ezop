@@ -273,6 +273,7 @@ public:
   void SetPos(size_t pos) {
     if ((begin_ + pos) <= end_) {
       pos_ = pos;
+      RealIncrement();
     }
   }
 

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <vector>
 #include <set>
 #include <iostream>
@@ -13,9 +15,10 @@ namespace rexp {
 class Dfa {
 public:
   // Используется для обозначения недоступного состояния.
-  enum {
-    ZERO_STATE = 0
-  };
+  static const unsigned ZERO_STATE = 0;
+
+  //! Размер таблицы переходов.
+  static const unsigned TABLE_SIZE = 256;
 
   //! Тип множества состояний.
   typedef std::set<unsigned> StateSet;
@@ -25,30 +28,24 @@ private:
   struct TableRow {
     // конструктор
     TableRow()
-      : row_(1 << sizeof(char) * 8, ZERO_STATE) {
+      : row_(TABLE_SIZE, ZERO_STATE) {
     }
 
     //! Строка таблицы переходов.
     std::vector<unsigned> row_;
 
     //! Добавление перехода.
-    void AddMove(char symbol, unsigned state_to) {
+    void AddMove(uint8_t symbol, unsigned state_to) {
       row_[symbol] = state_to;
     }
 
     //! Реализация перехода.
-    unsigned Move(char symbol) const {
+    unsigned Move(uint8_t symbol) const {
       return row_[symbol];
     }
 
     // Печать таблицы переходов.
-    void Print() const {
-      for (unsigned i = 1; i < row_.size(); ++i) {
-        if (row_[i]) {
-          std::cout << i << "-" << row_[i] << " ";
-        }
-      }
-    }
+    void Print() const;
   };
 
   //! Тип таблицы переходов.
@@ -85,7 +82,7 @@ public:
    * \param symbol      Символ, по которому производится переход.
    * \param state_to    Состояние, в которое производится переход.
    */
-  void AddTransition(unsigned state_from, char symbol, unsigned state_to);
+  void AddTransition(unsigned state_from, uint8_t symbol, unsigned state_to);
 
   //! Возвращает номер начального состояния.
   unsigned GetStartState() const {
@@ -113,7 +110,7 @@ public:
   }
 
   //! Производит переход.
-  unsigned Move(unsigned state, char symbol) const {
+  unsigned Move(unsigned state, uint8_t symbol) const {
     return transitions_[state].Move(symbol);
   }
 

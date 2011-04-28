@@ -21,19 +21,20 @@ inline char GetCp1251FromUtf16(uint16_t code) {
 }
 
 //! Преобразование из CP-1251 в UTF-16.
-inline uint16_t GetCp1251FromUtf16(char code) {
-  if (code >= '\xc0' and code <= '\xdf') { // Прописные для кирилицы.
-    return code - 0xc0 + 0x0410;
-  } else if (code >= '\xe0' and code <= '\xff') { // Строчные для кирилицы.
+inline uint16_t GetUtf16FromCp1251(char ch_code) {
+  uint16_t code = (uint16_t)(uint8_t)ch_code;
+  if (code >= 0xc0 and code <= 0xdf) { // Прописные для кирилицы.
+    return code + 0x0410 - 0xc0;
+  } else if (code >= 0xe0 and code <= 0xff) { // Строчные для кирилицы.
     return code - 0xe0 + 0x0430;
-  } else if (code == '\xa8') { // Прописная Ё.
+  } else if (code == 0xa8) { // Прописная Ё.
     return 0x0401;
-  } else if (code == '\xb8') { // Строчная ё.
+  } else if (code == 0xb8) { // Строчная ё.
     return 0x0451;
   } else if (code < 0x80) { // ANSI символы.
     return code;
   }
-  return '\0';
+  return 0;
 }
 
 //! Преобразование UTF-16 кода в UTF-8 последовательность.

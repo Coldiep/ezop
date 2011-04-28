@@ -7,6 +7,8 @@
 #include <string>
 #include <deque>
 
+#include <iostream>
+
 namespace rexp {
 
 /*!
@@ -178,6 +180,8 @@ private:
       ++it_;
     }
     if (not IsEnd()) {
+      std::string str;
+      lexer::GetUtf8Sequence(it_->utf16_, str);
       return it_->cp1251_;
     }
     return '\0';

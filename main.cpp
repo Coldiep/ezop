@@ -118,7 +118,7 @@ int main() {
     pg.AddRule(3,"M --> N x M");
     pg.AddLhsSymbol(3,9);
     pg.AddRhsSymbol(3,10);
-    pg.AddRhsSymbol(3,6);
+    pg.AddRhsSymbol(3,7);
     pg.AddRhsSymbol(3,9);
 
     pg.AddRule(4,"M --> N");
@@ -136,31 +136,20 @@ int main() {
     pg.SetStartSymbolId(8);
 
     pg.Print(std::cout);
-    std::cout << "1\n\n";
 
     Grammar gr(&pg);
   
-     std::cout << "2\n";
     lexer::Lexer lexer;
     lexer.AddLexType(1,"[1-9][0-9]*", "integer", true);
-     std::cout << "3.1\n";
     lexer.AddLexType(2,"-?([1-9][0-9]*)|(0?)\\.[0-9]*(-?(e|E)-?[1-9][0-9]*)?[0-9]*", "real", true);
-     std::cout << "3.2\n";
     lexer.AddLexType(3,"[a-zA-Zа-яА-ЯёЁ_][a-zA-Zа-яА-ЯёЁ_0-9]*", "word", true);
-     std::cout << "3.3\n";
     lexer.AddLexType(4,"(true)|(false)", "boolean", true);
-     std::cout << "3.4\n";
     //lexer.AddLexType(5,"\\/\\*.*\\*\\/", "comment", true);
-     std::cout << "3.5\n";
     lexer.AddLexType(6,"\\+", "add", true);
-     std::cout << "3.6\n";
     lexer.AddLexType(7, "\\*", "mul", true);
-     std::cout << "3.7\n";
     lexer.AddLexType(8, "[:space:]+", "space", false);
-     std::cout << "3.8\n";
     std::string st = "12345      + 34 * 55.4";
     lexer.SetInputStream(&st[0], &st[0] + st.length());
-     std::cout << "4\n";
 
     TestSemantic interpretator;
     EarleyParser parser(&gr, &lexer, &interpretator);

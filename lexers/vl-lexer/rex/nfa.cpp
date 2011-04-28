@@ -2,12 +2,16 @@
 #include <rex/nfa.h>
 using rexp::Nfa;
 
+#include <symbols.h>
+
 #include <iostream>
 
 void Nfa::TableRow::Print() const {
   std::cout << "{" << state_ << ";";
   for (CharMap::const_iterator cm_it = char_map_.begin(); cm_it != char_map_.end(); ++cm_it) {
-    std::cout << "[" << cm_it->first << "; ";
+    std::string ch_str;
+    lexer::GetUtf8Sequence(lexer::GetUtf16FromCp1251(cm_it->first), ch_str);
+    std::cout << "[" << ch_str << "; ";
     for (StateSet::const_iterator st_it = cm_it->second.begin(); st_it != cm_it->second.end(); ++st_it) {
       std::cout << *st_it << ",";
     }

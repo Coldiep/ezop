@@ -2,6 +2,8 @@
 #include <rex/nfa2dfa_transformer.h>
 using rexp::Nfa2DfaTransformer;
 
+#include <stdint.h>
+
 void Nfa2DfaTransformer::Transform(const Nfa& nfa, Dfa& dfa) {
   // таблица состояний ДКА
   DfaStateMap dfa_state_set;
