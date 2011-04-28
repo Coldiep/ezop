@@ -97,7 +97,6 @@ int main() {
     pg.AddTerminal(2,"real");
     pg.AddTerminal(3,"word");
     pg.AddTerminal(4,"boolean");
-    pg.AddTerminal(5,"comment");
     pg.AddTerminal(6,"+");
     pg.AddTerminal(7,"x");
 
@@ -144,11 +143,11 @@ int main() {
     lexer.AddLexType(2,"-?([1-9][0-9]*)|(0?)\\.[0-9]*(-?(e|E)-?[1-9][0-9]*)?[0-9]*", "real", true);
     lexer.AddLexType(3,"[a-zA-Zа-яА-ЯёЁ_][a-zA-Zа-яА-ЯёЁ_0-9]*", "word", true);
     lexer.AddLexType(4,"(true)|(false)", "boolean", true);
-    //lexer.AddLexType(5,"\\/\\*.*\\*\\/", "comment", true);
     lexer.AddLexType(6,"\\+", "add", true);
     lexer.AddLexType(7, "\\*", "mul", true);
     lexer.AddLexType(8, "[:space:]+", "space", false);
-    std::string st = "12345      + 34 * 55.4";
+    lexer.AddLexType(9,"\\/\\*.*\\*\\/", "comment", false);
+    std::string st = "12345  /* hello */    + 34 * 55.4";
     lexer.SetInputStream(&st[0], &st[0] + st.length());
 
     TestSemantic interpretator;
