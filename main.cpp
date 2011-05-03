@@ -2,7 +2,7 @@
 
 #include <parser/grammar.h>
 #include <parser/earley_parser.h>
-#include <lexers/vl-lexer/lex.h>
+#include <lexers/re-lexer/lex.h>
 
 using namespace parser;
 
@@ -92,13 +92,14 @@ struct TestSemantic : public EarleyParser::Interpretator {
 int main() {
 
   try {
+#if 0
     PublicGrammar pg("test");
     pg.AddTerminal(1,"integer");
     pg.AddTerminal(2,"real");
     pg.AddTerminal(3,"word");
     pg.AddTerminal(4,"boolean");
-    pg.AddTerminal(6,"+");
-    pg.AddTerminal(7,"x");
+    pg.AddTerminal(6,"add");
+    pg.AddTerminal(7,"multiplay");
 
     pg.AddNonterminal(8,"A");
     pg.AddNonterminal(9,"M");
@@ -149,6 +150,38 @@ int main() {
     lexer.AddLexType(9,"\\/\\*.*\\*\\/", "comment", false);
     std::string st = "12345  /* hello */    + 34 * 55.4";
     lexer.SetInputStream(&st[0], &st[0] + st.length());
+#endif
+
+
+    PublicGrammar pg("test");
+    pg.AddTerminal(1,"a");
+    pg.AddTerminal(2,"aa");
+
+    pg.AddNonterminal(3,"A");
+    pg.SetStartSymbolId(3);
+
+    pg.AddRule(1,"A --> A A");
+    pg.AddLhsSymbol(1,3);
+    pg.AddRhsSymbol(1,3);
+    pg.AddRhsSymbol(1,3);
+
+    pg.AddRule(2,"A --> a");
+    pg.AddLhsSymbol(2,3);
+    pg.AddRhsSymbol(2,1);
+
+    pg.AddRule(3,"A --> aa");
+    pg.AddLhsSymbol(3,3);
+    pg.AddRhsSymbol(3,2);
+
+    pg.Print(std::cout);
+
+    lexer::Lexer lexer;
+    lexer.AddLexType(1,"a", "one a", true);
+    lexer.AddLexType(2,"aa", "two a", true);
+    std::string st = "aaa";
+    lexer.SetInputStream(&st[0], &st[0] + st.length());
+
+    Grammar gr(&pg);
 
     TestSemantic interpretator;
     EarleyParser parser(&gr, &lexer, &interpretator);

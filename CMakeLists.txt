@@ -44,12 +44,12 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/parser
     ${PROJECT_SOURCE_DIR}/terms
-    ${PROJECT_SOURCE_DIR}/lexers/vl-lexer
+    ${PROJECT_SOURCE_DIR}/lexers/re-lexer
 )
 
 add_subdirectory(parser)
 add_subdirectory(terms)
-add_subdirectory(lexers/vl-lexer)
+add_subdirectory(lexers/re-lexer)
 
 set(NAME ezop)
 

@@ -17,11 +17,13 @@ int main() {
     lexer::Lexer lexer;
     //lexer.AddLexType(1, "(true)|(false)", "bolean", true);
     //lexer.AddLexType(2, "\\+", "Add", true);
-    lexer.AddLexType(3, "[:space:]+", "space", false);
-    lexer.AddLexType(5, "[а-яА-ЯёЁ]*", "test", true);
-    lexer.AddLexType(6, "\\/\\*.*\\*\\/", "test", false);
+    //lexer.AddLexType(3, "[:space:]+", "space", false);
+    //lexer.AddLexType(5, "[а-яА-ЯёЁ]*", "test", true);
+    //lexer.AddLexType(6, "\\/\\*.*\\*\\/", "test", false);
+    lexer.AddLexType(10, "a", "one a", true);
+    lexer.AddLexType(11, "aa", "two a", true);
 
-    std::string str = "  /* здравствуй жопа новый год */  привет";
+    std::string str = "aaa";
     //std::string str = "true  falsetrue";
     parser::Lexer::TokenList tok_list;
     tok_list.push_back(parser::Token::Ptr(new parser::Token()));
