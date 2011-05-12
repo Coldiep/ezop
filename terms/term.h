@@ -1,59 +1,63 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
-#include "signature.h"
+#include <terms/signature.h>
 
-namespace NTermAlg {
+namespace ezop { namespace terms {
 
-// The term representation.
-struct TTerm {
-    // The list of child terms.
-    typedef std::vector<TTerm*>     TTermList;
+/// Класс, реализующий терм.
+struct Term {
+  //! Тип умного указателя на терм.
+  typedef boost::shared_ptr<Term> Ptr;
 
-    TTermSignature  Signature;
-    TTermList       Children;
+  //! Тип списка параметров терма.
+  typedef std::vector<Term::Ptr> TermList;
 
-    TTerm()
-    {}
+  Operation::Ptr signature_;  ///< Сигнатура терма.
+  TermList       children_;   ///< Список дочерних элементов.
 
-    explicit TTerm( const TTermSignature signature )
-        : Signature(signature)
-        , Children(signature.ParamTypes.size(), 0)
-    {}
+  explicit Term(Operation::Ptr signature)
+    : signature_(signature)
+    , children(signature_->params_.size()) {
+  }
 
-    void SetTerm( TTerm* term, unsigned int place )
-    {
-        if (place >= Children.size())
-            throw std::runtime_error("Bad index of term passed.");
-
-        if (term->Signature.ResType != Signature.ParamTypes[place])
-            throw std::runtime_error("The term's type does not the same as type into term signature.");
-
-        if (Children[place])
-            throw std::runtime_error("The passed term has already been set to this place.");
-
-        Children[place] = term;
+  void SetParam(Term::ptr term, unsigned place) {
+    if (place >= children_.size()) {
+      throw std::invalid_argument("Bad index of term passed.");
     }
 
-    void PrintTerm( std::ostream& out, const TTerm* term ) const
-    {
-        out << term->Signature.Name << "(";
-        bool f = true;
-        for (unsigned int i = 0; i < Children.size(); ++i) {
-            if (f) f = false;
-            else out << ", ";
-            PrintTerm(out, Children[i]);
-        }
+    if (term->signature_->res_type != signature_->params_[place]) {
+      throw std::invalid_argument("The term's type does not the same as type into term signature.");
     }
 
-    void Print( std::ostream& out ) const
-    {
-        PrintTerm(out, this);
+    children_[place].reset(term);
+  }
+
+  void PrintTerm(std::ostream& out, const Term* term) const {
+    out << term->signature_->name_ << "(";
+    bool f = true;
+    for (unsigned i = 0; i < children_.size(); ++i) {
+      if (f) {
+        f = false;
+      } else {
+        out << ", ";
+      }
+      if (children_[i].get()) {
+        PrintTerm(out, children_[i].get());
+      } else {
+        out << "Null";
+      }
     }
+    out << ")";
+  }
+
+  void Print(std::ostream& out) const {
+    PrintTerm(out, this);
+  }
 };
 
-} // namespace NTermAlg
-
+}} // namespace ezop, terms.
 

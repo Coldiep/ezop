@@ -1,79 +1,56 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
-#include "type.h"
+#include <terms/type.h>
 
-namespace NTermAlg {
+namespace ezop { namespace terms {
 
-// A term signature is a pair (r, s*), where r -- result type,
-// s* string (may be empty) of parameter types.
-struct TTermSignature {
-    // The sort of the term.
-    enum ETermSort {
-        UNKNOWN_TERM = 0
-        , CLASSIC_TERM
-        , VARIABLE_TERM
-    };
+/**
+ * \brief Реализация класса операции алгебры.
+ *
+ * Операция -- это пара (r, s*), где:
+ *   r  -- тип результата.
+ *   s* -- список (может быть пустой) типов параметров.
+ */
+struct Operation {
+  /// Тип умного указателя на операцию.
+  typedef boost::shared_ptr<Operation> Ptr;
 
-    typedef TType::TTypeName        TTypeName;
-    typedef std::vector<TTypeName>  TTypeNameList;
+  /// Тип списка имен типов.
+  typedef std::vector<std::string>  TypeNameList;
 
-    ETermSort       Sort;
-    std::string     Name;
-    TTypeName       ResType;
-    TTypeNameList   ParamTypes;
+  std::string   name_;      ///< Имя Сигнатуры.
+  std::string   res_type_;  ///< Тип результата.
+  TypeNameList  params_;    ///< Типы параметров.
 
-    TTermSignature()
-        : Sort(UNKNOWN_TERM)
-    {}
+  Operation(const std::string& name, const std::string& res_type)
+    : name_(name)
+    , res_type(res_type) {
+  }
 
-    explicit TTermSignature( const std::string& name, ETermSort sort = CLASSIC_TERM )
-        : Sort(sort)
-        , Name(name)
-    {}
+  Operation(const std::string& name, const std::string& res_type, const TypeNameList& params)
+    : name_(name)
+    , res_type_(res_type)
+    , params_(params) {
+  }
 
-    TTermSignature( const std::string& name, TTypeName resType, ETermSort sort = CLASSIC_TERM )
-        : Sort(sort)
-        , Name(name)
-        , ResType(resType)
-    {}
-
-    TTermSignature( const std::string& name, TTypeName resType, const TTypeNameList& paramTypes )
-        : Sort(CLASSIC_TERM)
-        , Name(name)
-        , ResType(resType)
-        , ParamTypes(paramTypes)
-    {}
-
-    void Print( std::ostream& out )
-    {
-        switch (Sort) {
-            UNKNOWN_TERM:
-                out << "Unknown: ";
-                break;
-            CLASSIC_TERM:
-                out << "Classic: ";
-                break;
-            VARIABLE_TERM:
-                out << "Variable: ";
-                break;
-            default:
-                break;
-        }
-
-        out << ResType << " " << Name << "(";
-        bool f = true;
-        for (unsigned int i = 0; i < ParamTypes.size(); ++i) {
-            if (f) f = false;
-            else out << ", ";
-            out << ParamTypes[i];
-        }
-        out << ")\n";
+  void Print(std::ostream& out) {
+    out << res_type_ << " " << name_ << "(";
+    bool f = true;
+    for (unsigned i = 0; i < params_.size(); ++i) {
+      if (f) {
+        f = false;
+      } else {
+        out << ", ";
+      }
+      out << params_[i];
     }
+    out << ")\n";
+  }
 };
 
-} // namespace NTermAlg
-
+}} // namespace ezop, terms.
 

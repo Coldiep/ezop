@@ -6,16 +6,13 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+
+#include <map>
+
+#include <terms/type.h>
+
 namespace ezop { namespace onto {
-
-/*!
- * \brief Класс, реализующий онтологию.
- *
- *
- */
-class Ontology {
-
-};
 
 /*!
  * \brief Реализация системы управления онтологиями.
@@ -23,6 +20,17 @@ class Ontology {
  *
  */
 class OntoSystem {
+    /*!
+     * \brief Класс, реализующий онтологию.
+     *
+     *
+     */
+    struct Ontology {
+        ezop::terms::TypeSet type_set_;
+    };
+
+    typedef boost::shared_ptr<Ontology> OntoPtr;
+    typedef std::map<std::string, OntoPtr> OntoList;
 
 };
 
