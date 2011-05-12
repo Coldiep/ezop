@@ -20,17 +20,15 @@ namespace ezop { namespace onto {
  *
  */
 class OntoSystem {
-    /*!
-     * \brief Класс, реализующий онтологию.
-     *
-     *
-     */
-    struct Ontology {
-        ezop::terms::TypeSet type_set_;
-    };
+  /*!
+   * \brief Класс, реализующий онтологию.
+   */
+  struct Ontology {
+      ezop::terms::TypeSet type_set_;
+  };
 
-    typedef boost::shared_ptr<Ontology> OntoPtr;
-    typedef std::map<std::string, OntoPtr> OntoList;
+  typedef boost::shared_ptr<Ontology> OntoPtr;
+  typedef std::map<std::string, OntoPtr> OntoList;
 
 };
 
