@@ -50,6 +50,7 @@ include_directories(
 add_subdirectory(parser)
 add_subdirectory(terms)
 add_subdirectory(lexers/re-lexer)
+add_subdirectory(onto)
 
 set(NAME ezop)
 
