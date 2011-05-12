@@ -6,5 +6,5 @@ add_executable(${NAME}
 )
 
 target_link_libraries (${NAME}
-          vl-lexer
+          re-lexer
 )

@@ -60,5 +60,5 @@ add_executable(${NAME}
 target_link_libraries (${NAME}
           parser
           terms
-          vl-lexer
+          re-lexer
 )

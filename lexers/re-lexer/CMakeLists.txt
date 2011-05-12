@@ -3,7 +3,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set(NAME vl-lexer)
+set(NAME re-lexer)
 
 add_library(${NAME}
     lex.cpp
