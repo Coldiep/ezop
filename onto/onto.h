@@ -11,13 +11,13 @@
 #include <map>
 
 #include <terms/type.h>
+#include <terms/signature.h>
+#include <terms/action.h>
 
 namespace ezop { namespace onto {
 
 /*!
  * \brief Реализация системы управления онтологиями.
- *
- *
  */
 class OntoSystem {
   /*!
@@ -33,5 +33,4 @@ class OntoSystem {
 };
 
 }} // namespace ezop, onto
-
 
