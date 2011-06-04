@@ -51,6 +51,7 @@ add_subdirectory(parser)
 add_subdirectory(terms)
 add_subdirectory(lexers/re-lexer)
 add_subdirectory(onto)
+add_subdirectory(web)
 
 set(NAME ezop)
 
