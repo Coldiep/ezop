@@ -35,6 +35,7 @@ public:
     menu->addItem(Wt::WString::tr("onto-list"), new Wt::WText(Wt::WString::tr("onto-list")));
     menu->addItem(Wt::WString::tr("template-dictionary"), new Wt::WText(Wt::WString::tr("template-dictionary")));
     menu->addItem(Wt::WString::tr("template-list"), new Wt::WText(Wt::WString::tr("template-list")));
+    menu->addItem(Wt::WString::tr("onto.examples"), new Wt::WText(Wt::WString::tr("onto.examples")));
 
     new Wt::WText(Wt::WString::tr("ontologies-text"), this);
   }
@@ -101,7 +102,7 @@ public:
     AddToMenu(menu, "user-login", new UserLogin());
 
     Wt::WHBoxLayout* horiz_layout = new WHBoxLayout();
-    Wt::WVBoxLayout* vert_layout = new WVBoxLayout;
+    Wt::WVBoxLayout* vert_layout = new WVBoxLayout();
     Wt::WVBoxLayout* main_layout = new Wt::WVBoxLayout(this);
 
     main_layout->addWidget(new Wt::WText(Wt::WString::tr("sidebar-title")));

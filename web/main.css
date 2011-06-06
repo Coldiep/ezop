@@ -33,7 +33,7 @@ h1 {
     background: #308DB7 no-repeat right top;
     font-size: 1.8em;
     font-weight: 50;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     line-height: 1.8;
     padding: 5px;
     padding-left: 30px;
@@ -48,7 +48,7 @@ h1 {
     background: #308DB7 no-repeat left top;
     font-size: 120%;
     font-weight: 60;
-    letter-spacing:2px;
+    letter-spacing: 1px;
     line-height: 1.8;
     padding-left: 30px;
     margin-top: 5px;
@@ -130,7 +130,7 @@ ul.menu {
 ul.menu a {
     color: #BEBEBE;
     font-weight: 600;
-    letter-spacing:2px;
+    letter-spacing: 1px;
     text-decoration:none;
     font-size-adjust:.65;
     padding-bottom:5px;
@@ -157,7 +157,7 @@ ul.menu a:hover, ul.menu .item a:hover {
 ul.submenu {
     margin-left: 15px;
     padding-bottom: 0px;
-    width: 250;
+    width: 200;
     border-right: 3px;
 }
 
