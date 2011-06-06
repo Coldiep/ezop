@@ -5,7 +5,8 @@
 #include <Wt/WLineEdit>
 #include <Wt/WPushButton>
 #include <Wt/WText>
-
+#include <Wt/WMenu>
+#include <Wt/WStackedWidget>
 using namespace Wt;
 
 class HelloApplication : public WApplication {
@@ -21,21 +22,41 @@ private:
 
 HelloApplication::HelloApplication(const WEnvironment& env)
   : WApplication(env) {
-  setTitle("Hello world");                               // application title
 
-  root()->addWidget(new WText("Your name, please ? "));  // show some text
-  nameEdit_ = new WLineEdit(root());                     // allow text input
-  nameEdit_->setFocus();                                 // give focus
 
-  WPushButton* b = new WPushButton("Greet me.", root()); // create a button
-  b->setMargin(5, Left);                                 // add 5 pixels margin
+  setTitle("Test");
 
-  root()->addWidget(new WBreak());                       // insert a line break
-  greeting_ = new WText(root());                         // empty text
+  Wt::WContainerWidget* container = new WContainerWidget(root());
+  Wt::WStackedWidget* contents = new Wt::WStackedWidget();
+  container->addWidget(contents);
+
+  Wt::WMenu* menu = new Wt::WMenu(contents, Wt::Vertical);
+  menu->setRenderAsList(true);
+
+  menu->addItem("Item1", new Wt::WText("item1"));
+  menu->addItem("Item2", new Wt::WText("item2"));
+  menu->addItem("Item3", new Wt::WText("item3"));
+  useStyleSheet("main.css");
+  //root()->addWidget(container);
+  root()->addWidget(menu);
+
+#if 0
+ //menu->addItem("Demo", new DemoWidget());
+ //menu->addItem(new Wt::WMenuItem("Demo2", new DemoWidget()));
+  root()->addWidget(new WText("Your name, please ? "));
+  nameEdit_ = new WLineEdit(root());
+  nameEdit_->setFocus();
+
+  WPushButton* b = new WPushButton("Greet me.", root());
+  b->setMargin(5, Left);
+
+  root()->addWidget(new WBreak());
+  greeting_ = new WText(root());
 
   b->clicked().connect(this, &HelloApplication::Greet);
 
-  nameEdit_->enterPressed().connect(boost::bind(&HelloApplication::greet, this));
+  nameEdit_->enterPressed().connect(boost::bind(&HelloApplication::Greet, this));
+#endif
 }
 
 void HelloApplication::Greet() {
