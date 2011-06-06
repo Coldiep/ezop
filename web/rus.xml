@@ -13,6 +13,16 @@
     <message id="documentation">Документация</message>
     <message id="main-page">О проекте</message>
     <message id="onto.examples">Примеры</message>
+    <message id="main.news">Новости</message>
+    <message id="user.name">Имя пользователя: </message>
+    <message id="user.password">Пароль: </message>
+    <message id="user.login">Войти</message>
+    <message id="message.confirmation">Сообщение</message>
+    <message id="login.ok">Вход произведен успешно</message>
+
+    <message id="login.title">
+      <h2>Вход в систему</h2>
+    </message>
 
     <message id="documentation-text">
       <h2>Документация к системе</h2>

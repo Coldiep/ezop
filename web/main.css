@@ -118,7 +118,7 @@ h1 {
 }
 
 ul.menu {
-    font-size: 1.0em;
+    font-size: 100%;
     margin: 5px;
     padding: 3px;
     text-indent: 5px;
@@ -132,11 +132,10 @@ ul.menu a {
     font-weight: 600;
     letter-spacing: 1px;
     text-decoration:none;
-    font-size-adjust:.65;
     padding-bottom:5px;
     border-bottom: 1px dashed #528B12;
     display: block;
-    width: 270px;
+    width: 290px;
 }
 
 ul.menu .itemselected, ul.menu .itemselected a, ul.menu .itemselected a {
@@ -146,7 +145,7 @@ ul.menu .itemselected, ul.menu .itemselected a, ul.menu .itemselected a {
 ul.menu .item, ul.menu a.item, ul.menu .item a {
     color: #BEBEBE;
     text-decoration: none;
-    font-size: 1.0em;
+    font-size: 100%;
 }
 
 ul.menu a:hover, ul.menu .item a:hover {
@@ -157,7 +156,7 @@ ul.menu a:hover, ul.menu .item a:hover {
 ul.submenu {
     margin-left: 15px;
     padding-bottom: 0px;
-    width: 200;
+    width: 250;
     border-right: 3px;
 }
 

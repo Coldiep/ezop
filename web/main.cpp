@@ -10,12 +10,16 @@
 #include <Wt/WHBoxLayout>
 #include <Wt/WVBoxLayout>
 #include <Wt/WSubMenuItem>
+#include <Wt/WTable>
+#include <Wt/WLabel>
+#include <Wt/WMessageBox>
 using namespace Wt;
 
 class MenuElement : public Wt::WContainerWidget {
 public:
   virtual bool HasSubMenu() = 0;
-  virtual void PopulateMenu(WMenu *menu) = 0;
+  virtual void PopulateMenu(WMenu *menu) {
+  }
 };
 
 class OntoOperations : public MenuElement {
@@ -44,12 +48,47 @@ private:
 };
 
 class UserLogin : public MenuElement {
+public:
+  UserLogin() {
+    Wt::WVBoxLayout* vert_layout = new WVBoxLayout(this);
+
+    vert_layout->addWidget(new Wt::WText(Wt::WString::tr("login.title")), 0);
+    Wt::WTable* layout = new Wt::WTable(this);
+    vert_layout->addWidget(layout);
+
+    Wt::WLabel* username_label = new Wt::WLabel(Wt::WString::tr("user.name"), layout->elementAt(0, 0));
+    layout->elementAt(0, 0)->resize(Wt::WLength(14, Wt::WLength::FontEx), Wt::WLength::Auto);
+    username_ = new Wt::WLineEdit(layout->elementAt(0, 1));
+    username_label->setBuddy(username_);
+
+    Wt::WLabel* password_label = new Wt::WLabel(Wt::WString::tr("user.password"), layout->elementAt(1, 0));
+    password_ = new Wt::WLineEdit(layout->elementAt(1, 1));
+    password_->setEchoMode(Wt::WLineEdit::Password);
+    password_label->setBuddy(password_);
+
+    new Wt::WBreak(this);
+
+    Wt::WPushButton* login_button = new Wt::WPushButton(Wt::WString::tr("user.login"), this);
+    login_button->clicked().connect(this, &UserLogin::Check);
+    vert_layout->addWidget(login_button);
+  }
+
   bool HasSubMenu() {
     return false;
   }
 
-  void PopulateMenu(WMenu *menu) {
+private:
+  void Check() {
+    user_ = username_->text();
+    std::wstring password = password_->text();
+    username_->setText("");
+    password_->setText("");
+    Wt::WMessageBox::show(Wt::WString::tr("message.confirmation"), Wt::WString::tr("login.ok"), Wt::Ok);
   }
+
+  Wt::WLineEdit* username_;
+  Wt::WLineEdit* password_;
+  std::wstring    user_;
 };
 
 class Documentation : public MenuElement {
@@ -61,9 +100,6 @@ public:
   bool HasSubMenu() {
     return false;
   }
-
-  void PopulateMenu(WMenu *menu) {
-  }
 };
 
 class MainPage : public MenuElement {
@@ -73,10 +109,11 @@ public:
   }
 
   bool HasSubMenu() {
-    return false;
+    return true;
   }
 
   void PopulateMenu(WMenu *menu) {
+    menu->addItem(Wt::WString::tr("main.news"), new Wt::WText(Wt::WString::tr("main.news")));
   }
 };
 
