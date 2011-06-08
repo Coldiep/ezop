@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include </usr/lib64/swipl-5.11.21/include/SWI-Prolog.h>
+#include <SWI-Prolog.h>
 
 int main(int argc, char* argv[]) {
   if (not PL_initialise(argc, argv)) {
