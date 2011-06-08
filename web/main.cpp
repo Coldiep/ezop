@@ -13,7 +13,46 @@
 #include <Wt/WTable>
 #include <Wt/WLabel>
 #include <Wt/WMessageBox>
+#include <Wt/Ext/ToolBar>
+#include <Wt/Ext/Menu>
 using namespace Wt;
+
+class OntoEdit : public Wt::WContainerWidget {
+public:
+  OntoEdit() {
+#if 0
+    Wt::WVBoxLayout* layout = new WVBoxLayout(this);
+
+    Wt::Ext::ToolBar* tool_bar = new Wt::Ext::ToolBar(this);
+    layout->addWidget(tool_bar, 0);
+
+    Wt::Ext::Menu* menu = new Wt::Ext::Menu();
+    menu->addItem("build.all");
+    menu->addItem("save.draft");
+    menu->addItem("ending.safe");
+    tool_bar->addButton("current.onto", menu);
+    menu = new Wt::Ext::Menu();
+    menu->addItem("new.command");
+    tool_bar->addSeparator();
+    tool_bar->addButton("command", menu);
+
+    menu = new Wt::Ext::Menu();
+    menu->addItem("all.external.templates");
+    menu->addItem("current.onto.templates");
+    menu->addItem("cuurent.onto.and.env.templates");
+    menu->addItem("productions");
+    tool_bar->addSeparator();
+    tool_bar->addButton("dicts", menu);
+
+    menu = new Wt::Ext::Menu();
+    menu->addItem("set");
+    tool_bar->addSeparator();
+    tool_bar->addButton("messages", menu);
+
+    layout->addWidget(new Wt::WText("hello"), 1);
+#endif
+  }
+};
 
 class MenuElement : public Wt::WContainerWidget {
 public:
@@ -32,7 +71,7 @@ public:
   }
 
   void PopulateMenu(Wt::WMenu *menu) {
-    menu->addItem(Wt::WString::tr("new-ontology-in-kernel-environment"), new Wt::WText(Wt::WString::tr("new-ontology-in-kernel-environment")));
+    menu->addItem(Wt::WString::tr("new-ontology-in-kernel-environment"), new OntoEdit());
     menu->addItem(Wt::WString::tr("ontology-base"), new Wt::WText(Wt::WString::tr("ontology-base")));
     menu->addItem(Wt::WString::tr("ontology-in-environment"), new Wt::WText(Wt::WString::tr("ontology-in-environment")));
     menu->addItem(Wt::WString::tr("onto-dictionary"), new Wt::WText(Wt::WString::tr("onto-dictionary")));
@@ -55,22 +94,27 @@ public:
     vert_layout->addWidget(new Wt::WText(Wt::WString::tr("login.title")), 0);
     Wt::WTable* layout = new Wt::WTable(this);
     vert_layout->addWidget(layout);
+    layout->setStyleClass("login");
 
     Wt::WLabel* username_label = new Wt::WLabel(Wt::WString::tr("user.name"), layout->elementAt(0, 0));
-    layout->elementAt(0, 0)->resize(Wt::WLength(14, Wt::WLength::FontEx), Wt::WLength::Auto);
+    layout->elementAt(0, 0)->resize(Wt::WLength(18, Wt::WLength::FontEx), Wt::WLength::Auto);
     username_ = new Wt::WLineEdit(layout->elementAt(0, 1));
     username_label->setBuddy(username_);
+    username_->setStyleClass("label");
+    username_->setTextSize(20);
 
     Wt::WLabel* password_label = new Wt::WLabel(Wt::WString::tr("user.password"), layout->elementAt(1, 0));
     password_ = new Wt::WLineEdit(layout->elementAt(1, 1));
     password_->setEchoMode(Wt::WLineEdit::Password);
     password_label->setBuddy(password_);
+    password_->setStyleClass("label");
+    password_->setTextSize(20);
 
     new Wt::WBreak(this);
 
-    Wt::WPushButton* login_button = new Wt::WPushButton(Wt::WString::tr("user.login"), this);
+    Wt::WPushButton* login_button = new Wt::WPushButton(Wt::WString::tr("user.login"), layout->elementAt(2, 1));
     login_button->clicked().connect(this, &UserLogin::Check);
-    vert_layout->addWidget(login_button);
+    login_button->setStyleClass("label");
   }
 
   bool HasSubMenu() {
