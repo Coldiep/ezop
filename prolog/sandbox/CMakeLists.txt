@@ -15,7 +15,6 @@ find_file(SWI_LIBRARY libswipl.a
 )
 
 include_directories(${SWI_HEADER_PATH})
-message("path: ${SWI_LIBRARY}")
 
 target_link_libraries (${NAME}
           ${SWI_LIBRARY}
