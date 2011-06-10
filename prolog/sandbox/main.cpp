@@ -15,11 +15,9 @@ void Print(term_t t) {
       PL_get_chars(t, &s, CVT_ALL);
       std::cout << s;
       break;
-    case PL_STRING: {
-      PL_get_string_chars(t, &s, &len);
-      std::string res(s, len);
-      std::cout << res;
-    }
+    case PL_STRING:
+      PL_get_chars(t, &s, CVT_STRING | REP_UTF8);
+      std::cout << "\"" << s << "\"\n";
       break;
     case PL_TERM: {
       term_t a = PL_new_term_ref();
@@ -88,12 +86,22 @@ int main(int argc, char* argv[]) {
     PL_halt(1);
   }
 
-  term_t a0 = PL_new_term_refs(2);
-  predicate_t p = PL_predicate("onto_list", 1, "ezop");
-  if (qid_t qid = PL_open_query(NULL, PL_Q_NORMAL, p, a0)) {
+  term_t name = PL_new_term_refs(4);
+  predicate_t p = PL_predicate("get_onto_list", 4, "ezop");
+  if (qid_t qid = PL_open_query(NULL, PL_Q_NORMAL, p, name)) {
     while (PL_next_solution(qid)) {
-      Print(a0);
-      std::cout << "\n";
+      char* s = NULL;
+      PL_get_chars(name, &s, CVT_STRING | REP_UTF8);
+      std::cout << "name: \"" << s << "\"\n";
+
+      PL_get_chars(name + 1, &s, CVT_STRING | REP_UTF8);
+      std::cout << "id: \"" << s << "\"\n";
+
+      PL_get_chars(name + 2, &s, CVT_STRING | REP_UTF8);
+      std::cout << "parent id: \"" << s << "\"\n";
+
+      PL_get_chars(name + 3, &s, CVT_STRING | REP_UTF8);
+      std::cout << "content: \"" << s << "\"\n";
     }
   }
 

@@ -1,7 +1,8 @@
 
 % Библиотечный модуль проекта ЭЗОП.
-:- module(ezop,[onto_list/1]).
+:- module(ezop,[get_onto_list/4]).
 
+:- encoding(utf8).
 :- style_check(+string).
 :- set_prolog_flag(double_quotes, string).
 
@@ -22,11 +23,10 @@
 %:- use_module(tests).
 
 % Возвращает список онтологий системы.
-onto_list(Name) :-
+get_onto_list(Name, Id, Parent, Content) :-
   style_check(+string),
   set_prolog_flag(double_quotes, string),
   set_prolog_flag(encoding, utf8),
   consult("base/onto.ezp"),
-  name_file(Name, _, _, _).
-
+  name_file(Name, Id, Parent, Content).
 

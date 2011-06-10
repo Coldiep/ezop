@@ -17,6 +17,9 @@
 #include <Wt/Ext/Menu>
 using namespace Wt;
 
+#include <prolog/ezop-proxy.h>
+
+
 class OntoEdit : public Wt::WContainerWidget {
 public:
   OntoEdit() {
