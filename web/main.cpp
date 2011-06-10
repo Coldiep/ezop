@@ -19,7 +19,6 @@ using namespace Wt;
 
 #include <prolog/ezop-proxy.h>
 
-
 class OntoEdit : public Wt::WContainerWidget {
 public:
   OntoEdit() {
@@ -64,6 +63,28 @@ public:
   }
 };
 
+class OntoList : public  Wt::WContainerWidget {
+public:
+  OntoList() {
+    ezop::EzopProxy ezop_proxy("/home/mefrill/dev/git/ezop/prolog");
+    ezop::EzopProxy::OntoInfoList list;
+    ezop_proxy.GetOntoList(list);
+    std::stringstream table;
+    table << "<table>";
+    for (ezop::EzopProxy::OntoInfoList::iterator it = list.begin(); it != list.end(); ++it) {
+      table << "<tr>"
+            << "<td>" << it->name_ << "</td>"
+            << "</tr>";
+    }
+    table << "</table>";
+
+    Wt::WString str;
+    Wt::WVBoxLayout* vert_layout = new WVBoxLayout(this);
+    vert_layout->addWidget(new Wt::WText(Wt::WString::tr("onto-list-text")), 0);
+    vert_layout->addWidget(new Wt::WText(Wt::WString::fromUTF8(table.str().c_str())), 1);
+  }
+};
+
 class OntoOperations : public MenuElement {
 public:
   OntoOperations() {
@@ -78,7 +99,7 @@ public:
     menu->addItem(Wt::WString::tr("ontology-base"), new Wt::WText(Wt::WString::tr("ontology-base")));
     menu->addItem(Wt::WString::tr("ontology-in-environment"), new Wt::WText(Wt::WString::tr("ontology-in-environment")));
     menu->addItem(Wt::WString::tr("onto-dictionary"), new Wt::WText(Wt::WString::tr("onto-dictionary")));
-    menu->addItem(Wt::WString::tr("onto-list"), new Wt::WText(Wt::WString::tr("onto-list")));
+    menu->addItem(Wt::WString::tr("onto-list"), new OntoList());
     menu->addItem(Wt::WString::tr("template-dictionary"), new Wt::WText(Wt::WString::tr("template-dictionary")));
     menu->addItem(Wt::WString::tr("template-list"), new Wt::WText(Wt::WString::tr("template-list")));
     menu->addItem(Wt::WString::tr("onto.examples"), new Wt::WText(Wt::WString::tr("onto.examples")));
@@ -238,6 +259,10 @@ WApplication* createApplication(const WEnvironment& env) {
 }
 
 int main(int argc, char** argv) {
-  return WRun(argc, argv, &createApplication);
+  try {
+    return WRun(argc, argv, &createApplication);
+  } catch (const std::exception& err) {
+    std::cerr << err.what() << "\n";
+  }
 }
 

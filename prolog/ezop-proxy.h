@@ -6,28 +6,18 @@
 namespace ezop {
 
 /// Класс для взаимодействия с сервером ЭЗОП.
-class EzopProxy : public boost::noncopyable {
-
-
-public:
+struct EzopProxy : public boost::noncopyable {
   /**
    * \brief Инициализация "движка" SWI Prolog.
    *
    * \param path Путь к директории, где расположены данные и код ЭЗОП.
    */
-  EzopProxy(const std::string& path) {
-    int argc = 2;
-    std::string param = "-s " + path + "/ezop.pl";
-    const char* argv[] = {"ezop-proxy", param.c_str()};
-    if (not PL_initialise(argc, (char**)argv)) {
-      PL_halt(1);
-      throw std::invalid_argument("Cannot initialize Prolog engine");
-    }
+  EzopProxy(const std::string& path)
+    : path_(path) {
   }
 
   /// Корректно завершаем работу сервера Пролога.
   ~EzopProxy() {
-    PL_halt(0);
   }
 
   // ***************  Объявление API системы ЭЗОП ********************
@@ -44,6 +34,18 @@ public:
 
   /// Получить список онтологий.
   void GetOntoList(OntoInfoList& list) {
+    char* argv[10];
+    int argc = 0;
+
+    std::string param = path_ + "/ezop.pl";
+    argv[argc++] = "ezop-proxy";
+    argv[argc++] = "-s";
+    argv[argc++] = (char*)param.c_str();
+    argv[argc]   = NULL;
+    if (not PL_initialise(argc, (char**)argv)) {
+      PL_halt(1);
+      throw std::invalid_argument("Cannot initialize Prolog engine");
+    }
     term_t t = PL_new_term_refs(4);
     predicate_t p = PL_predicate("get_onto_list", 4, "ezop");
     if (qid_t qid = PL_open_query(NULL, PL_Q_NORMAL, p, t)) {
@@ -66,6 +68,9 @@ public:
       }
     }
   }
+
+private:
+  std::string path_;
 };
 
 }  // namespace ezop.

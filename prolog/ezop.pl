@@ -27,6 +27,6 @@ get_onto_list(Name, Id, Parent, Content) :-
   style_check(+string),
   set_prolog_flag(double_quotes, string),
   set_prolog_flag(encoding, utf8),
-  consult("base/onto.ezp"),
+  consult("/home/mefrill/dev/git/ezop/prolog/base/onto.ezp"),
   name_file(Name, Id, Parent, Content).
 

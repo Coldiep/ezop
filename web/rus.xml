@@ -20,6 +20,10 @@
     <message id="message.confirmation">Сообщение</message>
     <message id="login.ok">Вход произведен успешно</message>
 
+    <message id="onto-list-text">
+       <h2>Список онтологий</h2>
+    </message>
+
     <message id="login.title">
       <h2>Вход в систему</h2>
     </message>
