@@ -42,8 +42,9 @@ struct EzopProxy : public boost::noncopyable {
     argv[argc++] = "-s";
     argv[argc++] = (char*)param.c_str();
     argv[argc]   = NULL;
+    putenv("SWI_HOME_DIR=/usr/lib/swi-prolog");
     if (not PL_initialise(argc, (char**)argv)) {
-      PL_halt(1);
+      //PL_halt(1);
       throw std::invalid_argument("Cannot initialize Prolog engine");
     }
     term_t t = PL_new_term_refs(4);
