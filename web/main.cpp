@@ -12,6 +12,7 @@
 #include <Wt/WSubMenuItem>
 #include <Wt/WTable>
 #include <Wt/WLabel>
+#include <Wt/WAnchor>
 #include <Wt/WMessageBox>
 #include <Wt/Ext/ToolBar>
 #include <Wt/Ext/Menu>
@@ -64,25 +65,46 @@ public:
 };
 
 class OntoList : public  Wt::WContainerWidget {
+  typedef std::map<std::string, ezop::EzopProxy::OntoInfo> OntoMap;
 public:
-  OntoList() {
+  explicit OntoList(Wt::WMenu* menu) {
+    menu->itemSelected().connect(this, &OntoList::DisplayOntoList);
     ezop::EzopProxy ezop_proxy("/home/mefrill/dev/git/ezop/prolog");
     ezop::EzopProxy::OntoInfoList list;
     ezop_proxy.GetOntoList(list);
-    std::stringstream table;
-    table << "<table>";
     for (ezop::EzopProxy::OntoInfoList::iterator it = list.begin(); it != list.end(); ++it) {
-      table << "<tr>"
-            << "<td>" << it->name_ << "</td>"
-            << "</tr>";
+      onto_list_[it->id_] = *it;
     }
-    table << "</table>";
+  }
 
-    Wt::WString str;
+  void DisplayOntoList() {
+    clear();
     Wt::WVBoxLayout* vert_layout = new WVBoxLayout(this);
     vert_layout->addWidget(new Wt::WText(Wt::WString::tr("onto-list-text")), 0);
-    vert_layout->addWidget(new Wt::WText(Wt::WString::fromUTF8(table.str().c_str())), 1);
+    for (OntoMap::iterator it = onto_list_.begin(); it != onto_list_.end(); ++it) {
+      Wt::WAnchor* a = new Wt::WAnchor("", Wt::WString::fromUTF8(it->second.name_.c_str()), this);
+      a->setRefInternalPath("/onto/" + it->second.id_);
+      WApplication::instance()->internalPathChanged().connect(this, &OntoList::OntoPathChange);
+      vert_layout->addWidget(a, 1);
+    }
   }
+
+  void DisplayOntoContent(const std::string& onto_id) {
+    std::map<std::string, ezop::EzopProxy::OntoInfo>::iterator it = onto_list_.find(onto_id);
+    if (it != onto_list_.end()) {
+      clear();
+      new Wt::WText(Wt::WString::fromUTF8(it->second.content_.c_str()), this);
+    }
+  }
+
+  void OntoPathChange(const std::string& path) {
+    std::string id = WApplication::instance()->internalPathNextPart("/onto/");
+    if (not id.empty()) {
+        DisplayOntoContent(id);
+    }
+  }
+
+  OntoMap onto_list_;
 };
 
 class OntoOperations : public MenuElement {
@@ -99,7 +121,7 @@ public:
     menu->addItem(Wt::WString::tr("ontology-base"), new Wt::WText(Wt::WString::tr("ontology-base")));
     menu->addItem(Wt::WString::tr("ontology-in-environment"), new Wt::WText(Wt::WString::tr("ontology-in-environment")));
     menu->addItem(Wt::WString::tr("onto-dictionary"), new Wt::WText(Wt::WString::tr("onto-dictionary")));
-    menu->addItem(Wt::WString::tr("onto-list"), new OntoList());
+    menu->addItem(Wt::WString::tr("onto-list"), new OntoList(menu));
     menu->addItem(Wt::WString::tr("template-dictionary"), new Wt::WText(Wt::WString::tr("template-dictionary")));
     menu->addItem(Wt::WString::tr("template-list"), new Wt::WText(Wt::WString::tr("template-list")));
     menu->addItem(Wt::WString::tr("onto.examples"), new Wt::WText(Wt::WString::tr("onto.examples")));
@@ -116,8 +138,8 @@ public:
     Wt::WVBoxLayout* vert_layout = new WVBoxLayout(this);
 
     vert_layout->addWidget(new Wt::WText(Wt::WString::tr("login.title")), 0);
-    Wt::WTable* layout = new Wt::WTable(this);
-    vert_layout->addWidget(layout);
+    Wt::WTable* layout = new Wt::WTable();
+    vert_layout->addWidget(layout, 0);
     layout->setStyleClass("login");
 
     Wt::WLabel* username_label = new Wt::WLabel(Wt::WString::tr("user.name"), layout->elementAt(0, 0));
