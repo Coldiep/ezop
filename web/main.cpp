@@ -69,6 +69,7 @@ class OntoList : public  Wt::WContainerWidget {
 public:
   explicit OntoList(Wt::WMenu* menu) {
     menu->itemSelected().connect(this, &OntoList::DisplayOntoList);
+    WApplication::instance()->internalPathChanged().connect(this, &OntoList::OntoPathChange);
     ezop::EzopProxy ezop_proxy("/home/mefrill/dev/git/ezop/prolog");
     ezop::EzopProxy::OntoInfoList list;
     ezop_proxy.GetOntoList(list);
@@ -79,13 +80,12 @@ public:
 
   void DisplayOntoList() {
     clear();
-    Wt::WVBoxLayout* vert_layout = new WVBoxLayout(this);
-    vert_layout->addWidget(new Wt::WText(Wt::WString::tr("onto-list-text")), 0);
+    addWidget(new Wt::WText(Wt::WString::tr("onto-list-text"), this));
     for (OntoMap::iterator it = onto_list_.begin(); it != onto_list_.end(); ++it) {
       Wt::WAnchor* a = new Wt::WAnchor("", Wt::WString::fromUTF8(it->second.name_.c_str()), this);
-      a->setRefInternalPath("/onto/" + it->second.id_);
-      WApplication::instance()->internalPathChanged().connect(this, &OntoList::OntoPathChange);
-      vert_layout->addWidget(a, 1);
+      a->setRefInternalPath("/ontos/" + it->second.id_);
+      addWidget(new Wt::WBreak(this));
+      addWidget(a);
     }
   }
 
@@ -93,12 +93,15 @@ public:
     std::map<std::string, ezop::EzopProxy::OntoInfo>::iterator it = onto_list_.find(onto_id);
     if (it != onto_list_.end()) {
       clear();
-      new Wt::WText(Wt::WString::fromUTF8(it->second.content_.c_str()), this);
+      addWidget(new Wt::WText(Wt::WString::fromUTF8("<h2>Онтология \"" + it->second.name_ + "\"</h2>"), this));
+      addWidget(new Wt::WBreak(this));
+      addWidget(new Wt::WText(Wt::WString::fromUTF8(it->second.content_.c_str()), Wt::PlainText, this));
     }
   }
 
   void OntoPathChange(const std::string& path) {
-    std::string id = WApplication::instance()->internalPathNextPart("/onto/");
+      clear();
+    std::string id = WApplication::instance()->internalPathNextPart("/ontos/");
     if (not id.empty()) {
         DisplayOntoContent(id);
     }
