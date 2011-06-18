@@ -28,7 +28,7 @@ h1 {
     display: block;
 }
 
-.contents h2 {
+.content h2 {
     background: #308DB7 no-repeat left top;
     font-size: 120%;
     font-weight: 60;
@@ -41,11 +41,11 @@ h1 {
     height: 30px;
 }
 
-.contents h2 span {
+.content h2 span {
     border-bottom: 0.2em solid #000;
 }
 
-.contents h3 {
+.content h3 {
     font-size: 100%;
     font-weight: bold;
     color: #528B12;

@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
   <messages>
+    <message id="ezop-menu">Проект ЭЗОП</message>
+    <message id="projects-menu">Проекты</message>
+    <message id="login-menu">Управление пользователями</message>
+    <message id="ezop-menu-morda">О проекте</message>
+    <message id="ezop-menu-docs">Документация</message>
+    <message id="ezop-menu-news">Новости</message>
+    <message id="projects-menu-list">Список проектов</message>
+    <message id="projects-menu-mine">Мои проекты</message>
+    <message id="projects-menu-create">Создание нового проекта</message>
+    <message id="login-menu-login">Вход в систему</message>
+    <message id="login-menu-registration">Регистрация в системе</message>
+
     <message id="new-ontology-in-kernel-environment">Онтология в среде ядра</message>
     <message id="ontology-base">База онтологий</message>
     <message id="ontology-in-environment">Онтология в среде</message>
