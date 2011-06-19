@@ -6,6 +6,7 @@
 
 #include <web/menu_element.h>
 #include <web/login.h>
+#include <web/registration.h>
 
 namespace ezop { namespace web {
 
@@ -24,7 +25,7 @@ public:
    */
   virtual void CreateSubMenu(Wt::WMenu* parent_menu) {
     parent_menu->addItem(Wt::WString::tr("login-menu-login"), new Login());
-    parent_menu->addItem(Wt::WString::tr("login-menu-registration"), new Wt::WText(Wt::WString::fromUTF8("login-menu-registration")));
+    parent_menu->addItem(Wt::WString::tr("login-menu-registration"), new Registration());
   }
 };
 

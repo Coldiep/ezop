@@ -11,6 +11,12 @@
     <message id="projects-menu-create">Создание нового проекта</message>
     <message id="login-menu-login">Вход в систему</message>
     <message id="login-menu-registration">Регистрация в системе</message>
+    <message id="registration.first">Имя</message>
+    <message id="registration.second">Фамилия</message>
+    <message id="registration.email">Электронная почта</message>
+    <message id="registration.nick">Идентификатор</message>
+    <message id="registration.password">Пароль</message>
+    <message id="registration.push">Зарегистрироваться</message>
 
     <message id="new-ontology-in-kernel-environment">Онтология в среде ядра</message>
     <message id="ontology-base">База онтологий</message>
@@ -31,6 +37,10 @@
     <message id="user.login">Войти</message>
     <message id="message.confirmation">Сообщение</message>
     <message id="login.ok">Вход произведен успешно</message>
+
+    <message id="registration.title">
+       <h2>Регистрация нового пользователя</h2>
+    </message>
 
     <message id="onto-list-text">
        <h2>Список онтологий</h2>
