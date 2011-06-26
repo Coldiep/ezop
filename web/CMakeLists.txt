@@ -3,11 +3,12 @@ set(NAME ezop.wt)
 
 add_executable(${NAME}
     ezop.cpp
-    ezop.h
-    menu_element.h
-    ezop_menu.h
-    projects_menu.h
-    login_menu.h
+    ezop_widget.cpp
+    ezop_menu.cpp
+    projects_menu.cpp
+    login_menu.cpp
+    login.cpp
+    registration.cpp
 )
 
 find_library(WT_LIBRARY wt)

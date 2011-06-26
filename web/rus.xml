@@ -37,6 +37,7 @@
     <message id="user.login">Войти</message>
     <message id="message.confirmation">Сообщение</message>
     <message id="login.ok">Вход произведен успешно</message>
+    <message id="user.anonimus">Аноноимный</message>
 
     <message id="registration.title">
        <h2>Регистрация нового пользователя</h2>

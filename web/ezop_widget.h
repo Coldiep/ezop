@@ -1,26 +1,36 @@
 
 #pragma once
 
-#include <Wt/WApplication>
+#include <string>
 
-#include <web/ezop_widget.h>
+#include <Wt/WContainerWidget>
+#include <Wt/WMenu>
+#include <Wt/WStackedWidget>
+
+#include <web/menu_element.h>
 
 namespace ezop { namespace web {
 
 /// Абстрактный класс для всех элементов главного меню.
 
 /// Главный класс Web приложения.
-class EzopApplication : public Wt::WApplication {
+class EzopWidget : public Wt::WContainerWidget {
 public:
   /// В конструкторе создается главное меню проекта.
-  explicit EzopApplication(const Wt::WEnvironment& env);
+  EzopWidget();
 
   /// Установка текущего имени пользователя.
   void SetUserName(const std::string& name);
 
 private:
-  /// Указатель на класс главного виджета приложения.
-  EzopWidget* ezop_widget_;
+  /// Добавления элемента меню.
+  void AddToMenu(Wt::WMenu* menu, const std::string& name, MenuElement* element);
+
+  /// Имя текущего пользователя.
+  std::string user_name_;
+
+  /// Содержимое.
+  Wt::WStackedWidget* content_;
 };
 
 }}  // namespace ezop, web.
