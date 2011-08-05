@@ -18,12 +18,14 @@ find_library(WT_EXT_LIBRARY wtext)
 find_path(SWI_HEADER_PATH SWI-Prolog.h
          PATHS /usr/lib/swipl-5.11.21/include
                /usr/lib/swipl-5.11.22/include
+               /usr/lib/swipl-5.11.25/include
                /usr/lib/swi-prolog/include
 )
 
 find_file(SWI_LIBRARY libswipl.a
          PATHS /usr/lib/swipl-5.11.21/lib/
                /usr/lib/swipl-5.11.22/lib/
+               /usr/lib/swipl-5.11.25/lib/
                /usr/lib/swi-prolog/lib
          PATH_SUFFIXES amd64 x86_64-linux
 )
