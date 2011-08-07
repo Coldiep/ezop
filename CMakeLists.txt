@@ -51,7 +51,7 @@ add_subdirectory(parser)
 add_subdirectory(terms)
 add_subdirectory(lexers/re-lexer)
 add_subdirectory(onto)
-add_subdirectory(web)
+add_subdirectory(web/site)
 add_subdirectory(prolog/sandbox)
 
 set(NAME ezop)
