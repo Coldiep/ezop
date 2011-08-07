@@ -10,10 +10,9 @@
 #include <Wt/WLineEdit>
 #include <Wt/WMessageBox>
 #include <Wt/WStringUtil>
+#include <Wt/Dbo/backend/Sqlite3>
 
 #include <stdexcept>
-
-#include <sqlite3.h>
 
 #include <web/login.h>
 using ezop::web::Login;
@@ -91,6 +90,11 @@ void Login::Check() {
     }
     std::string id = Wt::toUTF8(username);
     std::string pwd = Wt::toUTF8(password);
+
+    Wt::Dbo::backend::Sqlite3 connection(app->appRoot() + "/ezop.db");
+    Wt::Dbo::Session session;
+    session.setConnection(connection);
+    session.execute("select id, password from users where id='" + id + "'");
 
     sqlite3* db = NULL;
     Wt::WApplication* app = Wt::WApplication::instance();
