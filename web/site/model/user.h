@@ -35,7 +35,10 @@ public:
   std::string GenerateToken();
 
   /// Получить проекты, собственниками которых является пользователь.
-  Projects GetProjects();
+  Projects GetOwns();
+
+  /// Получить проекты, в является пользователь является участником.
+  Projects GetParts();
 
   /// Получить онтологии, автором которых является пользователь.
   Ontologies GetOntologies();
@@ -47,15 +50,18 @@ public:
     Wt::Dbo::field(a, role_,     "role");
     Wt::Dbo::field(a, token_,    "token");
 
-    Wt::Dbo::hasMany(a, projects_,   Wt::Dbo::ManyToOne,  "owner");
-    Wt::Dbo::hasMany(a, ontologies_, Wt::Dbo::ManyToOne,  "author");
+    Wt::Dbo::hasMany(a, owns_,        Wt::Dbo::ManyToOne,  "owner");
+    Wt::Dbo::hasMany(a, ontologies_,  Wt::Dbo::ManyToOne,  "author");
+
+    Wt::Dbo::hasMany(a, parts_,       Wt::Dbo::ManyToMany, "participant");
   }
 
   std::string password_;    ///< Пароль, зашифрованный MD5.
   std::string token_;       ///< Уникальная строка, используемая в куках.
   Wt::WString name_;        ///< Имя пользователя.
   Role        role_;        ///< Роль пользователя в системе.
-  Projects    projects_;    ///< Проекты, собственником которых пользователь является.
+  Projects    owns_;        ///< Проекты, собственником которых пользователь является.
+  Projects    parts_;       ///< Проекты, собственником которых пользователь является.
   Ontologies  ontologies_;  ///< Онтологии, автором которых является пользователь.
 };
 

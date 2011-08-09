@@ -24,8 +24,12 @@ std::string User::GenerateToken() {
   return token_;
 }
 
-Projects User::GetProjects() {
-  return projects_.find().where("owner = ?").bind(name_).orderBy("date desc");
+Projects User::GetOwns() {
+  return owns_.find().where("owner = ?").bind(name_).orderBy("date desc");
+}
+
+Projects User::GetParts() {
+  return parts_.find().where("participant = ?").bind(name_).orderBy("date desc");
 }
 
 Ontologies User::GetOntologies() {

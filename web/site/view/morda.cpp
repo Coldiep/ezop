@@ -44,14 +44,14 @@ public:
     , invalid_user_(NULL) {
 
     Wt::WApplication* app = wApp;
-    app->messageResourceBundle().use(Wt::WApplication::appRoot() + "site");
-    app->useStyleSheet("/css/blog.css");
+    app->messageResourceBundle().use(Wt::WApplication::appRoot() + "ezop");
+    app->useStyleSheet("/css/ezop.css");
     //app->internalPathChanged().connect(this, &Site::HandlePathChange);
     login_ = new Wt::WTemplate(this);
     panel_ = new Wt::WStackedWidget(this);
     items_ = new Wt::WContainerWidget(this);
 
-    //Init();
+    Init();
 
     std::string token;
     try {
@@ -92,75 +92,72 @@ public:
   Wt::WTemplate*        must_be_administrator_warning_;
   Wt::WTemplate*        invalid_user_;
   Wt::WContainerWidget* items_;
-};
-}} // namespace ezop, web.
-#if 0
+
   void Logout() {
-    if (boost::starts_with(wApp->internalPath(), basePath_ + "author/")) {
-      wApp->setInternalPath(basePath_, true);
+    if (boost::starts_with(wApp->internalPath(), base_path_ + "user/")) {
+      wApp->setInternalPath(base_path_, true);
     }
 
     wApp->setCookie("sitelogin", "", 0);
-    morda_->UserChanged().emit(WString::Empty);
+    morda_->UserChanged().emit(Wt::WString::Empty);
 
     Init();
   }
 
   void Init() {
     session_.SetUser(Wt::Dbo::ptr<User>());
-    refresh();
+    Refresh();
     panel_->hide();
 
     login_->clear();
     login_->setTemplateText(tr("ezop-login"));
 
-    WCheckBox* remember_me = new WCheckBox(tr("remember-me"));
-    WLineEdit* name = new WLineEdit();
+    Wt::WCheckBox* remember_me = new Wt::WCheckBox(tr("remember-me"));
+    Wt::WLineEdit* name = new Wt::WLineEdit();
     name->setEmptyText("login");
     name->setToolTip("login");
-    WLineEdit* passwd = new WLineEdit();
+    Wt::WLineEdit* passwd = new Wt::WLineEdit();
     passwd->setEmptyText("password");
     passwd->setToolTip("password");
-    WPushButton* login_button = new WPushButton(tr("login"));
+    Wt::WPushButton* login_button = new Wt::WPushButton(tr("login"));
 
-    passwd->setEchoMode(WLineEdit::Password);
+    passwd->setEchoMode(Wt::WLineEdit::Password);
     passwd->enterPressed().connect(this, &Site::Login);
-    loginButton->clicked().connect(this, &Site::Login);
+    login_button->clicked().connect(this, &Site::Login);
 
     remember_me->hide();
     name->hide();
     passwd->hide();
-    loginButton->hide();
+    login_button->hide();
 
-    WText* login_link = new WText(tr("login"));
+    Wt::WText* login_link = new Wt::WText(tr("login"));
     login_link->setStyleClass("link");
 
-    login_link->clicked().connect(remember_me, &WWidget::show);
-    login_link->clicked().connect(name, &WWidget::show);
-    login_link->clicked().connect(passwd, &WWidget::show);
-    login_link->clicked().connect(loginButton, &WWidget::show);
-    login_link->clicked().connect(loginLink, &WWidget::hide);
-    login_link->clicked().connect(name, &WFormWidget::setFocus);
+    login_link->clicked().connect(remember_me, &Wt::WWidget::show);
+    login_link->clicked().connect(name, &Wt::WWidget::show);
+    login_link->clicked().connect(passwd, &Wt::WWidget::show);
+    login_link->clicked().connect(login_button, &Wt::WWidget::show);
+    login_link->clicked().connect(login_link, &Wt::WWidget::hide);
+    login_link->clicked().connect(name, &Wt::WFormWidget::setFocus);
 
-    WText* register_link = new WText(tr("register"));
+    Wt::WText* register_link = new Wt::WText(tr("register"));
     register_link->setStyleClass("link");
     register_link->clicked().connect(this, &Site::NewUser);
 
-    login_->bindWidget("rememberMe", rememberMe);
+    login_->bindWidget("remember-me", remember_me);
     login_->bindWidget("name", name);
     login_->bindWidget("passwd", passwd);
-    login_->bindWidget("login-button", loginButton);
-    login_->bindWidget("login-link", loginLink);
-    login_->bindWidget("register-link", registerLink);
-    login_->bindString("feed-url", rssFeedUrl_);
+    login_->bindWidget("login-button", login_button);
+    login_->bindWidget("login-link", login_link);
+    login_->bindWidget("register-link", register_link);
 
-    login_->bindWidget("archive-link", createArchiveLink());
+    //login_->bindWidget("archive-link", createArchiveLink());
   }
 
   void Login() {
-    WLineEdit* name = login_->resolve<WLineEdit*>("name");
-    WLineEdit* passwd = login_->resolve<WLineEdit*>("passwd");
-    WCheckBox* rememberMe = login_->resolve<WCheckBox*>("remember_me");
+    Wt::WLineEdit* name = login_->resolve<Wt::WLineEdit*>("name");
+    Wt::WLineEdit* passwd = login_->resolve<Wt::WLineEdit*>("passwd");
+    Wt::WCheckBox* remember_me = login_->resolve<Wt::WCheckBox*>("remember_me");
 
     Wt::Dbo::Transaction t(session_);
 
@@ -170,7 +167,7 @@ public:
       if (user->Authenticate(passwd->text().toUTF8())) {
         if (remember_me->isChecked()) {
           std::string token = user.modify()->GenerateToken();
-          WApplication* app = wApp;
+          Wt::WApplication* app = wApp;
           app->setCookie("ezoplogin", token, 60*60*24*14);
         }
         LoginAs(user);
@@ -184,26 +181,25 @@ public:
 
     t.commit();
   }
-};
 
   void LoginAs(Wt::Dbo::ptr<User> user) {
     session_.SetUser(user);
 
-    WApplication::instance()->changeSessionId();
+    //Wt::WApplication::instance()->changeSessionId();
     morda_->UserChanged().emit(user->name_);
 
-    refresh();
+    Refresh();
     login_->clear();
     login_->setTemplateText(tr("ezop-logout"));
 
-    cancelRegister();
+    CancelRegister();
 
-    WText *profileLink = new WText(tr("profile"));
-    profileLink->setStyleClass("link");
-    profileLink->clicked().connect(this, &BlogImpl::editProfile);
-
+    Wt::WText* profile_link = new Wt::WText(tr("profile"));
+    profile_link->setStyleClass("link");
+    //profileLink->clicked().connect(this, &BlogImpl::editProfile);
+#if 0
     if (user->role == User::Admin) {
-      WText *editUsersLink = new WText(tr("edit-users"));
+      WText* editUsersLink = new WText(tr("edit-users"));
       editUsersLink->setStyleClass("link");
       editUsersLink->clicked().connect(SLOT(this, BlogImpl::editUsers));
       login_->bindWidget("userlist-link", editUsersLink);
@@ -228,26 +224,27 @@ public:
     login_->bindWidget("archive-link", createArchiveLink());
 
     bindPanelTemplates();
+#endif
   }
 
   void NewUser() {
     if (not register_) {
-      register_ = new WTemplate();
+      register_ = new Wt::WTemplate();
       insertWidget(1, register_);
       register_->setTemplateText(tr("blog-register"));
 
-      WLineEdit* name = new WLineEdit();
-      WLineEdit* passwd = new WLineEdit();
-      WLineEdit* passwd2 = new WLineEdit();
-      WPushButton* ok_button = new WPushButton(tr("register"));
-      WPushButton* cancel_button = new WPushButton(tr("cancel"));
-      WText* error = new WText();
+      Wt::WLineEdit* name = new Wt::WLineEdit();
+      Wt::WLineEdit* passwd = new Wt::WLineEdit();
+      Wt::WLineEdit* passwd2 = new Wt::WLineEdit();
+      Wt::WPushButton* ok_button = new Wt::WPushButton(tr("register"));
+      Wt::WPushButton* cancel_button = new Wt::WPushButton(tr("cancel"));
+      Wt::WText* error = new Wt::WText();
 
-      passwd->setEchoMode(WLineEdit::Password);
-      passwd2->setEchoMode(WLineEdit::Password);
+      passwd->setEchoMode(Wt::WLineEdit::Password);
+      passwd2->setEchoMode(Wt::WLineEdit::Password);
 
-      ok_button->clicked().connect(this, &Site::doRegister);
-      cancel_button->clicked().connect(this, &Site::cancelRegister);
+      //ok_button->clicked().connect(this, &Site::DoRegister);
+      cancel_button->clicked().connect(this, &Site::CancelRegister);
 
       register_->bindWidget("name", name);
       register_->bindWidget("passwd", passwd);
@@ -257,6 +254,18 @@ public:
       register_->bindWidget("error", error);
     }
   }
+
+  void CancelRegister() {
+    delete register_;
+    register_ = 0;
+  }
+
+  void Refresh() {
+    //handlePathChange(wApp->internalPath());
+  }
+};
+}} // namespace ezop, web.
+#if 0
 
   void bindPanelTemplates() {
     if (!session_.user()) return;
@@ -394,15 +403,6 @@ public:
 
       loginAs(user);
     }
-  }
-
-  void cancelRegister() {
-    delete register_;
-    register_ = 0;
-  }
-
-  void refresh() {
-    handlePathChange(wApp->internalPath());
   }
 
   void handlePathChange(const std::string& path) {

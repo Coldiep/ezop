@@ -20,7 +20,7 @@ public:
     Wt::Dbo::field(a, text_,   "text");
     Wt::Dbo::field(a, date_,   "date");
 
-    Wt::Dbo::belongsTo(a, author_, "author");
+    Wt::Dbo::belongsTo(a, author_,  "author");
     Wt::Dbo::belongsTo(a, project_, "project");
   }
 
@@ -29,7 +29,7 @@ private:
   std::string             desc_;       ///< Описание.
   std::string             text_;       ///< Текст онтологии.
   Wt::Dbo::ptr<User>      author_;     ///< Автор онтологии.
-  Wt::Dbo::ptr<Project>   project_;     ///< Автор онтологии.
+  Wt::Dbo::ptr<Project>   project_;    ///< Автор онтологии.
   Wt::WDateTime           date_;       ///< Дата создания онтологии.
 };
 

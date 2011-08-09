@@ -14,6 +14,9 @@ class Ontology;
 /// Онтологии, входящие в проект.
 typedef Wt::Dbo::collection<Wt::Dbo::ptr<Ontology> > Ontologies;
 
+/// Участники проекта.
+typedef Wt::Dbo::collection<Wt::Dbo::ptr<User> > Users;
+
 /// Класс проекта.
 class Project {
 public:
@@ -28,15 +31,17 @@ public:
     Wt::Dbo::field(a, date_,  "date");
 
     Wt::Dbo::belongsTo(a, owner_, "owner");
-    Wt::Dbo::hasMany(a, ontologies_, Wt::Dbo::ManyToOne,  "project");
+    Wt::Dbo::hasMany(a, ontologies_,    Wt::Dbo::ManyToOne,  "ontology");
+    Wt::Dbo::hasMany(a, participants_,  Wt::Dbo::ManyToMany, "participant");
   }
 
 private:
-  Wt::WString         name_;       ///< Имя ппроекта.
-  std::string         desc_;       ///< Описание проекта.
-  Wt::Dbo::ptr<User>  owner_;      ///< Собственник проекта.
-  Wt::WDateTime       date_;       ///< Дата создания проекта.
-  Ontologies          ontologies_; ///< Онтологии, входящие в проект.
+  Wt::WString         name_;          ///< Имя проекта.
+  std::string         desc_;          ///< Описание проекта.
+  Wt::WDateTime       date_;          ///< Дата создания проекта.
+  Wt::Dbo::ptr<User>  owner_;         ///< Собственник проекта.
+  Users               participants_;  ///< Участники проекта.
+  Ontologies          ontologies_;    ///< Онтологии, входящие в проект.
 };
 
 }}  // namespace ezop, web.
