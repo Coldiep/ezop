@@ -1,4 +1,5 @@
 
+#include <Wt/WApplication>
 #include <Wt/WHBoxLayout>
 #include <Wt/WVBoxLayout>
 #include <Wt/WSubMenuItem>
@@ -12,7 +13,8 @@ using ezop::web::EzopWidget;
 
 EzopWidget::EzopWidget()
   : user_name_("user.anonimus")
-  , content_(new Wt::WStackedWidget()) {
+  , content_(new Wt::WStackedWidget())
+  , session_(Wt::WApplication::appRoot() + "/ezop.db") {
 
   // Инициализируем содержимое.
   content_->setOverflow(Wt::WContainerWidget::OverflowAuto);
@@ -68,7 +70,7 @@ void EzopWidget::AddToMenu(Wt::WMenu* menu, const std::string& name, MenuElement
 }
 
 /// Установка текущего имени пользователя.
-void EzopWidget::SetUserName(const std::string& name) {
+void EzopWidget::SetUserName(const Wt::WString& name) {
   user_name_ = name;
 }
 

@@ -15,7 +15,7 @@ public:
     : WApplication(env) {
     messageResourceBundle().use(WApplication::appRoot() + "ezop");
     root()->addWidget(new ezop::web::Morda("/", WApplication::appRoot() + "ezop.db"));
-    useStyleSheet("css/ezop.css");
+    useStyleSheet("ezop.css");
   }
 };
 

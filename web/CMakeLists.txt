@@ -9,11 +9,16 @@ add_executable(${NAME}
     login_menu.cpp
     login.cpp
     registration.cpp
+    session.cpp
+    model/user.cpp
+    model/project.cpp
+    model/ontology.cpp
 )
 
 find_library(WT_LIBRARY wt)
 find_library(WT_HTTP_LIBRARY wthttp)
-find_library(WT_EXT_LIBRARY wtext)
+find_library(WT_DBO_LIBRARY wtdbo)
+find_library(WT_DBO_SQLITE_LIBRARY wtdbosqlite3)
 
 find_path(SWI_HEADER_PATH SWI-Prolog.h
          PATHS /usr/lib/swipl-5.11.21/include
@@ -35,7 +40,8 @@ include_directories(${SWI_HEADER_PATH})
 target_link_libraries (${NAME}
           ${WT_LIBRARY}
           ${WT_HTTP_LIBRARY}
-          ${WT_EXT_LIBRARY}
+          ${WT_DBO_LIBRARY}
+          ${WT_DBO_SQLITE_LIBRARY}
           ${SWI_LIBRARY}
           pthread
           dl

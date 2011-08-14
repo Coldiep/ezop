@@ -5,8 +5,6 @@
 
 namespace ezop { namespace web {
 
-class Site;
-
 class Morda : public Wt::WCompositeWidget {
 public:
   Morda(const std::string& base_path, const std::string& sqlite_db, Wt::WContainerWidget* parent = NULL);
@@ -20,7 +18,7 @@ public:
   }
 
 private:
-  Site* impl_;
+  class Site* impl_;
   Wt::Signal<Wt::WString> user_changed_;
 };
 

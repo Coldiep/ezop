@@ -8,6 +8,7 @@ add_executable(${NAME}
     model/ontology.cpp
     view/morda.cpp
     site_session.cpp
+    banner.cpp
 )
 
 find_library(WT_LIBRARY wt)

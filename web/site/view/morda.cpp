@@ -21,6 +21,7 @@
 #include <web/site/model/ontology.h>
 #include <web/site/model/user.h>
 #include <web/site/site_session.h>
+#include <web/site/banner.h>
 
 #include <web/site/view/morda.h>
 using ezop::web::Morda;
@@ -33,40 +34,37 @@ public:
     : base_path_(base_path)
     , session_(sqlite_db)
     , morda_(morda)
-    , panel_(NULL)
-    , register_(NULL)
-    , profile_(NULL)
-    , author_panel_(NULL)
-    //, users_(NULL)
-    //, user_editor_(NULL)
-    , must_login_warning_(NULL)
-    , must_be_administrator_warning_(NULL)
-    , invalid_user_(NULL) {
-
-    Wt::WApplication* app = wApp;
-    app->messageResourceBundle().use(Wt::WApplication::appRoot() + "ezop");
-    app->useStyleSheet("/css/ezop.css");
+//    , banner_(NULL)
+    , content_(NULL) {
     //app->internalPathChanged().connect(this, &Site::HandlePathChange);
-    login_ = new Wt::WTemplate(this);
-    panel_ = new Wt::WStackedWidget(this);
-    items_ = new Wt::WContainerWidget(this);
-
-    Init();
 
     std::string token;
     try {
+      Wt::WApplication* app = wApp;
       token = app->environment().getCookie("ezoplogin");
     } catch (...) {
     }
 
+    Wt::WString user_name;
     if (not token.empty()) {
       Wt::Dbo::Transaction t(session_);
       Wt::Dbo::ptr<ezop::web::User> user = session_.find<ezop::web::User>("where token = ?").bind(token);
       if (user) {
-        //LoginAs(user);
+        user_name = user->name_;
       }
       t.commit();
+    } else {
+      user_name = tr("unknown-user");
     }
+
+    // Создаем главное окно. Окно состоит из двух панелей:
+    //   1. Верхняя панель содержит баннер программы и данные о пользователе.
+    //   2. Нижняя панель меняется в заивисимости от вида операции.
+    header_ = new Wt::WTemplate(this);
+    header_->setTemplateText(tr("ezop-header"));
+    header_->bindString("user", user_name);
+    //banner_  = new Banner(user_name, this);
+    content_ = new Wt::WContainerWidget(this);
   }
 
   ezop::web::SiteSession& Session() {
@@ -77,10 +75,15 @@ public:
     //Clear();
   }
 
-  std::string       base_path_;
-  ezop::web::SiteSession       session_;
-  ezop::web::Morda*            morda_;
+  std::string           base_path_;
+  SiteSession           session_;
+  Morda*                morda_;
+  //Banner*               banner_;
+  Wt::WTemplate*        header_; ///< Панель с названием и именем пользователя.
+  Wt::WContainerWidget* content_;
+};
 
+#if 0
   Wt::WTemplate*        login_;
   Wt::WStackedWidget*   panel_;
   Wt::WTemplate*        register_;
@@ -197,7 +200,6 @@ public:
     Wt::WText* profile_link = new Wt::WText(tr("profile"));
     profile_link->setStyleClass("link");
     //profileLink->clicked().connect(this, &BlogImpl::editProfile);
-#if 0
     if (user->role == User::Admin) {
       WText* editUsersLink = new WText(tr("edit-users"));
       editUsersLink->setStyleClass("link");
@@ -224,7 +226,6 @@ public:
     login_->bindWidget("archive-link", createArchiveLink());
 
     bindPanelTemplates();
-#endif
   }
 
   void NewUser() {
@@ -265,7 +266,6 @@ public:
   }
 };
 }} // namespace ezop, web.
-#if 0
 
   void bindPanelTemplates() {
     if (!session_.user()) return;
@@ -661,3 +661,4 @@ Wt::WString Morda::User() {
   }
 }
 
+}}  //namespace ezop, web.

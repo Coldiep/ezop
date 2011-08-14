@@ -1,4 +1,6 @@
 
+#include <stdexcept>
+
 #include <Wt/WApplication>
 #include <Wt/WContainerWidget>
 #include <Wt/WText>
@@ -10,10 +12,11 @@
 #include <Wt/WLineEdit>
 #include <Wt/WMessageBox>
 #include <Wt/WStringUtil>
+
+#include <Wt/Dbo/Session>
 #include <Wt/Dbo/backend/Sqlite3>
 
-#include <stdexcept>
-
+#include <web/model/user.h>
 #include <web/login.h>
 using ezop::web::Login;
 
@@ -51,36 +54,6 @@ void Login::Init() {
   login_button->setStyleClass("label");
 }
 
-namespace {
-
-struct UserPassword {
-  std::string password_;
-  bool        result_;
-
-  explicit UserPassword(const std::string& password)
-    : password_(password)
-    , result_(false) {
-  }
-};
-
-} //namespace 
-
-/// Проверка пароля.
-int Login::CheckPassword(void* param, int argc, char** argv, char** col_name) {
-  UserPassword* pwd = (UserPassword*)param;
-  for(int i = 0; i < argc; ++i) {
-    if (std::string(col_name[i]) == "password") {
-      if (argv[i] == pwd->password_) {
-        pwd->result_ = true;
-      } else {
-        pwd->result_ = false;
-      }
-      break;
-    }
-  }
-  return 0;
-}
-
 void Login::Check() {
   try {
     std::wstring username = username_->text();
@@ -91,30 +64,28 @@ void Login::Check() {
     std::string id = Wt::toUTF8(username);
     std::string pwd = Wt::toUTF8(password);
 
+    Wt::WApplication* app = wApp;
     Wt::Dbo::backend::Sqlite3 connection(app->appRoot() + "/ezop.db");
     Wt::Dbo::Session session;
     session.setConnection(connection);
-    session.execute("select id, password from users where id='" + id + "'");
+    session.mapClass<ezop::web::User>("user");
+    session.mapClass<ezop::web::Project>("project");
+    session.mapClass<ezop::web::Ontology>("ontology");
 
-    sqlite3* db = NULL;
-    Wt::WApplication* app = Wt::WApplication::instance();
-    if (sqlite3_open((app->appRoot() + "ezop.db").c_str(), &db) == 0) {
-      char* err_msg = NULL;
-      UserPassword check_pwd(pwd);
-      if (sqlite3_exec(db, ("select id, password from users where id='" + id + "'").c_str(), CheckPassword, &check_pwd, &err_msg) == SQLITE_OK) {
-        if (check_pwd.result_) {
-          Wt::WMessageBox::show(Wt::WString::tr("message.confirmation"), Wt::WString::tr("login.ok"), Wt::Ok);
-        } else {
-          throw std::invalid_argument(("Пользователь с именем '" + id + "' не зарегистирован в системе").c_str());
-        }
+    Wt::Dbo::Transaction t(session);
+    Wt::Dbo::ptr<ezop::web::User> user = session.find<ezop::web::User>().where("name = ?").bind(id);
+
+    if (user) {
+      if (user->Authenticate(pwd)) {
+
       } else {
-        sqlite3_free(err_msg);
-        throw std::invalid_argument("Не получилось прочитать данные с базы");
+        throw std::invalid_argument("Неверный пароль");
       }
-      sqlite3_close(db);
     } else {
-      throw std::invalid_argument("Невозможно соединиться с базой данных пользователей");
+      throw std::invalid_argument("Пользователь с таким именем не зарегистрирован в системе");
     }
+
+    t.commit();
   } catch (const std::exception& err) {
     Wt::WMessageBox::show(Wt::WString::fromUTF8("Ошибка"), Wt::WString::fromUTF8(err.what()), Wt::Abort);
   }

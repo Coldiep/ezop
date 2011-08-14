@@ -5,9 +5,11 @@
 
 #include <Wt/WContainerWidget>
 #include <Wt/WMenu>
+#include <Wt/WString>
 #include <Wt/WStackedWidget>
 
 #include <web/menu_element.h>
+#include <web/session.h>
 
 namespace ezop { namespace web {
 
@@ -20,17 +22,20 @@ public:
   EzopWidget();
 
   /// Установка текущего имени пользователя.
-  void SetUserName(const std::string& name);
+  void SetUserName(const Wt::WString& name);
 
 private:
   /// Добавления элемента меню.
   void AddToMenu(Wt::WMenu* menu, const std::string& name, MenuElement* element);
 
   /// Имя текущего пользователя.
-  std::string user_name_;
+  Wt::WString user_name_;
 
   /// Содержимое.
   Wt::WStackedWidget* content_;
+
+  /// Сессия базы данных.
+  Session session_;
 };
 
 }}  // namespace ezop, web.
